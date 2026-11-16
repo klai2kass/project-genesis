@@ -71,8 +71,11 @@ def create_world(seed, config=None):
     for agent_id in range(1, cfg["start_agents"] + 1):
         spot = rng.choice(land)
         age = rng.between(0, 200)
-        agents.append(make_agent(agent_id, spot % width, spot // width,
-                                 cfg["start_energy"], age, rng, cfg))
+        agent = make_agent(agent_id, spot % width, spot // width,
+                           cfg["start_energy"], age, rng, cfg)
+        # Stagger first children too, so there is no baby boom at tick 1.
+        agent["cooldown"] = rng.between(0, cfg["repro_cooldown"])
+        agents.append(agent)
 
     return {
         "version": SAVE_VERSION,

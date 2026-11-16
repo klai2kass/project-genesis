@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Project Genesis</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="top">
+    <h1>Project Genesis</h1>
+    <p class="top-meta">
+      <span>Seed <strong id="seed-label">–</strong></span>
+      <span>Tick <strong id="tick-label">0</strong></span>
+      <span id="run-state" class="state">–</span>
+    </p>
+  </header>
+
+  <main class="layout">
+    <section class="map-panel">
+      <canvas id="map" aria-label="World map. Click an agent to inspect it."></canvas>
+      <ul class="legend">
+        <li><i class="swatch water"></i>Water</li>
+        <li><i class="swatch grass"></i>Grass</li>
+        <li><i class="swatch forest"></i>Forest</li>
+        <li><i class="swatch food"></i>Food (bigger = more)</li>
+        <li><i class="dot healthy"></i>Agent, well fed</li>
+        <li><i class="dot hungry"></i>Agent, starving</li>
+      </ul>
+    </section>
+
+    <aside class="side">
+      <section class="card">
+        <div class="row">
+          <button id="play" class="primary" type="button">Pause</button>
+          <button id="step" type="button" title="Advance one tick">Step</button>
+          <div class="segmented" id="speeds" role="group" aria-label="Speed">
+            <button type="button" data-speed="1">1×</button>
+            <button type="button" data-speed="2">2×</button>
+            <button type="button" data-speed="5">5×</button>
+            <button type="button" data-speed="20">20×</button>
+          </div>
+        </div>
+        <form class="row" id="new-form">
+          <label for="seed-input">Seed</label>
+          <input id="seed-input" type="text" maxlength="40" value="1" autocomplete="off">
+          <button type="submit">New world</button>
+        </form>
+        <form class="row" id="save-form">
+          <label for="save-name">Save</label>
+          <input id="save-name" type="text" maxlength="40" value="quicksave" autocomplete="off">
+          <button type="submit">Save</button>
+        </form>
+        <form class="row" id="load-form">
+          <label for="load-name">Load</label>
+          <select id="load-name"></select>
+          <button type="submit">Load</button>
+        </form>
+        <p id="message" class="message" role="status"></p>
+      </section>
+
+      <section class="card">
+        <dl class="stats">
+          <div><dt>Alive</dt><dd id="s-alive">0</dd></div>
+          <div><dt>Births</dt><dd id="s-births">0</dd></div>
+          <div><dt>Starved</dt><dd id="s-starved">0</dd></div>
+          <div><dt>Old age</dt><dd id="s-old">0</dd></div>
+          <div><dt>Avg energy</dt><dd id="s-energy">0</dd></div>
+          <div><dt>Food on map</dt><dd id="s-food">0</dd></div>
+        </dl>
+        <h2>Population</h2>
+        <canvas id="chart" height="70"></canvas>
+      </section>
+
+      <section class="card">
+        <h2>Agent</h2>
+        <div id="agent-empty" class="hint">Click an agent on the map to see what it is doing and why.</div>
+        <div id="agent-panel" hidden>
+          <p class="agent-title"><strong id="a-name"></strong> <span id="a-meta" class="muted"></span></p>
+          <div class="bar" aria-hidden="true"><span id="a-bar"></span></div>
+          <p id="a-numbers" class="muted"></p>
+          <p class="why"><span id="a-action" class="tag"></span> <span id="a-why"></span></p>
+          <ol id="a-trail" class="trail"></ol>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="row between">
+          <h2>What is happening</h2>
+          <div class="segmented" id="feed-mode" role="group" aria-label="Feed">
+            <button type="button" data-feed="notable">Births &amp; deaths</button>
+            <button type="button" data-feed="all">Every decision</button>
+          </div>
+        </div>
+        <ol id="feed" class="feed"></ol>
+      </section>
+    </aside>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
