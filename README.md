@@ -33,7 +33,7 @@ Want a different world? `python3 server.py --seed banana`
 | **Seed + New world** | Build a fresh world. Same seed = same world, always |
 | **Save** | Writes the world to `saves/<name>.json` |
 | **Load** | Brings a saved world back (it loads paused) |
-| **Click an agent** | See its energy, age, and *why* it did its last few actions |
+| **Click an agent** | See its energy, age, what it needs, the options it weighed, and *why* it chose |
 | **Feed** | Births and deaths, or every single decision |
 
 ## Check that it works (tests)
@@ -72,6 +72,24 @@ python3 run_headless.py --seed 42 --ticks 200 --log decisions.jsonl
 
 The last one writes every decision and its "why" to a file, one per line.
 
+## Ask why one agent did something
+
+List who is alive after 300 ticks:
+
+```bash
+python3 why.py --seed 42 --ticks 300
+```
+
+Show the last 5 decisions of agent 12:
+
+```bash
+python3 why.py --seed 42 --ticks 300 --agent 12
+```
+
+Each decision shows the agent's **need**, every **option** it considered
+(`no`, `could`, or `CHOSEN`) and the **why**. Add `--last 20` for more, or
+use `--load saves/quicksave.json` to start from a save.
+
 ## How an agent thinks
 
 Every tick, each agent loses 1 energy and gets 1 tick older. Then it picks
@@ -84,8 +102,9 @@ the first rule that fits:
 
 It **dies** if its energy hits 0 (starved) or it reaches its lifespan (old age).
 
-Every decision is recorded with a short reason, for example
-`gather — 2 food on this tile and my pack has room (1/3)`.
+Every decision is recorded with three parts: the **need** ("food, energy 41
+of 100"), the **options** it considered and whether each fitted, and the
+**why**, for example `gather — 2 food on this tile and my pack has room (1/3)`.
 
 ## Where things live
 
@@ -97,10 +116,13 @@ Every decision is recorded with a short reason, for example
 | `genesis/sim.py` | One tick of time (`step`) |
 | `genesis/save.py` | Save, load, fingerprint |
 | `genesis/rng.py` | The dice. One number, so saves can store it |
+| `genesis/whylog.py` | Turns decision records into readable text |
 | `run_headless.py` | Run with no page |
+| `why.py` | Show the last decisions of one agent |
 | `server.py` | Runs the world and serves the page |
 | `web/` | The page. It only draws; no rules live there |
 | `tests/` | The automatic checks |
+| `STATUS.md` | What works right now, and what to do next |
 
 The `genesis/` folder never touches the page or the server. That is what
 lets the tests run it with no UI.
