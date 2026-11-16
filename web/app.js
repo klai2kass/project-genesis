@@ -170,8 +170,32 @@ function eventRow(event, withAgent) {
   const what = document.createElement("b");
   what.textContent = (withAgent ? "#" + event.agent + " " : "") + event.action;
   row.append(tick, what, " — " + event.why);
+  if (!withAgent && event.need) {       // in an agent's own trail, show its need too
+    const need = document.createElement("span");
+    need.className = "needed";
+    need.textContent = "need: " + event.need;
+    row.append(need);
+  }
   row.dataset.agent = event.agent;
   return row;
+}
+
+// The options an agent weighed for one decision: chosen / could / no.
+function optionRows(event) {
+  return (event.options || []).map((option) => {
+    const kind = option.action === event.action ? "chosen" : option.ok ? "could" : "no";
+    const row = document.createElement("li");
+    row.className = kind;
+    const name = document.createElement("span");
+    name.textContent = option.action;
+    const verdict = document.createElement("span");
+    verdict.className = "verdict";
+    verdict.textContent = kind;
+    const note = document.createElement("span");
+    note.textContent = option.note;
+    row.append(name, verdict, note);
+    return row;
+  });
 }
 
 function renderAgent() {
@@ -200,7 +224,18 @@ function renderAgent() {
     $("a-action").textContent = "die";
     $("a-why").textContent = last ? last.why : "It is no longer in the world.";
   }
-  const rows = sel.trail.slice().reverse().map((event) => eventRow(event, false));
+  // The newest decision is shown in full: need, options, reason.
+  const newest = sel.trail[sel.trail.length - 1];
+  const needLine = $("a-need");
+  needLine.replaceChildren();
+  if (newest && newest.need) {
+    const label = document.createElement("b");
+    label.textContent = "Need: ";
+    needLine.append(label, newest.need);
+  }
+  $("a-options").replaceChildren(...(newest ? optionRows(newest) : []));
+
+  const rows = sel.trail.slice(0, -1).reverse().map((event) => eventRow(event, false));
   $("a-trail").replaceChildren(...rows);
 }
 
