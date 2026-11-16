@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.DS_Store
+.claude/
+# Your saved worlds and decision logs stay on your machine, not in git.
+saves/*.json
+*.jsonl
