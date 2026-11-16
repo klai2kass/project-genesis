@@ -1,8 +1,8 @@
 """The heartbeat of the world: `step()` moves time forward by one tick.
 
 `step()` changes the world and returns a list of events. Every agent
-decision becomes one event with a short "why", so you can always ask
-"why did agent #12 do that?".
+decision becomes one event holding its need, the options it considered and
+a short "why", so you can always ask "why did agent #12 do that?".
 """
 
 from .agents import DIRS, decide
@@ -18,9 +18,11 @@ def step(world):
     tick = world["tick"]
     events = []
 
-    def log(agent, action, why):
+    def log(agent, action, why, need=None, options=None):
+        # x, y is where the agent stands AFTER the action.
         events.append({"tick": tick, "agent": agent["id"], "action": action,
-                       "why": why, "x": agent["x"], "y": agent["y"]})
+                       "need": need, "options": options or [], "why": why,
+                       "x": agent["x"], "y": agent["y"]})
 
     _regrow_food(world, rng)
 
@@ -48,7 +50,8 @@ def step(world):
         child = _apply(world, agent, decision, rng)
         agent["last_action"] = decision["action"]
         agent["last_why"] = decision["why"]
-        log(agent, decision["action"], decision["why"])
+        log(agent, decision["action"], decision["why"],
+            decision["need"], decision["options"])
         survivors.append(agent)
 
         if child is not None:
