@@ -46,6 +46,7 @@ class Game:
         self.lock = threading.Lock()   # only one thread touches the world at a time
         self.paused = False
         self.speed = 1
+        self.running = True            # set to False to end the background loop
         self.world_id = 0              # goes up whenever the world is replaced
         self.seq = 0                   # running number for events
         self._use_world(create_world(seed))
@@ -82,9 +83,9 @@ class Game:
             self.paused = True   # nobody left: stop the clock
 
     def loop(self):
-        """Runs forever in a background thread, ticking at the chosen speed."""
+        """Runs in a background thread, ticking at the chosen speed."""
         next_tick = time.monotonic()
-        while True:
+        while self.running:
             with self.lock:
                 running = not self.paused
                 if running:
@@ -113,7 +114,10 @@ class Game:
             cfg = world["config"]
             agents = world["agents"]
             source = self.recent if feed == "all" else self.notable
-            events = [e for e in source if e["seq"] > since][-80:]
+            # The feed only needs the headline; the full record (need and
+            # options) is sent for the one selected agent, below.
+            events = [{k: e[k] for k in ("seq", "tick", "agent", "action", "why")}
+                      for e in source if e["seq"] > since][-80:]
 
             selected = None
             if agent_id is not None:
