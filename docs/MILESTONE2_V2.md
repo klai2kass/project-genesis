@@ -1,7 +1,27 @@
-# Milestone 2, version 2: a staged plan (nothing here is built)
+# Milestone 2, version 2: the staged plan, and what was built
 
-**Status: APPROVED by the owner on 2026-11-17 (`rest_resume = 70` confirmed).
-Design and design tests are committed; no simulation feature is implemented.**
+**Status (checked 2026-11-17 against the code): BUILT.** Approved by the owner
+on 2026-11-17 (`rest_resume = 70`); implemented in commit `e3e07c3`;
+measured in `docs/MILESTONE2_REPORT.md`. The text below is the approved plan,
+kept as the design record. Where the build differs, "As built" says so.
+
+## As built (read this first)
+
+| Stage | Plan | As built |
+| --- | --- | --- |
+| 0 baseline tools | digests, frozen baseline, v2 fixture | Done (`genesis/digest.py`, `experiments/baseline/`, `tests/test_baseline.py`) |
+| 1 data, save v3 | new fields, migration | Done. v1/v2 saves migrate and keep their old rules (`MILESTONE1_RULES` in `genesis/save.py`) |
+| 2 traits, no effect | `traits.py`, `trait_report.py` | `traits.py` done. `trait_report.py` was not written; `experiments/trait_drift.py` measures the same thing (real run against a control where traits do nothing) |
+| 3 rest | `needs.py`, rest rule after gather, `stage_compare.py` | Done. All stage 3 bands hold (`experiments/results/stage_compare.txt`) |
+| 4 trait effects + curiosity probe | formulas, opposite-trait tests, probe | Done. Probe: `experiments/curiosity_probe.py` (forced and mixed worlds, 10 seeds; no separate 50-vs-50 control, the seed-to-seed spread and per-seed paired differences play that role) |
+| 5 emergence report | `emergence_report.py` | Written as `docs/MILESTONE2_REPORT.md` from `stage_compare.py`, `curiosity_probe.py`, `trait_drift.py`. Measures 3, 4 and 8 of section 7 were not computed |
+| 6 scoring | conditional | Not built: the condition (a trade-off thresholds cannot express) was never shown |
+| 7 company | gate | Not built (owner has not said "yes, add company"; no payoff exists) |
+| 8 tidy | summary, docs | Docs done this session. `summary.py` does not yet report action mix or trait averages |
+
+Stages 1 to 4 were committed together in `e3e07c3`, not one commit each.
+Every number in the plan's formulas below matches the code
+(`genesis/config.py`, `traits.py`, `needs.py`).
 
 ## Final proposed mechanics at a glance
 
@@ -647,8 +667,8 @@ at this scale".
 
 ## 8. Your answers
 
-Recorded from your messages of 2026-11-17. Awaiting your approval of the
-whole design.
+Recorded from your messages of 2026-11-17. The whole design was approved
+the same day.
 
 | Question | Your answer | Notes |
 | --- | --- | --- |

@@ -2,14 +2,306 @@
 
 Last checked: 2026-11-17, by running the commands in this file (not from memory).
 
-**Milestone 1 is complete. Milestone 2 (rest, curiosity, industriousness) is
-IMPLEMENTED and committed (not pushed).** Design:
-`docs/MILESTONE2_V2.md`. Starvation background: `docs/STARVATION.md`. Read the
-"Session log" first.
+**Milestones 1 and 2 are built, tested, measured and documented.** GitHub
+(`origin/main`) has everything up to `e3e07c3` (the Milestone 2 build); this
+session's commits are local only, not pushed. Milestone 2 = a rest need plus two inherited traits (curiosity,
+industriousness). What they do, measured: `docs/MILESTONE2_REPORT.md`.
+**Proposed next step: Milestone 3, step 1, "a home"** (section 5). Not
+started; it waits for your go.
+
+Plain words: a **tick** is one step of time. A **seed** is the number a world
+is built from (same seed = same world). A **fingerprint** is a short code that
+is equal only when two worlds are exactly equal. **Headless** = no window.
+
+## 1. What works today (checked this session)
+
+- [x] World, food, agents that search (around water), gather, eat, rest,
+      reproduce and die. Same seed = same world.
+- [x] Rest need and traits (curiosity, industriousness), inherited +/-5.
+- [x] Every decision has a "why"; recent decisions are kept in saves.
+- [x] Saves version 3; versions 1 and 2 load and keep their old rules.
+- [x] Milestone 1 behaviour frozen: `tests/test_baseline.py`,
+      `experiments/baseline/make_baseline.py --check`.
+- [x] Browser page (checked this session at http://127.0.0.1:8766, see 3).
+- [x] Measurement scripts in `experiments/`, results in `experiments/results/`.
+- [ ] `why.py --load` reads the stored history (it still replays instead).
+- [ ] `--summary` does not report action mix or trait averages.
+
+## 2. Tests (run this session)
+
+`python3 -m unittest discover -s tests` -> `Ran 109 tests in 38.7s`, `OK`.
+By file: baseline 5, controls 11, determinism 7, history 8, movement 7,
+overrides 11, rest 12, rest_design 14, save_load 10, summary 5,
+trait_streams 5, traits 8, why_log 6. No test was changed this session.
+Reference run: `python3 run_headless.py --seed 42 --ticks 500 --every 0`
+-> 92 alive, fingerprint `63826e5a26ffdded` (same as after the Milestone 2
+build). Speed: seed 42, 2,000 ticks, history on, about 4.5 s (about 450
+ticks per second, measured while another experiment was running).
+
+## 3. Browser check (this session)
+
+Server started from the shell on port 8766 (`python3 server.py --no-browser
+--port 8766`; Claude's sandbox blocks ports, so it ran outside the sandbox),
+page opened in the app's browser. Checked: map draws; Play/Pause, Step and
+20x work; stats show resting now and average traits; clicking agent #1
+shows energy, rest bar, "resting (until 70)", traits with their effect
+("turns 15% of wandering ticks", "loses 1.06 rest per move"), the options
+table and earlier decisions; Save (name `claude_browsercheck`) then Load
+returns to tick 392, paused, with the fading "Loaded ..." message; earlier
+decisions still show after loading. **No console errors.**
+Small things noticed (not fixed): the population graph starts empty after a
+load (it is not stored in saves); the rest bar shows the value after this
+tick's rest (36) while the decision text shows the value at decision time
+(33). The test save `saves/claude_browsercheck.json` was left in `saves/`
+(ignored by git); delete it if you like.
+
+## 4. Measured results (details in `docs/MILESTONE2_REPORT.md`)
+
+Curiosity, 10 seeds x 3,000 ticks (`experiments/curiosity_probe.py`):
+
+| | low (10) | neutral (50) | high (90) |
+| --- | --- | --- | --- |
+| direction changes while wandering | 16.4% | 22.5% | 28.6% |
+| straightness (1 = straight line) | 0.53 | 0.47 | 0.43 |
+| tiles per 100 ticks | 65.6 | 64.2 | 62.3 |
+| moves until food in sight again | 4.76 | 4.84 | 4.86 |
+| starved %, everyone the same | 66.9 +/- 1.0 | 66.1 +/- 0.8 | 65.9 +/- 1.0 |
+| population, everyone the same | 93.5 | 93.2 | 93.5 |
+| alive at end, mixed worlds (30 extra seeds) | 17.3 | 34.1 | 42.8 |
+
+Plain answer to "does curiosity matter?": it always changes how agents
+walk; it does not change the world when everyone has the same value; but
+when families with different curiosity compete, the curious (zigzagging)
+families win in 34 of 40 worlds. "Curious" here means "searches its patch
+thoroughly", not "explores far". In normal runs (founders 40-60) no trait is
+selected beyond chance in 3,000 ticks (`experiments/trait_drift.py`).
+
+## 5. Next step (evidence-based recommendation)
+
+**Milestone 3, step 1: a home.** Each agent remembers one place, the tile
+where it was born (founders: where they start). When it wanders (no food in
+sight, or pack full) and is more than `home_radius` tiles from home, it steps
+toward home instead of drifting on. Eating, gathering, resting, reproducing
+and walking to food it can see do not change. No new dice. Then **step 2:
+encounter memory** (who did I meet, where, when, how often), shown in the
+agent panel, at first changing no behaviour.
+
+**Why this first (FACT, `experiments/encounter_probe.py`, 5 seeds x 3,000
+ticks, counted after tick 500):**
+
+| | today's rules | prototype home, radius 6 | prototype home, radius 3 |
+| --- | --- | --- | --- |
+| different agents met in a life | 38.3 | 25.0 | 19.4 |
+| pairs that meet 5+ times | 8.5% | 21.5% | 26.9% |
+| pairs that meet again after 100+ ticks apart | 7.3% | 13.5% | 11.7% |
+| meetings that are family (parent/child, siblings) | 6.0% | 13.1% | 20.1% |
+| home range radius (tiles) | 11.0 | 5.2 | 3.7 |
+| population after tick 500 | 93.0 | 93.4 | 93.3 |
+| starved % of deaths | 66.5 | 65.4 | 64.6 |
+| births | 946 | 938 | 939 |
+
+(Meeting = within 1 tile. The prototype lives only inside the experiment
+script and is never saved.)
+
+Plain reading: today an agent drifts over a circle about 11 tiles wide and
+meets mostly strangers. Recognising individuals would mostly record people
+it never sees again, so relationships would have almost nothing to grow on.
+A remembered home is the smallest change that keeps the same agents near
+each other: family meetings double (radius 6) or triple (radius 3), pairs
+that meet 5+ times rise 2.5 times, and survival does not change. It is individual memory of a
+place (VISION: "agents remember places and individuals"), not a social rule.
+
+**Alternative considered and rejected as the FIRST step: encounter memory
+now** (your expectation). It is cheap and changes no behaviour, but with
+today's movement it would fill with one-off strangers (only 7% of pairs meet
+again after 100 ticks; 6% of meetings are family). It stays the planned step
+2, built right after the home, when it has repeat meetings to record.
+**Also rejected: reworking curiosity first.** It works and is selected in
+competition (section 4); changing it now would not move toward the vision.
+
+**Build plan for step 1 (one stage, one commit):**
+- Files: `genesis/world.py` (`home: [x, y]` on every agent;
+  `SAVE_VERSION = 4`), `genesis/save.py` (`_migrate_3_to_4`: home = current
+  position and `home_radius = 0`, so old saves keep their behaviour; add
+  `home_radius: 0` to `MILESTONE1_RULES`), `genesis/config.py`
+  (`home_radius`, 0 = off; proposed default 6), `genesis/overrides.py`,
+  `genesis/agents.py` (inside `_wander`: if beyond the radius, step to the
+  land neighbour that is closest to home, fixed tie order; why text "...,
+  heading home (8 tiles away, I stay within 6)"), `server.py` and `web/`
+  (mark the selected agent's home on the map), README.
+- Before building: record today's Milestone 2 event digests for seeds
+  42/1/2 as a second frozen reference.
+- Tests (new `tests/test_home.py` + additions): with `home_radius = 0` the
+  event digest equals today's Milestone 2 run exactly; Milestone 1 baseline
+  unchanged; a v3 save migrates and continues identically; home survives
+  save/load; an agent outside the radius steps toward home; home never
+  overrides eat, gather, rest or walking to visible food; children get
+  their birth tile; same seed = same world.
+- Measure: `experiments/encounter_probe.py` switched from the prototype to
+  the real setting, plus `stage_compare.py` and `curiosity_probe.py`.
+- Success: population, starved share, births and age at death stay inside
+  the Milestone 2 bands (pop 80-98, starved 62-73%, births 830-1,010, age
+  265-325, no run dies out) AND family share of meetings at least doubles
+  (6% -> 12%+) AND pairs meeting 5+ times at least double (8.5% -> 17%+).
+- Risks: an agent stuck behind a lake between it and home (the greedy step
+  can bounce; test a lake case, fall back to normal wandering when no step
+  gets closer); crowding near birthplaces could raise local starvation (the
+  prototype says no, measure again); the change in which families win
+  (curiosity) must be re-measured.
+
+## 6. Next 5 tasks
+
+1. **Your go for Milestone 3 step 1 (home)**, then build it as in section 5.
+   Check: `python3 -m unittest discover -s tests`, then
+   `python3 experiments/encounter_probe.py`.
+2. **Step 2, encounter memory** (record only): per agent the last N agents
+   met (id, first and last tick, count, place), capped, saved, shown in the
+   panel. Files: `genesis/world.py`, `save.py`, `sim.py`, `server.py`, `web/`.
+3. **Test industriousness in mixed worlds** (copy the mixed mode of
+   `curiosity_probe.py`): is it selected in competition too? About 2 min.
+4. **`why.py --load` reads stored history.** Files: `why.py`,
+   `genesis/history.py`, `tests/test_history.py`.
+5. **Add action mix and trait averages to `--summary`.** Files:
+   `genesis/summary.py`, `tests/test_summary.py`.
+
+## 7. Decisions for you
+
+1. **Go for "home" (section 5)?** Default: wait for your yes.
+2. **`home_radius` default:** 6 (proposed; families meet twice as often) or
+   3 (stronger clustering, family share 20%). Default if you say go: 6.
+3. **Curiosity wording:** describe it on the page as "how often it turns
+   while searching (high = searches its patch thoroughly)". No code change.
+   Default: do it with the next page change.
+4. History caps (20 decisions per agent, 50 dead agents): kept.
+5. The gather-then-eat flaw (6.2% of starvation deaths happen one tick after
+   picking food up): still NOT fixed, so all comparisons stay valid.
+
+## 8. Remaining limitations
+
+- Results are for one map size (60 x 40), one food setting, 3,000 ticks.
+- Mixed-world curiosity results use extreme values (10/50/90), no mutation.
+- `why.py` replays from the seed; it does not read stored history.
+- The population graph on the page is not saved; it restarts after Load.
+- History makes saves about 20 times bigger (about 600 KB at 2,000 ticks).
+- One test (`test_controls.py`) sleeps 0.7 s and could rarely fail on a very
+  busy Mac. Python 3.9.
+- Claude's sandbox blocks opening a port; the server check needed a run
+  outside the sandbox (or `sandbox.network.allowLocalBinding: true`).
+
+## 9. Copy-paste commands
+
+```bash
+cd ~/Desktop/"Project Genesis"
+```
+
+See the world in your browser (stop with Ctrl+C):
+
+```bash
+python3 server.py
+```
+
+All automatic checks (should end with `Ran 109 tests` and `OK`, about 40 s):
+
+```bash
+python3 -m unittest discover -s tests
+```
+
+Run without the page, with a report:
+
+```bash
+python3 run_headless.py --seed 42 --ticks 2000 --every 0 --summary
+```
+
+Why did agent 12 do that?
+
+```bash
+python3 why.py --seed 42 --ticks 300 --agent 12
+```
+
+Experiments (each only reads the world; results go to `experiments/results/`):
+
+```bash
+python3 experiments/curiosity_probe.py
+```
+
+```bash
+python3 experiments/curiosity_probe.py --mixed-extra
+```
+
+```bash
+python3 experiments/trait_drift.py
+```
+
+```bash
+python3 experiments/encounter_probe.py
+```
+
+```bash
+python3 experiments/stage_compare.py
+```
+
+```bash
+python3 experiments/starvation_study.py
+```
+
+```bash
+python3 experiments/baseline/make_baseline.py --check
+```
+
+Times on this Mac: curiosity probe about 4 min, mixed extra about 4 min,
+trait drift about 2 min, encounter probe about 3 min, stage compare about
+3 min, starvation study about 25 s, baseline check about 1 min.
+
+## Design choices (one line each)
+
+- **Python standard library only, plus a thin web page.** Node.js is not installed.
+- **The world is one plain dictionary.** A save is that dictionary as JSON text.
+- **Our own dice (`rng.py`).** Its memory is one number, stored in the save;
+  traits use their own per-agent dice so they never disturb the main dice.
+- **Rules in a fixed order, first one that fits wins.** No scoring system:
+  nothing measured so far needs one.
+- **Personality as thresholds and rates**, neutral at 50, whole numbers only.
+- **Old saves are repaired on every load** and keep their old rules, logged.
+- **The server runs the world; the page only draws.**
+- **Experiments only read the world.** Prototypes live in `experiments/`,
+  clearly marked, never in `genesis/` and never in saves.
+- **(This session) Mixed worlds as the selection test**, because forced
+  worlds cannot show competition between traits.
+
+## Known risks
+
+- Claude's sandbox blocks opening a port, so browser checks need a run
+  outside the sandbox.
+- Replays (`why.py`) match only if code and settings are unchanged.
+- Big populations slow the page (over about 300 agents at 20x).
+- The experiment scripts recognise wandering from the "why" text; if that
+  wording changes, update `move_kind` in the scripts.
 
 ## Session log
 
-Newest first. A fresh session should read this section first.
+Newest first. Older entries mention section numbers of earlier versions of
+this file; see `git log -p STATUS.md` for those.
+
+### Session 2026-11-17 (part 4: Milestone 2 finished and measured; next step chosen)
+- **Verified first:** git clean on `main` at `e3e07c3`; remote `origin`
+  (github.com/klai2kass/project-genesis); 109 tests OK (38.7 s).
+- **Curiosity probe built and run** (`experiments/curiosity_probe.py`,
+  10 seeds, forced and mixed worlds, plus 30 extra mixed seeds). Result in
+  section 4. Re-run from a clean copy of the commit (`git archive`): curiosity
+  probe, mixed extra and stage compare give identical numbers (speed aside).
+- **Final checks:** 109 tests OK (43.4 s); `make_baseline.py --check` ALL SAME.
+- **Trait drift** (`experiments/trait_drift.py`): no selection in normal runs.
+- **Report written:** `docs/MILESTONE2_REPORT.md`.
+- **Docs brought up to date:** README (Milestone 2 rules, settings, files,
+  test count), VISION (works today / not built / next), `docs/MILESTONE2_V2.md`
+  ("As built" table: stage 6 scoring and stage 7 company not built,
+  `trait_report.py` replaced by `trait_drift.py`), this file rewritten.
+- **Browser checked** (section 3): works, no console errors.
+- **Next step chosen with evidence** (`experiments/encounter_probe.py`,
+  includes a throwaway home prototype): section 5.
+- **No simulation code changed.** Baseline and determinism tests untouched.
+- **Not done:** industriousness in mixed worlds; measures 3, 4, 8 of
+  `MILESTONE2_V2.md` section 7.
 
 ### Session 2026-11-17 (part 3: Milestone 2 implementation, committed after your review)
 - **Built (approved design, no scoring, no company):**
@@ -209,76 +501,9 @@ Newest first. A fresh session should read this section first.
   Server port still blocked in this sandbox (see section 9).
 - **In progress:** nothing. Next: "Next 5 tasks".
 
-## 1. What was completed
+## Appendix: earlier results kept for reference
 
-All steps 0-9 of this session: verified state; `VISION.md`; backward-
-compatible saves; `--set`; water dithering fix; `--summary`; load pop-up in
-the browser; decisions stored in saves; regrowth experiment; Milestone 2
-proposal. Every step except the first two has its own commit (steps 1 and 2
-share one). Nothing was pushed (there is no remote).
-
-Plain words: a **fingerprint** is a short code equal only when two worlds are
-exactly equal. A **tick** is one step of time. **Headless** means running
-with no window. A **migration** upgrades an old save file when loading.
-
-## 2. What changed (file by file)
-
-| File | Change |
-| --- | --- |
-| `VISION.md` (new) | Principles and roadmap, "works today" vs "future" |
-| `genesis/save.py` | Save format 2; repairs missing/old fields on every load; `migration_log`; keeps unknown keys; plain errors |
-| `genesis/overrides.py` (new) | Type and range checks for `--set` |
-| `genesis/agents.py` | `_walk_to_food`: real walking distance, ignores unreachable food, keeps its target |
-| `genesis/history.py` (new) | Per-agent decision history stored in the world |
-| `genesis/summary.py` (new) | Report behind `--summary` |
-| `genesis/sim.py` | Records history; die events carry `age` and `cause` |
-| `genesis/world.py` | Save version 2; agents get `target`; world gets `history`, `history_dead` |
-| `genesis/config.py` | New settings `history_keep` (20), `dead_history_keep` (50) |
-| `run_headless.py`, `why.py` | `--set` (both), `--summary` (headless) |
-| `server.py` | Trail now read from the world's history; load reply shows tick and seed |
-| `web/app.js`, `index.html`, `style.css` | Fading load/error pop-up |
-| `experiments/regrow_sweep.py` (new) | The regrowth comparison |
-| `docs/MILESTONE2.md` (new) | The proposal |
-| `tests/` | 4 new files; additions to `test_save_load.py`, `test_controls.py` |
-| `README.md` | `--set`, `--summary`, new files |
-
-## 3. Tests actually run (this session, final run)
-
-`python3 -m unittest discover -s tests` printed `Ran 64 tests in 16.4s` and
-`OK`. By file: controls 11, determinism 7, history 8, movement 7, overrides
-11, save_load 9, summary 5, why_log 6. (Later the same day, with the new
-`tests/test_baseline.py`: `Ran 68 tests in 28.5s`, `OK`.) Not covered by automatic tests: the
-real web page in a browser (see Remaining limits), and starting the server.
-
-## 4. Current performance (seed 42, 2,000 ticks, this Mac, measured)
-
-| | Speed | Save size | Save / load time |
-| --- | --- | --- | --- |
-| History on (default 20 / 50) | about 850 ticks/s | 605 KB | 4 ms / 4 ms |
-| History off (`--set history_keep=0`) | about 990 ticks/s | 28 KB | under 1 ms |
-| Before this session (Milestone 1) | about 1,800 ticks/s (claimed earlier; the old code measured 1.1 s per 2,000 ticks) | about 30 KB | not measured |
-
-Timings are noisy (a few runs varied by about 10%). The slowdown comes from
-the new walking-distance search (step 4) and from history (step 7).
-
-## 5. Remaining bugs and limitations
-
-- The real server and page were NOT run in this sandbox (port blocked). The
-  load pop-up was checked only as an injected snippet (see step 6 above).
-- Food farther than the view (13 x 13 tiles) is still unseen. A long detour
-  around a very large lake is not planned; the agent re-searches each tick.
-- Several agents can still stand on one tile.
-- Starvation is still about two thirds of all deaths at every regrowth
-  setting tested (section 6).
-- History makes saves about 20 times bigger (605 KB); fine on disk, grows
-  with population (about 290 bytes per remembered decision).
-- `why.py` still replays from the seed; it does not read stored history.
-- Back-and-forth moves while heading to food fell from 9,828 to 5,384 over
-  5 seeds x 2,000 ticks, not to zero (food gets eaten by others, so targets change).
-- One test uses real time (0.7 s) and could rarely fail on a very busy Mac.
-- Python 3.9 only; no remote backup (run `git push` yourself once a remote exists).
-
-## 6. Regeneration experiment results
+### Regeneration experiment results (earlier session)
 
 `regrow_per_tick` changed with `--set`, code default was 4 when measured (changed to 6 afterwards, see section 7). 5 seeds
 (42, 1, 2, 3, 4) x 3,000 ticks each, averages, via
@@ -301,7 +526,7 @@ at the default), then a steady level. Only 5 seeds, one map size, one length.
 The reason the starved share stays put is a guess (agents multiply until food
 is short again); it was not tested.
 
-## 7. Recommended `regrow_per_tick`
+### Recommended `regrow_per_tick` (decided: 6)
 
 **Decision made: 6.** The code default is now 6 (was 4). After the change: 64 tests pass; seed 42, 500 ticks gives 79 alive, fingerprint `61e8b205b6228bc9`. Older fingerprints in this file are from default 4.
 - It keeps the world as deadly as before (starved share 67.7% against 68.9%,
@@ -314,136 +539,3 @@ is short again); it was not tested.
 - Values of 8 or more mainly add agents (123 to 173) without more scarcity.
 To try it: `python3 run_headless.py --seed 42 --ticks 2000 --every 0 --summary --set regrow_per_tick=6`
 
-## 8. Milestone 2 proposal, review and revised plan
-
-Read in this order: `docs/STARVATION.md` (why 2/3 starve), then
-`docs/MILESTONE2_REVIEW.md` (7 verdicts on the ChatGPT review), then
-`docs/MILESTONE2_V2.md` (staged plan, 8 emergence measures, your 7 questions,
-empty answers table). The original proposal follows; V2 replaces its build
-order and some of its rules.
-
-Written in full in [docs/MILESTONE2.md](docs/MILESTONE2.md): numerical needs
-(hunger, rest, company), four personality traits, scored decisions with
-"why" records, no LLM, file changes, save changes, determinism, tests,
-performance risks, 8-step build order, 7 decisions for you. Not built.
-
-## 9. Copy-paste commands
-
-Run from the project folder:
-
-```bash
-cd ~/Desktop/"Project Genesis"
-```
-
-See the map in your browser (run this in your own Terminal; Claude's sandbox
-blocks the port). Stop with Ctrl+C:
-
-```bash
-python3 server.py
-```
-
-All automatic checks (end should say `Ran 109 tests` and `OK`):
-
-```bash
-python3 -m unittest discover -s tests
-```
-
-Run with no page and a report:
-
-```bash
-python3 run_headless.py --seed 42 --ticks 2000 --every 0 --summary
-```
-
-Experiment with settings (repeat `--set` as needed; nothing is saved to files):
-
-```bash
-python3 run_headless.py --seed 42 --ticks 2000 --every 0 --summary --set regrow_per_tick=6 --set vision=6
-```
-
-Why did agent 12 do that?
-
-```bash
-python3 why.py --seed 42 --ticks 300 --agent 12
-```
-
-Compare regrowth values:
-
-```bash
-python3 experiments/regrow_sweep.py
-```
-
-Why do agents starve (about 25 s), and the settings sweep (about 4 min):
-
-```bash
-python3 experiments/starvation_study.py
-python3 experiments/starvation_study.py --sweep
-```
-
-Check that behaviour still equals the frozen Milestone 1 reference (about 1 min):
-
-```bash
-python3 experiments/baseline/make_baseline.py --check
-```
-
-## 10. Next 5 tasks
-
-1. **Curiosity probe and emergence report** (stage 4 probe, stage 5 of
-   `docs/MILESTONE2_V2.md`), and README notes for the 13 new settings.
-2. **Check the real page by hand.** Run `python3 server.py` in your own
-   Terminal, press Save, then Load, and confirm the pop-up at the top fades;
-   click an agent after loading and confirm earlier decisions are listed.
-3. **Stage 1 of the V2 plan** (fields and save version 3, behaviour
-   unchanged). Files: `genesis/world.py`, `genesis/save.py`, `genesis/sim.py`,
-   `tests/test_save_load.py`. Check: `python3 -m unittest discover -s tests`
-   and `python3 experiments/baseline/make_baseline.py --check` (digests equal).
-4. **Let `why.py --load` read stored history** (still not done). Files:
-   `why.py`, `genesis/history.py`, `tests/test_history.py`. Check: unit tests;
-   `python3 run_headless.py --seed 42 --ticks 300 --save saves/t.json` then
-   `python3 why.py --load saves/t.json --ticks 0 --agent 3` prints stored decisions.
-5. **Measure the two starvation guesses** (cheap, read-only): food in view at
-   birth against a random tile, and food taken by someone else before an agent
-   arrived. Files: `experiments/starvation_study.py`. Check: new numbers in
-   `docs/STARVATION.md` under "What is only a guess".
-
-## Decisions you need to make
-
-Safe defaults were used for all of them.
-
-1. ~~`regrow_per_tick`~~ Decided: switched to 6 (section 7).
-2. **History caps.** 20 decisions per agent, 50 dead agents (605 KB saves).
-   Default: kept as is. Lower for smaller saves, higher for longer stories.
-3. **Milestone 2 design approval.** All answers and the 3 open points are
-   resolved in `docs/MILESTONE2_V2.md` (section "Final proposed mechanics at a
-   glance" is the summary). Final review points handled: dice streams
-   (section 2a, `tests/test_trait_streams.py`, 5 design tests), complete rest
-   behaviour with test list, curiosity probe reports numbers and you decide.
-   Decided: industriousness = how fast an agent tires while moving (option B,
-   integer accumulator, 150 / 100 / 50 hundredths per move at trait 0 / 50 /
-   100; `tests/test_rest_design.py`, 14 design tests: extremes and the complete rest cycle).
-   APPROVED 2026-11-17 (`rest_resume = 70`). Next: stage 1 of the plan, only when you say go.
-4. **The gather-then-eat flaw.** 6.2% of starvation deaths happen one tick
-   after picking food up (gather and eat are two ticks). Fixing it changes
-   behaviour and all baselines. Default: NOT fixed, so that Milestone 2 is
-   compared against today's world.
-4. **Is the harsh world right?** This session's data suggests food amount
-   alone does not change the share of starvation deaths. If you want that
-   share lower, task 3 looks for levers; this is your call.
-5. **Dither fix is slower** (about 1.1 s to 1.9 s per 2,000 ticks). Acceptable?
-   Default: yes.
-
-## Design choices (one line each)
-
-- **Python for everything, plus a thin web page.** Node.js is not installed.
-- **The world is one plain dictionary.** A save is that dictionary as JSON text.
-- **Our own dice (`rng.py`).** Its memory is one number, stored in the save.
-- **Rules in a fixed order, first one that fits wins.** Scoring is proposed for Milestone 2.
-- **Decisions ARE stored in saves** (capped), so the page survives load.
-- **Old saves are repaired on every load** with documented defaults, never silently.
-- **The server runs the world; the page only draws.**
-
-## Known risks
-
-- Claude's sandbox blocks writing to `.git` in some modes and opening a port;
-  commits worked in this session, the server did not start.
-- Replays (`why.py`) match only if code and settings are unchanged.
-- Big populations slow the page (over about 300 agents at 20x).

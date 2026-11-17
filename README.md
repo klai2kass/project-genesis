@@ -4,7 +4,10 @@ A small world that runs on your Mac. About 50 simple agents wander a map,
 look for food, eat, have children and die. Nothing is installed and nothing
 is paid for: it only needs the Python that is already on your Mac.
 
-This is **Milestone 1**: no AI model (LLM) yet, just clear rules.
+Milestone 1 (food, children, death) and **Milestone 2** (a rest need and two
+personality traits, curiosity and industriousness) are built. No AI model
+(LLM): every decision comes from a few clear rules, and every decision says
+why. What the traits actually do, measured: `docs/MILESTONE2_REPORT.md`.
 
 ## Run it
 
@@ -33,7 +36,8 @@ Want a different world? `python3 server.py --seed banana`
 | **Seed + New world** | Build a fresh world. Same seed = same world, always |
 | **Save** | Writes the world to `saves/<name>.json` |
 | **Load** | Brings a saved world back (it loads paused) |
-| **Click an agent** | See its energy, age, what it needs, the options it weighed, and *why* it chose |
+| **Click an agent** | See its energy, rest, traits, age, what it needs, the options it weighed, *why* it chose, and its earlier decisions |
+| **Stats** | Alive, births, deaths by cause, resting now, average curiosity and industriousness, population graph |
 | **Feed** | Births and deaths, or every single decision |
 
 ## Check that it works (tests)
@@ -42,12 +46,17 @@ Want a different world? `python3 server.py --seed banana`
 python3 -m unittest discover -s tests -v
 ```
 
+It should end with `Ran 109 tests` and `OK` (about 40 seconds).
+
 The tests prove the two promises this project is built on:
 
 - **Same seed = same result.** Two runs with one seed end up identical,
   decision for decision.
 - **Save → load = same state.** A loaded world is identical to the one that
-  was saved, and it also *continues* identically.
+  was saved, and it also *continues* identically. Saves from older versions
+  (1, 2) still load and keep their old rules.
+- **Milestone 1 is frozen.** With `MILESTONE1_RULES` the new code repeats the
+  old behaviour exactly (`tests/test_baseline.py`).
 
 ## Run it without the page (headless)
 
@@ -89,6 +98,13 @@ python3 run_headless.py --seed 42 --ticks 500 --set regrow_per_tick=6 --set visi
 ```bash
 python3 why.py --seed 42 --ticks 300 --agent 12 --set regrow_per_tick=6
 ```
+
+Milestone 2 settings (all whole numbers; see `genesis/config.py`):
+`rest_below` (30), `rest_resume` (70), `rest_gain` (3), `rest_drain_units`
+(1), `drain_units_per_energy` (2), `tire_base` (100), `tire_span` (100),
+`tire_scale` (100), `turn_chance` (15), `turn_span` (20),
+`trait_founder_min` (40), `trait_founder_max` (60), `trait_mutation` (5).
+`--set rest_below=0` switches resting off.
 
 Notes: `food_cap` takes three numbers (water, grass, forest). If you give the
 same name twice, the last one wins. A wrong name or value stops with a plain
@@ -135,8 +151,21 @@ the first rule that fits:
 1. **Eat** if it carries food and has room for the energy.
 2. **Reproduce** if it is strong, grown up and rested.
 3. **Gather** if there is food on its tile and room in its pack.
-4. **Move** toward the nearest food it can *walk to* (around water), or
+4. **Rest** if it is not hungry (energy above 80) and tired (rest below 30);
+   it keeps resting until rest reaches 70. Resting costs half the energy.
+5. **Move** toward the nearest food it can *walk to* (around water), or
    wander if there is none. Food it cannot reach is ignored.
+
+Each agent has two **traits** (0 to 100, 50 = average), made at birth from
+its own seeded dice and inherited by children (parent's value +/- 5):
+
+- **Industriousness**: how fast it tires while moving (lazy agents rest
+  about twice as often as hard-working ones).
+- **Curiosity**: how often a wandering agent turns (7% of wandering ticks at
+  10, 15% at 50, 23% at 90). High curiosity means zigzagging and searching
+  the nearby patch thoroughly, not exploring further. Measured: when
+  high- and low-curiosity families share a world, the high ones usually end
+  up with more descendants (`docs/MILESTONE2_REPORT.md`).
 
 It **dies** if its energy hits 0 (starved) or it reaches its lifespan (old age).
 
@@ -151,6 +180,9 @@ of 100"), the **options** it considered and whether each fitted, and the
 | `genesis/config.py` | **All the numbers** (map size, food, energy, lifespan). Start here to experiment |
 | `genesis/world.py` | Builds a new world from a seed |
 | `genesis/agents.py` | The decision rules (`decide`) and their "why" text |
+| `genesis/needs.py` | The rest need: when to rest, resting, tiring |
+| `genesis/traits.py` | Curiosity and industriousness: dice, inheritance, effects |
+| `genesis/digest.py` | Behaviour-only codes used to prove Milestone 1 is unchanged |
 | `genesis/sim.py` | One tick of time (`step`) |
 | `genesis/save.py` | Save, load, fingerprint; repairs older saves |
 | `genesis/history.py` | Each agent's recent decisions, stored in the world and saves |
@@ -163,9 +195,12 @@ of 100"), the **options** it considered and whether each fitted, and the
 | `server.py` | Runs the world and serves the page |
 | `web/` | The page. It only draws; no rules live there |
 | `tests/` | The automatic checks |
-| `experiments/` | `regrow_sweep.py`: compares `regrow_per_tick` values |
+| `experiments/` | Measurement scripts (they only read the world); results in `experiments/results/`. `regrow_sweep.py`, `starvation_study.py`, `stage_compare.py`, `curiosity_probe.py`, `trait_drift.py`, `encounter_probe.py`; `baseline/` is the frozen Milestone 1 reference |
 | `VISION.md` | The long-term idea and roadmap (read first) |
-| `docs/MILESTONE2.md` | Proposal for needs and personality (not built) |
+| `docs/MILESTONE2_REPORT.md` | What Milestone 2 does, measured |
+| `docs/MILESTONE2_V2.md` | The Milestone 2 design as built |
+| `docs/STARVATION.md` | Why about two thirds of deaths are starvation |
+| `docs/MILESTONE2.md`, `docs/MILESTONE2_REVIEW.md` | The first proposal and its review (history) |
 | `STATUS.md` | What works right now, and what to do next |
 
 The `genesis/` folder never touches the page or the server. That is what
@@ -178,3 +213,5 @@ Open `genesis/config.py`, change one number, start a new world:
 - `regrow_per_tick` (default 6): more food growing means a bigger population.
 - `vision`: how far agents see food.
 - `repro_cooldown`: lower it and watch a baby boom, then a famine.
+- `--set tire_base=200`: everyone tires twice as fast and rests more.
+- `--set rest_below=0`: nobody rests (Milestone 1 behaviour for rest).
