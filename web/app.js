@@ -243,6 +243,29 @@ function optionRows(event) {
   });
 }
 
+// Who this agent has met most (encounter memory, genesis/memory.py).
+function renderKnown(known) {
+  const list = $("a-known-list");
+  list.replaceChildren();
+  if (!known || known.keep <= 0) {
+    $("a-known").textContent = known ? "Remembers no meetings (memory is off in this world)." : "";
+    return;
+  }
+  $("a-known").textContent = known.count === 0 ? "Has not met anyone yet." :
+    "Knows " + known.count + " agent" + (known.count === 1 ? "" : "s") +
+    " (remembers up to " + known.keep + "). Met most:";
+  for (const k of known.top) {
+    const li = document.createElement("li");
+    const who = document.createElement("strong");
+    who.textContent = "#" + k.id + (k.family ? " (" + k.family + ")" : "");
+    li.append(who, document.createTextNode(
+      " · met " + k.meetings + " time" + (k.meetings === 1 ? "" : "s") +
+      ", last at tick " + k.last + " near (" + k.x + ", " + k.y + ")" +
+      (k.alive ? "" : " · has died")));
+    list.append(li);
+  }
+}
+
 function renderAgent() {
   const sel = state.selected;
   $("agent-empty").hidden = Boolean(sel);
@@ -280,6 +303,7 @@ function renderAgent() {
     } else {
       $("a-home").textContent = "";
     }
+    renderKnown(sel.known);
   } else {
     const last = sel.trail[sel.trail.length - 1];
     $("a-name").textContent = "Agent #" + sel.id;
@@ -290,6 +314,7 @@ function renderAgent() {
     $("a-rest").textContent = "";
     $("a-traits").textContent = "";
     $("a-home").textContent = "";
+    renderKnown(null);
     $("a-action").textContent = "die";
     $("a-why").textContent = last ? last.why : "It is no longer in the world.";
   }

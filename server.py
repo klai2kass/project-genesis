@@ -23,6 +23,7 @@ from urllib.parse import parse_qs, urlparse
 
 from genesis import create_world, load_world, save_world, step
 from genesis.history import events_for
+from genesis.memory import strongest
 from genesis.traits import tire_rate, turn_percent
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -40,6 +41,27 @@ BASE_TICKS_PER_SECOND = 4        # what "1x" speed means
 ALLOWED_SPEEDS = (1, 2, 5, 20)
 SAVE_NAME = re.compile(r"^[A-Za-z0-9_-]{1,40}$")  # keeps saves inside saves/
 
+
+
+def _known(agent, agents, cfg):
+    """The agents this one has met most (genesis/memory.py), with family
+    marked where the world still knows it (living agents carry `parent`)."""
+    living = {a["id"]: a for a in agents}
+    out = []
+    for other_id, first, last, meetings, x, y in strongest(agent, 5):
+        other = living.get(other_id)
+        if other_id == agent["parent"]:
+            family = "parent"
+        elif other is not None and other["parent"] == agent["id"]:
+            family = "child"
+        elif (other is not None and agent["parent"] is not None
+              and other["parent"] == agent["parent"]):
+            family = "sibling"
+        else:
+            family = ""
+        out.append({"id": other_id, "first": first, "last": last, "meetings": meetings,
+                    "x": x, "y": y, "alive": other is not None, "family": family})
+    return {"count": len(agent["memory"]), "keep": cfg["memory_keep"], "top": out}
 
 class Game:
     """One running world plus the things the UI needs around it."""
@@ -128,7 +150,8 @@ class Game:
                                "rest_resume": cfg["rest_resume"],
                                "home_radius": cfg["home_radius"]}
                     selected = {"alive": True, "agent": agent, "trail": trail,
-                                "effects": effects}
+                                "effects": effects,
+                                "known": _known(agent, agents, cfg)}
                 else:
                     selected = {"alive": False, "id": agent_id, "trail": trail}
 

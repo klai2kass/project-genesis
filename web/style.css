@@ -181,6 +181,7 @@ button.primary {
   overflow-y: auto;
   overflow-wrap: anywhere;
 }
+.trail.known { max-height: none; border-top: none; padding-top: 0; margin-bottom: 8px; }
 .trail { max-height: 150px; color: var(--muted); border-top: 1px solid var(--border); padding-top: 6px; }
 .feed { height: 220px; margin-top: 8px; }
 .trail li, .feed li { padding: 2px 0; }
