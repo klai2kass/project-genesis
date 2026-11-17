@@ -278,7 +278,7 @@ blocks the port). Stop with Ctrl+C:
 python3 server.py
 ```
 
-All automatic checks (end should say `Ran 68 tests` and `OK`):
+All automatic checks (end should say `Ran 87 tests` and `OK`):
 
 ```bash
 python3 -m unittest discover -s tests
@@ -323,9 +323,8 @@ python3 experiments/baseline/make_baseline.py --check
 
 ## 10. Next 5 tasks
 
-1. **Answer the 7 questions** in the table at the end of `docs/MILESTONE2_V2.md`
-   (or say "use the defaults"). Files: none for me, one table for you.
-   Check: the table has your answers. Nothing is built before this.
+1. **Say "go" for stage 1** of `docs/MILESTONE2_V2.md` (design approved).
+   Nothing is built before this.
 2. **Check the real page by hand.** Run `python3 server.py` in your own
    Terminal, press Save, then Load, and confirm the pop-up at the top fades;
    click an agent after loading and confirm earlier decisions are listed.
@@ -349,12 +348,15 @@ Safe defaults were used for all of them.
 1. ~~`regrow_per_tick`~~ Decided: switched to 6 (section 7).
 2. **History caps.** 20 decisions per agent, 50 dead agents (605 KB saves).
    Default: kept as is. Lower for smaller saves, higher for longer stories.
-3. **Milestone 2.** Answer the 7 questions in section 8 of
-   `docs/MILESTONE2_V2.md` (options, consequences and my recommendations are
-   in its section 6), or say "use the defaults" (Q1 no penalty, Q2 three
-   active traits, Q3 founders 50 and +/-10, Q4 no noise, Q5 tiles shared,
-   Q6 no switch, only baseline files, Q7 scoring in code). Nothing is built
-   until then.
+3. **Milestone 2 design approval.** All answers and the 3 open points are
+   resolved in `docs/MILESTONE2_V2.md` (section "Final proposed mechanics at a
+   glance" is the summary). Final review points handled: dice streams
+   (section 2a, `tests/test_trait_streams.py`, 5 design tests), complete rest
+   behaviour with test list, curiosity probe reports numbers and you decide.
+   Decided: industriousness = how fast an agent tires while moving (option B,
+   integer accumulator, 150 / 100 / 50 hundredths per move at trait 0 / 50 /
+   100; `tests/test_rest_design.py`, 14 design tests: extremes and the complete rest cycle).
+   APPROVED 2026-11-17 (`rest_resume = 70`). Next: stage 1 of the plan, only when you say go.
 4. **The gather-then-eat flaw.** 6.2% of starvation deaths happen one tick
    after picking food up (gather and eat are two ticks). Fixing it changes
    behaviour and all baselines. Default: NOT fixed, so that Milestone 2 is
