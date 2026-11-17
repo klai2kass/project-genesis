@@ -18,8 +18,14 @@ every tick, so an entry whose last_tick is the previous tick means they were
 together a moment ago and still are.
 
 At most `memory_keep` entries (config, default 10; 0 = no memory). When the
-list is too long, the entry met longest ago is dropped (ties: fewer meetings
-first, then the lower id). Whole numbers, fixed order, no dice.
+list is too long, the agent forgets the one it met the FEWEST times (ties:
+met longest ago, then the lower id), but never someone it is meeting right
+now unless everyone in the list is. So close contacts are kept and a new
+face gets a place by pushing out an old passing acquaintance.
+Chosen by measurement (experiments/memory_probe.py, docs/MILESTONE3.md): the
+first rule, "forget whoever was met longest ago", kept only about half of the
+agents met 5+ times and reset a friend's count to 1 after forgetting it.
+Whole numbers, fixed order, no dice.
 
 Memory is a RECORD only: nothing in decide() reads it, so the world behaves
 exactly as without it (tests/test_memory.py checks this against the frozen
@@ -65,8 +71,9 @@ def _remember(agent, other_id, tick):
 def _trim(agent, keep):
     mem = agent["memory"]
     while len(mem) > keep:
-        oldest = min(mem, key=lambda e: (e[2], e[3], e[0]))
-        mem.remove(oldest)
+        newest = max(e[2] for e in mem)
+        pool = [e for e in mem if e[2] != newest] or mem
+        mem.remove(min(pool, key=lambda e: (e[3], e[2], e[0])))
 
 
 def update_memories(world):

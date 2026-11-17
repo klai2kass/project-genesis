@@ -100,7 +100,20 @@ class Counting(unittest.TestCase):
         self.assertIsNone(entry(a, 3))
         self.assertIsNone(entry(c, 1))
 
-    def test_cap_drops_the_one_met_longest_ago(self):
+    def test_cap_drops_the_least_met_and_keeps_a_friend(self):
+        # Keep 2. Agent 1 meets #2 three separate times, then #3, then #4.
+        far = (0, 0)
+        w = tiny_world([(10, 10), far, far, far], keep=2)
+        for _ in range(3):
+            tick(w, [(10, 10), (11, 10), (0, 19), (19, 19)])   # with #2
+            tick(w, [(10, 10), (0, 19), (19, 0), (19, 19)])    # apart
+        tick(w, [(10, 10), (0, 19), (10, 11), (19, 19)])       # meets #3
+        tick(w, [(10, 10), (0, 19), (19, 0), (9, 9)])          # meets #4
+        a = w["agents"][0]
+        self.assertEqual(sorted(e[0] for e in a["memory"]), [2, 4])  # #3 forgotten
+        self.assertEqual(entry(a, 2)[3], 3)
+
+    def test_cap_among_equals_drops_the_one_met_longest_ago(self):
         # Agent 1 at (10, 10) meets 2, then 3, then 4 (one at a time). Keep 2.
         far = (0, 0)
         w = tiny_world([(10, 10), far, far, far], keep=2)
