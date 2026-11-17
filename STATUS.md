@@ -2,8 +2,10 @@
 
 Last checked: 2026-11-17, by running the commands in this file (not from memory).
 
-**Milestone 1 is complete and Steps 0-9 of the second session are done.**
-Milestone 2 is only a written proposal (`docs/MILESTONE2.md`). Read the
+**Milestone 1 is complete. Milestone 2 is NOT built.** It exists as a proposal
+(`docs/MILESTONE2.md`), a review (`docs/MILESTONE2_REVIEW.md`) and a revised
+staged plan (`docs/MILESTONE2_V2.md`, with your questions). Starvation is
+explained in `docs/STARVATION.md`. Read the
 "Session log" first, then "Next 5 tasks" and "Decisions you need to make".
 
 ## Session log
@@ -46,6 +48,19 @@ Newest first. A fresh session should read this section first.
   of today's rules), a real v2 save in `tests/fixtures/`, and
   `tests/test_baseline.py` (4 tests). Full suite: 68 tests OK (28 s).
   Fingerprint seed 42 / 500 ticks still `61e8b205b6228bc9`.
+- **Step 3 done (staged plan).** `docs/MILESTONE2_V2.md`: 8 stages (0 done),
+  definitions of needs and traits with exact whole-number rules (examples
+  hand-checked and run), rest/company incentives with alternatives and
+  predicted effect on deaths, 8 emergence measures, the 7 questions with
+  options and recommendations, and an empty "Your answers" table. I differ
+  from the reviewer in one place: personality as thresholds BEFORE any scoring
+  system (reason in section 1 of the file). Nothing built.
+- **Step 4 done (this log).** Final checks of the session: full suite
+  `Ran 68 tests ... OK`; `run_headless.py --seed 42 --ticks 500` gives alive 79,
+  fingerprint `61e8b205b6228bc9` (same as step 0). No code default changed,
+  no feature of Milestone 2 built. Only code added: `genesis/digest.py`
+  (read-only) and the study/baseline scripts.
+- **In progress:** nothing. Next: "Next 5 tasks" (needs your answers first).
 
 ### Session 2026-11-17 (steps 0-9 plan)
 - **Step 0 verified by running:** git clean, 8 commits. 25 tests pass (6.3 s).
@@ -167,7 +182,8 @@ with no window. A **migration** upgrades an old save file when loading.
 
 `python3 -m unittest discover -s tests` printed `Ran 64 tests in 16.4s` and
 `OK`. By file: controls 11, determinism 7, history 8, movement 7, overrides
-11, save_load 9, summary 5, why_log 6. Not covered by automatic tests: the
+11, save_load 9, summary 5, why_log 6. (Later the same day, with the new
+`tests/test_baseline.py`: `Ran 68 tests in 28.5s`, `OK`.) Not covered by automatic tests: the
 real web page in a browser (see Remaining limits), and starting the server.
 
 ## 4. Current performance (seed 42, 2,000 ticks, this Mac, measured)
@@ -234,7 +250,13 @@ is short again); it was not tested.
 - Values of 8 or more mainly add agents (123 to 173) without more scarcity.
 To try it: `python3 run_headless.py --seed 42 --ticks 2000 --every 0 --summary --set regrow_per_tick=6`
 
-## 8. Milestone 2 proposal
+## 8. Milestone 2 proposal, review and revised plan
+
+Read in this order: `docs/STARVATION.md` (why 2/3 starve), then
+`docs/MILESTONE2_REVIEW.md` (7 verdicts on the ChatGPT review), then
+`docs/MILESTONE2_V2.md` (staged plan, 8 emergence measures, your 7 questions,
+empty answers table). The original proposal follows; V2 replaces its build
+order and some of its rules.
 
 Written in full in [docs/MILESTONE2.md](docs/MILESTONE2.md): numerical needs
 (hunger, rest, company), four personality traits, scored decisions with
@@ -256,7 +278,7 @@ blocks the port). Stop with Ctrl+C:
 python3 server.py
 ```
 
-All automatic checks (end should say `Ran 64 tests` and `OK`):
+All automatic checks (end should say `Ran 68 tests` and `OK`):
 
 ```bash
 python3 -m unittest discover -s tests
@@ -286,28 +308,39 @@ Compare regrowth values:
 python3 experiments/regrow_sweep.py
 ```
 
+Why do agents starve (about 25 s), and the settings sweep (about 4 min):
+
+```bash
+python3 experiments/starvation_study.py
+python3 experiments/starvation_study.py --sweep
+```
+
+Check that behaviour still equals the frozen Milestone 1 reference (about 1 min):
+
+```bash
+python3 experiments/baseline/make_baseline.py --check
+```
+
 ## 10. Next 5 tasks
 
-1. **Check the real page by hand.** Files: none. Run `python3 server.py`,
-   press Save, then Load, and confirm the pop-up at the top fades. Click an
-   agent after loading and confirm earlier decisions are listed.
-   Check: you see both. Tell me if not.
-2. **Let `why.py --load` read stored history.** Files: `why.py`,
-   `genesis/history.py`, new test in `tests/test_history.py`. When the save has
-   history for the agent and `--ticks 0`, print it without replaying.
-   Check: `python3 -m unittest discover -s tests` and
+1. **Answer the 7 questions** in the table at the end of `docs/MILESTONE2_V2.md`
+   (or say "use the defaults"). Files: none for me, one table for you.
+   Check: the table has your answers. Nothing is built before this.
+2. **Check the real page by hand.** Run `python3 server.py` in your own
+   Terminal, press Save, then Load, and confirm the pop-up at the top fades;
+   click an agent after loading and confirm earlier decisions are listed.
+3. **Stage 1 of the V2 plan** (fields and save version 3, behaviour
+   unchanged). Files: `genesis/world.py`, `genesis/save.py`, `genesis/sim.py`,
+   `tests/test_save_load.py`. Check: `python3 -m unittest discover -s tests`
+   and `python3 experiments/baseline/make_baseline.py --check` (digests equal).
+4. **Let `why.py --load` read stored history** (still not done). Files:
+   `why.py`, `genesis/history.py`, `tests/test_history.py`. Check: unit tests;
    `python3 run_headless.py --seed 42 --ticks 300 --save saves/t.json` then
-   `python3 why.py --load saves/t.json --ticks 0 --agent 3`.
-3. **Find what really changes the death rate.** Files: new
-   `experiments/mortality_sweep.py` (copy of the regrow sweep), STATUS.md.
-   Sweep `repro_cost`, `food_energy`, `repro_cooldown` (never the code defaults).
-   Check: `python3 experiments/mortality_sweep.py`.
-4. **Milestone 2, build step 1** (fields only, behaviour unchanged). Files:
-   `genesis/world.py`, `genesis/save.py`, `web/app.js`, tests. Needs your
-   answers first (below). Check: all tests pass, `saves/quicksave.json` loads.
-5. **Optional: shrink saves with a string table.** Files: `genesis/save.py`,
-   `tests/test_save_load.py`. Only if 600 KB saves bother you; estimated about
-   half the size. Check: same tests plus a size print.
+   `python3 why.py --load saves/t.json --ticks 0 --agent 3` prints stored decisions.
+5. **Measure the two starvation guesses** (cheap, read-only): food in view at
+   birth against a random tile, and food taken by someone else before an agent
+   arrived. Files: `experiments/starvation_study.py`. Check: new numbers in
+   `docs/STARVATION.md` under "What is only a guess".
 
 ## Decisions you need to make
 
@@ -316,8 +349,16 @@ Safe defaults were used for all of them.
 1. ~~`regrow_per_tick`~~ Decided: switched to 6 (section 7).
 2. **History caps.** 20 decisions per agent, 50 dead agents (605 KB saves).
    Default: kept as is. Lower for smaller saves, higher for longer stories.
-3. **Milestone 2.** Read the 7 questions at the end of `docs/MILESTONE2.md`;
-   say "go with the defaults" or answer them. Nothing is started until then.
+3. **Milestone 2.** Answer the 7 questions in section 8 of
+   `docs/MILESTONE2_V2.md` (options, consequences and my recommendations are
+   in its section 6), or say "use the defaults" (Q1 no penalty, Q2 three
+   active traits, Q3 founders 50 and +/-10, Q4 no noise, Q5 tiles shared,
+   Q6 no switch, only baseline files, Q7 scoring in code). Nothing is built
+   until then.
+4. **The gather-then-eat flaw.** 6.2% of starvation deaths happen one tick
+   after picking food up (gather and eat are two ticks). Fixing it changes
+   behaviour and all baselines. Default: NOT fixed, so that Milestone 2 is
+   compared against today's world.
 4. **Is the harsh world right?** This session's data suggests food amount
    alone does not change the share of starvation deaths. If you want that
    share lower, task 3 looks for levers; this is your call.
