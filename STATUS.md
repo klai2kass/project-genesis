@@ -4,6 +4,21 @@ Last checked: 2026-11-17, by actually running the commands below (not from memor
 
 **Milestone 1 is complete.** Read "Next 5 tasks" to continue.
 
+## Session log
+
+Newest first. A fresh session should read this section first.
+
+### Session 2026-11-17 (steps 0-9 plan)
+- **Step 0 verified by running:** git clean, 8 commits. 25 tests pass (6.3 s).
+  `run_headless.py --seed 42 --ticks 500` gives 49 alive, fingerprint
+  `f8afe5e75d1209c4` (matches the claim below). `server.py` could NOT start
+  here: the sandbox refuses the local port (`Operation not permitted`). Run it
+  yourself: `cd ~/Desktop/"Project Genesis" && python3 server.py`.
+- **Plan:** 1 VISION.md, 2 compatible saves, 3 `--set`, 4 water dithering,
+  5 `--summary`, 6 browser load message, 7 history in saves, 8 regrow
+  experiments, 9 Milestone 2 proposal (docs only).
+- **In progress:** step 1.
+
 ## What this project is
 
 A small artificial world that runs on this Mac, offline and for free.
