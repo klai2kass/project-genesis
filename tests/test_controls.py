@@ -96,6 +96,17 @@ class Controls(unittest.TestCase):
         self.assertIn("tick 7", text)
         self.assertIn("seed 42", text)
 
+    def test_agent_trail_is_still_there_after_loading_a_save(self):
+        for _ in range(30):
+            self.game.control({"action": "step"})
+        self.game.control({"action": "save", "name": "trail"})
+        before = json.loads(self.game.snapshot(since=0, feed="all", agent_id=1))
+        self.game.control({"action": "new", "seed": "other"})
+        self.game.control({"action": "load", "name": "trail"})
+        after = json.loads(self.game.snapshot(since=0, feed="all", agent_id=1))
+        self.assertEqual(len(after["selected"]["trail"]), 20)
+        self.assertEqual(after["selected"]["trail"], before["selected"]["trail"])
+
     def test_broken_saves_fail_with_a_plain_error_and_keep_the_world(self):
         before = fingerprint(self.game.world)
         bad = {"not json": "{oops", "empty": "{}",

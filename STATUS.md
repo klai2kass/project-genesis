@@ -63,7 +63,22 @@ Newest first. A fresh session should read this section first.
   hidden with opacity 0 after ~4.6 s; error variant red. NOT checked: the
   full click on the real Load button. Please try once: run `python3 server.py`,
   Save, then Load, and look at the top of the page.
-- **In progress:** step 7 (agent history in saves).
+- **Step 7 done (history in saves).** New `genesis/history.py`; `sim.step`
+  records every decision into `world["history"]` (per agent) and
+  `world["history_dead"]`; the page's trail now reads from it (so it survives
+  load). Settings `history_keep` (default 20 per agent) and
+  `dead_history_keep` (default 50 dead agents). Old saves without history load
+  (logged in `migration_log`) and start remembering from the load.
+  **Measured, seed 42, 2,000 ticks:** save size 28 KB -> 605 KB (history off
+  -> default); save 4 ms, load 4 ms; speed 993 -> 846 ticks/s (about 15%
+  slower). Cap needed: yes. Without limits history grows forever; with
+  keep=30 and 100 dead the save was 1.3 MB, and keeping 400 dead was 3.8 MB.
+  Size is roughly (alive + dead kept) x 20 x ~290 bytes. A string table would
+  roughly halve it; not done (adds complexity, files are still small).
+  9 new tests (64 total, all pass), including history belongs to the right
+  agent, dead agents kept, limits, old save, behaviour unchanged by history.
+  Decision resolved: history IS now stored in saves (see Decisions).
+- **In progress:** step 8 (regrow experiments).
 
 ## What this project is
 
@@ -190,8 +205,8 @@ Nothing is broken. Rough edges, none blocking:
   the same results on every Python version.
 - **Rules in a fixed order, first one that fits wins.** Simplest thing that
   explains itself. Scoring by needs can replace it in a later milestone.
-- **Decision records are not stored in the save.** They are rebuilt by
-  replaying the seed (`why.py`). This keeps saves small and old saves loadable.
+- **Recent decisions ARE stored in the save** (last 20 per agent, last 50
+  dead agents). `why.py` still replays from the seed.
 - **The server runs the world; the page only draws.** So the rules exist in
   one place and stay testable.
 

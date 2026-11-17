@@ -88,6 +88,8 @@ def create_world(seed, config=None):
         "food": food,
         "agents": agents,
         "next_id": cfg["start_agents"] + 1,
+        "history": {},
+        "history_dead": [],
         "stats": {"births": 0, "deaths_starved": 0, "deaths_old_age": 0},
     }
 

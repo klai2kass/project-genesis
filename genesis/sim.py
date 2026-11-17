@@ -6,6 +6,7 @@ a short "why", so you can always ask "why did agent #12 do that?".
 """
 
 from .agents import DIRS, decide
+from .history import record
 from .rng import Rng
 from .world import is_land, make_agent, tile_index
 
@@ -27,6 +28,7 @@ def step(world):
             event["age"] = agent["age"]
             event["cause"] = "starved" if why.startswith("starved") else "old age"
         events.append(event)
+        record(world, event)
 
     _regrow_food(world, rng)
 

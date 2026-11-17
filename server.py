@@ -17,11 +17,12 @@ import threading
 import time
 import traceback
 import webbrowser
-from collections import OrderedDict, deque
+from collections import deque
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
 from genesis import create_world, load_world, save_world, step
+from genesis.history import events_for
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 WEB_DIR = os.path.join(ROOT, "web")
@@ -56,8 +57,6 @@ class Game:
         self.world_id += 1
         self.notable = deque(maxlen=200)   # births and deaths
         self.recent = deque(maxlen=300)    # every decision
-        self.trails = {}                   # agent id -> its last few decisions
-        self.graves = OrderedDict()        # trails of agents that died recently
         self.history = deque([len(world["agents"])], maxlen=300)  # population
 
     # ---- time -----------------------------------------------------------
@@ -68,15 +67,8 @@ class Game:
             self.seq += 1
             event["seq"] = self.seq
             self.recent.append(event)
-            agent_id = event["agent"]
-            trail = self.trails.setdefault(agent_id, deque(maxlen=12))
-            trail.append(event)
             if event["action"] in ("born", "die"):
                 self.notable.append(event)
-            if event["action"] == "die":
-                self.graves[agent_id] = self.trails.pop(agent_id)
-                if len(self.graves) > 100:
-                    self.graves.popitem(last=False)
         if self.world["tick"] % 5 == 0:
             self.history.append(len(self.world["agents"]))
         if not self.world["agents"]:
@@ -122,14 +114,13 @@ class Game:
             selected = None
             if agent_id is not None:
                 agent = next((a for a in agents if a["id"] == agent_id), None)
+                # The trail comes from the world itself (genesis/history.py),
+                # so it survives save and load.
+                trail = events_for(world, agent_id)
                 if agent is not None:
-                    selected = {"alive": True, "agent": agent,
-                                "trail": list(self.trails.get(agent_id, []))}
-                elif agent_id in self.graves:
-                    selected = {"alive": False, "id": agent_id,
-                                "trail": list(self.graves[agent_id])}
+                    selected = {"alive": True, "agent": agent, "trail": trail}
                 else:
-                    selected = {"alive": False, "id": agent_id, "trail": []}
+                    selected = {"alive": False, "id": agent_id, "trail": trail}
 
             energy_total = sum(a["energy"] for a in agents)
             return json.dumps({

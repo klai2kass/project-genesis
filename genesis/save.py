@@ -72,6 +72,12 @@ def _repair(world):
                 _note(world, "agent %s: %s missing: used %r"
                       % (agent.get("id", "?"), key, value))
 
+    for key, empty in (("history", {}), ("history_dead", [])):
+        if key not in world:
+            world[key] = empty
+            _note(world, "%s missing (old save): starting with no remembered "
+                         "decisions" % key)
+
     if "next_id" not in world:
         world["next_id"] = max([a["id"] for a in world["agents"]] + [0]) + 1
         _note(world, "next_id missing: set to %d" % world["next_id"])

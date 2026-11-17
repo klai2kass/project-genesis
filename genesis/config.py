@@ -37,4 +37,8 @@ DEFAULT_CONFIG = {
     # --- Lifespan (each agent gets a random number in this range) ---
     "max_age_min": 400,
     "max_age_max": 700,
+
+    # --- Memory of decisions (kept in saves) ---
+    "history_keep": 20,        # recent decisions remembered per agent
+    "dead_history_keep": 50,   # how many dead agents' decisions are kept
 }

@@ -30,6 +30,8 @@ RULES = {
     "repro_cooldown": ("int", 0, 100000),
     "max_age_min": ("int", 1, 100000),
     "max_age_max": ("int", 1, 100000),
+    "history_keep": ("int", 0, 1000),
+    "dead_history_keep": ("int", 0, 100000),
 }
 
 # Only used while a world is being created; changing them on a loaded world
