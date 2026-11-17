@@ -125,7 +125,8 @@ class Game:
                                "tire_rate": tire_rate(agent, cfg),
                                "tire_scale": cfg["tire_scale"],
                                "rest_below": cfg["rest_below"],
-                               "rest_resume": cfg["rest_resume"]}
+                               "rest_resume": cfg["rest_resume"],
+                               "home_radius": cfg["home_radius"]}
                     selected = {"alive": True, "agent": agent, "trail": trail,
                                 "effects": effects}
                 else:

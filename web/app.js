@@ -127,6 +127,27 @@ function drawMap() {
       mapCtx.stroke();
     }
   }
+  drawHome();
+}
+
+// The selected agent's home: a gold square, and a dashed box for the area it
+// stays inside while wandering (home_radius steps; none if homes are off).
+function drawHome() {
+  const sel = state.selected;
+  if (!sel || !sel.alive || !sel.agent.home) return;
+  const [hx, hy] = sel.agent.home;
+  const r = (sel.effects || {}).home_radius || 0;
+  mapCtx.lineWidth = 1.5;
+  mapCtx.strokeStyle = "#e8b04a";
+  if (r > 0) {
+    mapCtx.setLineDash([4, 4]);
+    mapCtx.strokeRect((hx - r) * TILE, (hy - r) * TILE, (2 * r + 1) * TILE, (2 * r + 1) * TILE);
+    mapCtx.setLineDash([]);
+  }
+  mapCtx.fillStyle = "#e8b04a";
+  mapCtx.fillRect(hx * TILE + 3, hy * TILE + 3, TILE - 6, TILE - 6);
+  mapCtx.strokeStyle = "#101114";
+  mapCtx.strokeRect(hx * TILE + 3, hy * TILE + 3, TILE - 6, TILE - 6);
 }
 
 function drawChart() {
@@ -247,8 +268,18 @@ function renderAgent() {
                  : " · rests below " + fx.rest_below + " when not hungry");
     const t = a.traits || {};
     $("a-traits").textContent = "Curiosity " + t.curiosity + " (turns " + fx.turn_percent +
-      "% of wandering ticks) · industriousness " + t.industriousness + " (loses " +
-      (fx.tire_rate / fx.tire_scale).toFixed(2) + " rest per move)";
+      "% of wandering ticks: high searches nearby, low walks straight) · industriousness " +
+      t.industriousness + " (loses " + (fx.tire_rate / fx.tire_scale).toFixed(2) +
+      " rest per move)";
+    if (a.home) {
+      const far = Math.max(Math.abs(a.x - a.home[0]), Math.abs(a.y - a.home[1]));
+      $("a-home").textContent = "Home (" + a.home[0] + ", " + a.home[1] + "), where it was born · " +
+        far + " tiles away · " + (fx.home_radius > 0
+          ? "wanders within " + fx.home_radius + " tiles of it (gold square on the map)"
+          : "homes are off in this world");
+    } else {
+      $("a-home").textContent = "";
+    }
   } else {
     const last = sel.trail[sel.trail.length - 1];
     $("a-name").textContent = "Agent #" + sel.id;
@@ -258,6 +289,7 @@ function renderAgent() {
     $("a-rest-bar").style.width = "0%";
     $("a-rest").textContent = "";
     $("a-traits").textContent = "";
+    $("a-home").textContent = "";
     $("a-action").textContent = "die";
     $("a-why").textContent = last ? last.why : "It is no longer in the world.";
   }

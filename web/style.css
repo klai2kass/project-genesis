@@ -82,6 +82,7 @@ body {
 .dot.healthy { background: #fff3d1; }
 .dot.hungry { background: var(--danger); }
 .dot.resting { border-color: #8a7ce0; }
+.sq.home { width: 9px; height: 9px; display: inline-block; background: #e8b04a; border: 1.5px solid #101114; outline: 1.5px dashed #e8b04a; outline-offset: 2px; }
 
 .side { display: grid; gap: 12px; min-width: 0; }
 .card {
