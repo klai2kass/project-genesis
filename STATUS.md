@@ -10,6 +10,23 @@ Milestone 2 is only a written proposal (`docs/MILESTONE2.md`). Read the
 
 Newest first. A fresh session should read this section first.
 
+### Session 2026-11-17 (part 2: starvation + Milestone 2 review plan)
+- **Step 0 verified by running (not trusted):** git clean on `main`;
+  `python3 -m unittest discover -s tests` -> `Ran 64 tests ... OK` (21 s;
+  `pytest` is not installed, unittest is the right command);
+  `run_headless.py --seed 42 --ticks 500` -> alive 79, fingerprint
+  `61e8b205b6228bc9` (matches STATUS section 7). This is the reference
+  fingerprint for this session: it must stay the same.
+- **Planned items, checked against the repo:**
+  - `why.py --load`: option exists, but it only loads a save and then
+    REPLAYS ticks; it does NOT read the stored `history`. NOT done.
+  - Performance: speed and save size were measured (section 4), but no
+    profiler run / hot-spot breakdown. Only partly done.
+  - Mortality investigation: only the regrowth sweep exists (section 6);
+    the reason for ~2/3 starvation was never tested. NOT done -> step 1.
+  - `docs/MILESTONE2_DECISIONS.md`: does not exist. NOT done (the seven
+    questions go into `docs/MILESTONE2_V2.md` in step 3 instead).
+
 ### Session 2026-11-17 (steps 0-9 plan)
 - **Step 0 verified by running:** git clean, 8 commits. 25 tests pass (6.3 s).
   `run_headless.py --seed 42 --ticks 500` gives 49 alive, fingerprint
