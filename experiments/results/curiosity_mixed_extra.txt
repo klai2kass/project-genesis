@@ -1,0 +1,13 @@
+Mixed worlds, extra seeds 10..39 (30 seeds), 3000 ticks.
+                         low (10)          neutral (50)             high (90)
+alive end           17.3 +/- 14.1         34.1 +/- 15.8         42.8 +/- 14.1
+born               248.5 +/- 79.3        329.8 +/- 85.6        363.9 +/- 79.1
+gath/100            5.20 +/- 0.05         5.26 +/- 0.04         5.28 +/- 0.04
+starved%             67.6 +/- 1.8          66.1 +/- 1.7          66.0 +/- 1.6
+age                     298 +/- 6             302 +/- 7             301 +/- 6
+tiles/100t           65.5 +/- 0.8          63.8 +/- 0.7          62.3 +/- 0.9
+Per seed, high minus low:
+  alive end                25.5 +/- 23.0   positive in 26/30 seeds
+  born                   115.4 +/- 131.6   positive in 23/30 seeds
+  gath/100                 0.08 +/- 0.06   positive in 28/30 seeds
+Seeds where the group is extinct at the end: low 1, neutral 0, high 0
