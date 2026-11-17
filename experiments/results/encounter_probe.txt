@@ -2,7 +2,7 @@ Encounter probe: seeds 42,1,2,3,4, 3000 ticks, counted after tick 500.
 Meeting = within 1 tile. Family = parent/child or same parent. Home range and
 partners: agents that died after tick 500 having lived >= 50 ticks.
 
-== today's rules ==
+== homes off (home_radius 0 = Milestone 2) ==
                                                    mean       sd      min      max
 encounters per agent per 100 ticks                 29.7      0.2     29.5     30.0
 other agents in sight (4 tiles), average            3.7      0.0      3.7      3.8
@@ -22,42 +22,42 @@ population after tick 500, mean                    93.0      0.6     92.0     93
 deaths by starvation (%)                           66.5      0.7     65.4     67.0
 births                                              946       15      930      964
 
-== PROTOTYPE home radius 6 ==
+== homes, home_radius 6 (default) ==
                                                    mean       sd      min      max
-encounters per agent per 100 ticks                 28.1      0.4     27.8     28.8
-other agents in sight (4 tiles), average            3.5      0.1      3.5      3.6
-encounters that are a repeat (%)                   68.4      0.7     67.6     69.2
-pairs that meet 2+ times (%)                       64.8      0.8     63.4     65.5
-pairs that meet 5+ times (%)                       21.5      0.8     20.8     22.4
-encounters after >= 100 ticks apart (%)             4.7      0.2      4.5      4.9
-pairs that meet again after >= 100 ticks (%)       13.5      0.4     13.0     14.1
+encounters per agent per 100 ticks                 27.8      0.6     26.8     28.4
+other agents in sight (4 tiles), average            3.5      0.1      3.4      3.6
+encounters that are a repeat (%)                   68.1      0.4     67.6     68.5
+pairs that meet 2+ times (%)                       64.7      0.6     63.9     65.6
+pairs that meet 5+ times (%)                       21.1      0.7     20.5     22.0
+encounters after >= 100 ticks apart (%)             4.8      0.1      4.6      5.0
+pairs that meet again after >= 100 ticks (%)       13.5      0.4     12.8     13.8
 ticks between repeats, median                        14        0       14       14
-ticks between repeats, 90th percentile               79        2       77       81
-encounters that are family (%)                     13.1      0.8     12.2     14.1
-repeats that are family (%)                        15.0      1.1     13.5     16.3
-different agents met in a life                     25.0      0.6     24.2     25.8
-observed life of those agents (ticks)               316        5      308      321
+ticks between repeats, 90th percentile               80        1       78       82
+encounters that are family (%)                     13.0      0.6     12.2     13.6
+repeats that are family (%)                        14.8      0.8     13.8     15.7
+different agents met in a life                     25.0      0.6     24.1     25.8
+observed life of those agents (ticks)               315        3      310      317
 home range radius (tiles; map is 60 x 40)           5.2      0.0      5.1      5.2
-population after tick 500, mean                    93.4      0.3     93.0     93.8
-deaths by starvation (%)                           65.4      1.5     64.0     67.8
-births                                              938       10      924      950
+population after tick 500, mean                    93.1      0.6     92.4     94.0
+deaths by starvation (%)                           65.4      0.8     64.5     66.5
+births                                              931       14      919      955
 
-== PROTOTYPE home radius 3 ==
+== homes, home_radius 3 ==
                                                    mean       sd      min      max
-encounters per agent per 100 ticks                 26.4      0.4     25.8     26.7
+encounters per agent per 100 ticks                 26.2      0.3     26.0     26.6
 other agents in sight (4 tiles), average            3.3      0.0      3.2      3.3
-encounters that are a repeat (%)                   73.7      0.4     73.3     74.3
-pairs that meet 2+ times (%)                       66.1      0.5     65.6     66.9
-pairs that meet 5+ times (%)                       26.9      0.6     26.1     27.8
-encounters after >= 100 ticks apart (%)             3.4      0.1      3.4      3.6
-pairs that meet again after >= 100 ticks (%)       11.7      0.2     11.4     11.9
-ticks between repeats, median                        13        0       13       14
-ticks between repeats, 90th percentile               63        1       62       65
-encounters that are family (%)                     20.1      0.2     19.9     20.5
-repeats that are family (%)                        23.1      0.3     22.9     23.5
-different agents met in a life                     19.4      0.2     19.0     19.6
-observed life of those agents (ticks)               314        5      308      322
+encounters that are a repeat (%)                   73.4      0.6     72.6     74.2
+pairs that meet 2+ times (%)                       66.5      0.5     65.9     67.1
+pairs that meet 5+ times (%)                       26.6      1.1     25.2     28.3
+encounters after >= 100 ticks apart (%)             3.5      0.1      3.4      3.6
+pairs that meet again after >= 100 ticks (%)       11.7      0.2     11.5     12.1
+ticks between repeats, median                        14        1       13       14
+ticks between repeats, 90th percentile               65        1       64       67
+encounters that are family (%)                     20.0      0.7     19.0     20.8
+repeats that are family (%)                        23.0      0.8     21.6     23.8
+different agents met in a life                     19.4      0.5     19.0     19.9
+observed life of those agents (ticks)               311        3      308      315
 home range radius (tiles; map is 60 x 40)           3.7      0.0      3.7      3.8
-population after tick 500, mean                    93.3      0.9     92.2     94.6
-deaths by starvation (%)                           64.6      0.4     64.1     65.1
-births                                              939       20      911      958
+population after tick 500, mean                    93.4      0.7     92.2     94.1
+deaths by starvation (%)                           66.1      0.5     65.5     66.8
+births                                              947       13      932      963

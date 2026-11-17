@@ -6,7 +6,12 @@ exactly (tests/test_baseline.py). Also runs forced-trait worlds (every agent,
 and every child, gets one fixed trait value) to see what each trait does.
 Prints measurements only; it does not judge them.
 
-Run:  python3 experiments/stage_compare.py            (about 3 minutes)
+Since homes (Milestone 3) "defaults" and the forced-trait rows have homes
+on; "M2 rules (homes off)" reproduces Milestone 2. The Milestone 2 printout is
+experiments/results/stage_compare.txt; the one with homes is
+experiments/results/stage_compare_home.txt.
+
+Run:  python3 experiments/stage_compare.py            (about 4 minutes)
       python3 experiments/stage_compare.py --quick    (2 seeds, 1500 ticks)
 """
 import json
@@ -18,7 +23,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
 from genesis import create_world, step  # noqa: E402
-from genesis.save import MILESTONE1_RULES  # noqa: E402
+from genesis.save import MILESTONE1_RULES, MILESTONE2_RULES  # noqa: E402
 
 SEEDS, TICKS = ["42", "1", "2", "3", "4"], 3000
 if "--quick" in sys.argv:
@@ -100,11 +105,12 @@ def main():
             "frozen M1 baseline", avg(b, "mean_pop_after_500"), avg(b, "end_pop"),
             avg(b, "births"), avg(b, "starved_share_pct"), avg(b, "mean_age_at_death")))
     runs = [("M1 rules (new code)", MILESTONE1_RULES, None),
-            ("M2 defaults", {}, None),
-            ("M2, all industrious 10", {}, {"industriousness": 10}),
-            ("M2, all industrious 90", {}, {"industriousness": 90}),
-            ("M2, all curiosity 10", {}, {"curiosity": 10}),
-            ("M2, all curiosity 90", {}, {"curiosity": 90})]
+            ("M2 rules (homes off)", MILESTONE2_RULES, None),
+            ("defaults (homes on)", {}, None),
+            ("all industrious 10", {}, {"industriousness": 10}),
+            ("all industrious 90", {}, {"industriousness": 90}),
+            ("all curiosity 10", {}, {"curiosity": 10}),
+            ("all curiosity 90", {}, {"curiosity": 90})]
     for label, rules, force in runs:
         rows = [run(s, rules, force) for s in SEEDS]
         print(table(label, rows))

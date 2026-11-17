@@ -17,7 +17,10 @@ Everything else uses the code defaults. The script only READS events.
 
 Run:  python3 experiments/curiosity_probe.py          (10 seeds x 3000 ticks, ~4 min)
       python3 experiments/curiosity_probe.py --mixed-extra  (mixed worlds only,
-            30 more seeds 10..39, ~4 min; -> curiosity_mixed_extra.json/.txt)
+            30 more seeds 10..39, ~4 min)
+Add --homes-off for the Milestone 2 world (home_radius=0): that reproduces
+curiosity_probe.json/.txt and curiosity_mixed_extra.json/.txt exactly.
+Without it homes are on and files end in _home (curiosity_probe_home.json ...).
       python3 experiments/curiosity_probe.py --quick  (3 seeds x 1000 ticks)
 Writes experiments/results/curiosity_probe.json (every per-seed number) and
 prints the tables that docs/MILESTONE2_REPORT.md quotes
@@ -39,6 +42,11 @@ TICKS = 3000
 if "--quick" in sys.argv:
     SEEDS, TICKS = ["42", "1", "2"], 1000
 LEVELS = [("low", 10), ("neutral", 50), ("high", 90)]
+# Milestone 2 results were made before homes existed. --homes-off sets
+# home_radius=0, which reproduces them exactly (files without a suffix).
+# Without it, homes are on (the default) and files get the suffix "_home".
+HOMES_OFF = "--homes-off" in sys.argv
+SUFFIX = "" if HOMES_OFF else "_home"
 MIN_EPISODE = 10      # wander episodes at least this long count for straightness
 WINDOW = 100          # displacement is measured over this many ticks of life
 
@@ -93,6 +101,8 @@ def close_search(g, ag, outcome):
 
 def run(seed, mode, value=None):
     cfg = {"history_keep": 0, "trait_mutation": 0}
+    if HOMES_OFF:
+        cfg["home_radius"] = 0
     w = create_world(seed, cfg)
     for a in w["agents"]:
         if mode == "forced":
@@ -275,6 +285,8 @@ def mixed_extra():
         rows.append({"seed": seed, "metrics": {n: metrics(r["groups"][n]) for n, _ in LEVELS}})
         sys.stderr.write("mixed extra seed %s: %.1fs\n" % (seed, r["secs"]))
     print("Mixed worlds, extra seeds %s..%s (%d seeds), %d ticks." % (seeds[0], seeds[-1], len(seeds), TICKS))
+    if not HOMES_OFF:
+        print("Homes ON (home_radius = code default).")
     print("%-11s" % "" + "".join("%22s" % ("%s (%d)" % (n, v)) for n, v in LEVELS))
     for key, head, d in [("alive_end", "alive end", 1), ("born", "born", 1),
                          ("gather_per_100", "gath/100", 2), ("starved_pct", "starved%", 1),
@@ -288,7 +300,7 @@ def mixed_extra():
         print("  %-11s %26s   positive in %d/%d seeds" % (head, fmt(s, d), k, n))
     zero = [sum(r["metrics"][n]["alive_end"] == 0 for r in rows) for n, _ in LEVELS]
     print("Seeds where the group is extinct at the end: low %d, neutral %d, high %d" % tuple(zero))
-    path = os.path.join(ROOT, "experiments", "results", "curiosity_mixed_extra.json")
+    path = os.path.join(ROOT, "experiments", "results", "curiosity_mixed_extra%s.json" % SUFFIX)
     with open(path, "w") as f:
         json.dump({"seeds": seeds, "ticks": TICKS, "rows": rows}, f, indent=1, sort_keys=True)
 
@@ -316,6 +328,8 @@ def main():
 
     print("Curiosity probe: seeds %s, %d ticks each. Cells: mean +/- sd over seeds."
           % (",".join(SEEDS), TICKS))
+    if not HOMES_OFF:
+        print("Homes ON (home_radius = code default).")
     print("Turn chance while wandering: low (10) 7%, neutral (50) 15%, high (90) 23%.")
     print()
     fr = {n: [x["metrics"] for x in out["forced"][n]] for n, _ in LEVELS}
@@ -362,7 +376,7 @@ def main():
     print("Total run time %.0f s." % (time.time() - t_all))
 
     if "--quick" not in sys.argv:
-        path = os.path.join(ROOT, "experiments", "results", "curiosity_probe.json")
+        path = os.path.join(ROOT, "experiments", "results", "curiosity_probe%s.json" % SUFFIX)
         with open(path, "w") as f:
             json.dump(out, f, indent=1, sort_keys=True)
         sys.stderr.write("wrote %s\n" % path)

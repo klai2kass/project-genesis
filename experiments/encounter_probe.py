@@ -2,7 +2,7 @@
 
 Question behind it: is "recognise individuals and remember encounters" worth
 building next? Remembering someone only matters if you meet them again. This
-script runs the default world (code defaults, nothing forced) and only LOOKS:
+script runs the default world (code defaults except home_radius) and only LOOKS:
 
   meeting    two living agents stand within 1 tile of each other (they touch)
   encounter  a pair STARTS a meeting (they were not within 1 tile last tick)
@@ -16,10 +16,10 @@ how often an encounter is a REPEAT (the pair met before), how much of it is
 family (parent/child, siblings), how long between repeats, and how far an
 agent's life spreads over the map (home range).
 
-It also runs a PROTOTYPE (clearly marked below, never saved, not in genesis/):
-agents that remember their birthplace and walk back toward it when they wander
-too far. That is the cheapest test of "would place memory create repeat
-meetings?" before anyone builds it for real.
+It compares three settings of the real "home" rule (genesis/agents.py,
+_step_home): home_radius 0 (homes off = Milestone 2), 6 (the default) and 3.
+(Before homes were built, this script tested a throwaway prototype of the
+same idea; that version and its results are in commit 2e4d82a.)
 
 Run:  python3 experiments/encounter_probe.py           (3 variants x 5 seeds x 3000 ticks, ~3 min)
       python3 experiments/encounter_probe.py --quick   (2 seeds x 1000 ticks)
@@ -36,7 +36,6 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
 from genesis import create_world, step  # noqa: E402
-from genesis import agents as agents_mod  # noqa: E402
 
 SEEDS = ["42", "1", "2", "3", "4"]
 TICKS = 3000
@@ -44,35 +43,6 @@ if "--quick" in sys.argv:
     SEEDS, TICKS = ["42", "1"], 1000
 WARMUP = 500   # count encounters only after the start-up boom
 LONG_GAP = 100  # a repeat after at least this many ticks apart is a real reunion
-
-# --- PROTOTYPE ONLY (evidence for STATUS.md, not part of the simulation) ---
-# "home" variant: every agent remembers the tile where it was born (founders:
-# where they were placed). When it WANDERS (no food in sight, or pack full) and
-# is more than HOME_RADIUS tiles from home, it steps toward home instead of
-# drifting on. Walking to visible food is unchanged. The real _wander is put
-# back after each run. Nothing here is saved or used outside this script.
-HOME = {}
-HOME_RADIUS = None
-_real_wander = agents_mod._wander
-
-
-def _wander_home(world, agent, rng, note, why):
-    hx, hy = HOME[agent["id"]]
-    x, y = agent["x"], agent["y"]
-    if max(abs(x - hx), abs(y - hy)) <= HOME_RADIUS:
-        return _real_wander(world, agent, rng, note, why)
-    best = None
-    for i, (dx, dy) in enumerate(agents_mod.DIRS):
-        if agents_mod.is_land(world, x + dx, y + dy):
-            d = (max(abs(x + dx - hx), abs(y + dy - hy)), abs(x + dx - hx) + abs(y + dy - hy))
-            if best is None or d < best[0]:
-                best = (d, i)
-    if best is None:
-        return _real_wander(world, agent, rng, note, why)
-    dx, dy = agents_mod.DIRS[best[1]]
-    return {"action": "move", "dx": dx, "dy": dy, "heading": best[1],
-            "note": note + ", heading home", "why": why + ", heading home"}
-
 
 def pairs_within(agents, r):
     """All pairs (id_a < id_b) with Chebyshev distance <= r, via a grid."""
@@ -92,14 +62,8 @@ def pairs_within(agents, r):
     return out
 
 
-def run(seed, home_radius=None):
-    global HOME_RADIUS
-    w = create_world(seed, {"history_keep": 0})
-    HOME.clear()
-    HOME_RADIUS = home_radius
-    agents_mod._wander = _wander_home if home_radius is not None else _real_wander
-    for a in w["agents"]:
-        HOME[a["id"]] = (a["x"], a["y"])
+def run(seed, home_radius):
+    w = create_world(seed, {"history_keep": 0, "home_radius": home_radius})
     pops = []
     vision = w["config"]["vision"]
     parent = {a["id"]: a["parent"] for a in w["agents"]}
@@ -118,7 +82,6 @@ def run(seed, home_radius=None):
         for e in step(w):
             if e["action"] == "born":
                 parent[e["agent"]] = next(c for c in w["agents"] if c["id"] == e["agent"])["parent"]
-                HOME[e["agent"]] = (e["x"], e["y"])
             elif e["action"] == "die":
                 i = e["agent"]
                 if w["tick"] > WARMUP and seen_life.get(i, 0) >= 50:
@@ -154,7 +117,6 @@ def run(seed, home_radius=None):
                 partners.setdefault(a, set()).add(b)
                 partners.setdefault(b, set()).add(a)
         touching = now
-    agents_mod._wander = _real_wander
     st = w["stats"]
 
     def spread(path):
@@ -209,8 +171,8 @@ KEYS = [("encounters_per_agent_per_100", "encounters per agent per 100 ticks", 1
         ("mean_pop", "population after tick 500, mean", 1),
         ("starved_pct", "deaths by starvation (%)", 1),
         ("births", "births", 0)]
-VARIANTS = [("today's rules", None), ("PROTOTYPE home radius 6", 6),
-            ("PROTOTYPE home radius 3", 3)]
+VARIANTS = [("homes off (home_radius 0 = Milestone 2)", 0),
+            ("homes, home_radius 6 (default)", 6), ("homes, home_radius 3", 3)]
 
 
 def main():
