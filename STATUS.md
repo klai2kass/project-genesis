@@ -28,7 +28,24 @@ Newest first. A fresh session should read this section first.
   valid names, last repeat wins, config files untouched, README documented).
   11 new tests (41 total, all pass).
 - Note: steps 1 and 2 share one commit (my slip); every later step has its own.
-- **In progress:** step 4 (water dithering).
+- **Step 4 done (water dithering).**
+  Cause in 3 lines: (1) agents picked the nearest food by straight-line
+  distance, ignoring water, and re-picked every tick; (2) when the straight
+  step was water they wandered at random, then re-targeted the same food;
+  (3) so they bounced at lakes and chased food across water they could never
+  reach. Fix: `_walk_to_food` in `genesis/agents.py`. It finds food by real
+  walking distance with a small search limited to what the agent can see
+  (at most 13x13 tiles, fixed order, no dice), ignores unreachable food, and
+  keeps its chosen food (`target`) until eaten. A first try with only
+  "step around the obstacle" looped around a long wall (the new wall test
+  showed it), so the small search was needed.
+  Before -> after, seeds 42,1,2,3,4 x 2000 ticks (totals): births 2099 -> 2083,
+  starved 1442 -> 1414 (68.7% -> 67.9% of births), alive at end 283 -> 302.
+  Back-and-forth moves (A->B->A) while heading for food: 9,828 -> 5,384.
+  Seed 42 alone: starved 285 of 427 births -> 279 of 414.
+  Cost: speed fell from ~1.1 s to ~1.9 s per 2,000 ticks (~1,050 ticks/s).
+  7 new tests in `tests/test_movement.py` (48 total, all pass).
+- **In progress:** step 5 (`--summary`).
 
 ## What this project is
 
@@ -124,7 +141,7 @@ Checked on 2026-11-17:
 Nothing is broken. Rough edges, none blocking:
 
 - The world is harsh: about two thirds of all deaths are starvation.
-- Agents sometimes dither when water lies between them and food.
+- Water dithering fixed in step 4 (see Session log). Food farther than the 13x13 view is still unseen.
 - Several agents can stand on the same tile.
 - The page forgets an agent's earlier decisions when you load a save or
   restart the server. `why.py` does not have this limit.

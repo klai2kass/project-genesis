@@ -42,6 +42,7 @@ def make_agent(agent_id, x, y, energy, age, rng, cfg, parent=None, generation=0)
         "cooldown": 0,             # ticks until it may reproduce again
         "parent": parent,
         "generation": generation,
+        "target": None,            # food it is walking to: [x, y], or None
         "last_action": "born",
         "last_why": "placed in the world at the start" if parent is None
                     else "child of #%d" % parent,

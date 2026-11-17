@@ -170,20 +170,89 @@ def _choose_move(world, agent, rng):
                        % (pack, carry_max))
 
     mood = "starving (energy %d), " % energy if energy <= 20 else ""
-    target = find_nearest_food(world, x, y)
-    if target is None:
-        return _wander(world, agent, rng, "no food in sight, so search",
-                       mood + "no food within %d tiles, searching" % cfg["vision"])
+    return _walk_to_food(world, agent, rng, mood)
 
-    tx, ty, steps = target
-    sx, sy = _sign(tx - x), _sign(ty - y)
-    for dx, dy in ((sx, sy), (sx, 0), (0, sy)):
-        if (dx, dy) != (0, 0) and is_land(world, x + dx, y + dy):
-            return {"action": "move", "dx": dx, "dy": dy,
-                    "heading": DIRS.index((dx, dy)),
-                    "note": "food in sight at (%d, %d)" % (tx, ty),
-                    "why": mood + "nearest food is %d step%s away at (%d, %d)"
-                           % (steps, "" if steps == 1 else "s", tx, ty)}
-    return _wander(world, agent, rng, "food in sight but water blocks the way",
-                   mood + "I see food at (%d, %d) but water blocks the way, "
-                          "going around" % (tx, ty))
+
+def _food_in_box(world, x, y, vision):
+    """Tiles with food inside the square the agent can see (cheap row scan)."""
+    cfg = world["config"]
+    width, height, food = cfg["width"], cfg["height"], world["food"]
+    x0, x1 = max(0, x - vision), min(width - 1, x + vision)
+    found = []
+    for ty in range(max(0, y - vision), min(height - 1, y + vision) + 1):
+        base = ty * width
+        for tx in range(x0, x1 + 1):
+            if food[base + tx] > 0 and (tx, ty) != (x, y):
+                found.append((tx, ty))
+    return found
+
+
+def _steps_to(world, x, y, vision, goals):
+    """Walk outward over land, one ring at a time, inside the square the agent
+    can see (at most 13 x 13 tiles), until the first tile in `goals` is
+    reached. Returns (tile, steps, first_direction) or None if no goal can be
+    walked to. Water is never entered, so food across water is not found.
+    Fixed order, no dice, so the answer is always the same."""
+    cfg = world["config"]
+    width, height = cfg["width"], cfg["height"]
+    terrain = world["terrain"]
+    seen = {(x, y): None}
+    frontier = [((x, y), None)]
+    steps = 0
+    while frontier:
+        steps += 1
+        nxt = []
+        for (cx, cy), first_here in frontier:
+            for i, (dx, dy) in enumerate(DIRS):
+                nx, ny = cx + dx, cy + dy
+                if ((nx, ny) in seen or abs(nx - x) > vision or abs(ny - y) > vision
+                        or nx < 0 or ny < 0 or nx >= width or ny >= height
+                        or terrain[ny * width + nx] == 0):
+                    continue
+                first = i if first_here is None else first_here
+                if (nx, ny) in goals:
+                    return (nx, ny), steps, first
+                seen[(nx, ny)] = first
+                nxt.append(((nx, ny), first))
+        frontier = nxt
+    return None
+
+
+def _walk_to_food(world, agent, rng, mood):
+    """Walk toward food that can really be reached, going around water.
+
+    Food is judged by the number of steps needed to WALK there, not by
+    straight-line distance. Food behind water that cannot be walked to is
+    ignored. The agent keeps its chosen food until it is gone or can no
+    longer be reached, so it never flips between two foods. Every step lowers
+    the walking distance by one, so it cannot circle forever.
+    """
+    cfg = world["config"]
+    x, y = agent["x"], agent["y"]
+    width = cfg["width"]
+    vision = cfg["vision"]
+    foods = _food_in_box(world, x, y, vision)
+
+    result = None
+    target = agent["target"]   # [x, y] or None
+    if foods and target is not None and tuple(target) in foods:
+        result = _steps_to(world, x, y, vision, {tuple(target)})
+    if result is None and foods:
+        result = _steps_to(world, x, y, vision, set(foods))
+    if result is None:
+        agent["target"] = None
+        return _wander(world, agent, rng, "no reachable food in sight, so search",
+                       mood + "no food within %d tiles that I can walk to, searching"
+                       % vision)
+
+    (tx, ty), steps, first = result
+    agent["target"] = [tx, ty]
+    dx, dy = DIRS[first]
+    note = "food in sight at (%d, %d)" % (tx, ty)
+    around = ""
+    if steps > max(abs(tx - x), abs(ty - y)):
+        around = ", going around water"
+    return {"action": "move", "dx": dx, "dy": dy, "heading": first,
+            "note": note + around,
+            "why": mood + "nearest reachable food is %d step%s away at (%d, %d)%s"
+                   % (steps, "" if steps == 1 else "s", tx, ty, around)}

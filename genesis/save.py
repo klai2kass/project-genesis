@@ -16,7 +16,7 @@ from .world import SAVE_VERSION
 # ---------------------------------------------------------------------------
 # Save format versions
 #   1  first format (Milestone 1).
-#   2  same layout, but loading now repairs older/partial saves: settings and
+#   2  same layout, but loading (any version) repairs older/partial saves: settings and
 #      fields missing from the file are filled with the documented defaults
 #      below. Anything the file has that we do not know is kept untouched.
 # Every change made while loading is written to world["migration_log"] (only
@@ -30,7 +30,7 @@ REQUIRED_KEYS = ["seed", "tick", "rng", "config", "terrain", "food", "agents"]
 
 # Defaults for agent fields (used if an old save lacks them).
 AGENT_DEFAULTS = {
-    "food": 0, "heading": 0, "cooldown": 0, "parent": None, "generation": 0,
+    "food": 0, "heading": 0, "target": None, "cooldown": 0, "parent": None, "generation": 0,
     "last_action": "unknown (old save)", "last_why": "unknown (old save)",
 }
 
@@ -47,8 +47,10 @@ def _note(world, text):
     world.setdefault("migration_log", []).append(text)
 
 
-def _migrate_1_to_2(world):
-    """Fill anything missing with defaults, and say what was filled."""
+def _repair(world):
+    """Fill anything missing with defaults, and say what was filled.
+    Runs on EVERY load (not only old versions), so adding a new optional
+    field later never needs a version bump."""
     cfg = world["config"]
     if not isinstance(cfg, dict):
         raise ValueError("This save's config is damaged (not a dictionary).")
@@ -66,14 +68,17 @@ def _migrate_1_to_2(world):
     for agent in world["agents"]:
         for key, value in AGENT_DEFAULTS.items():
             if key not in agent:
-                agent[key] = value
+                agent[key] = copy.deepcopy(value)
                 _note(world, "agent %s: %s missing: used %r"
                       % (agent.get("id", "?"), key, value))
 
     if "next_id" not in world:
         world["next_id"] = max([a["id"] for a in world["agents"]] + [0]) + 1
         _note(world, "next_id missing: set to %d" % world["next_id"])
-    world["version"] = 2
+
+
+def _migrate_1_to_2(world):
+    world["version"] = 2   # same layout; the repair step does the real work
 
 
 MIGRATIONS = {1: _migrate_1_to_2}
@@ -98,8 +103,8 @@ def world_from_json(text):
     # Unknown extra keys are deliberately left in place, never discarded.
     while world["version"] < SAVE_VERSION:
         before = world["version"]
-        world["version"] = before  # (migration sets the new number itself)
         MIGRATIONS[before](world)
+    _repair(world)
     return world
 
 
