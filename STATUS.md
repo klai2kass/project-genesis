@@ -17,7 +17,13 @@ Newest first. A fresh session should read this section first.
 - **Plan:** 1 VISION.md, 2 compatible saves, 3 `--set`, 4 water dithering,
   5 `--summary`, 6 browser load message, 7 history in saves, 8 regrow
   experiments, 9 Milestone 2 proposal (docs only).
-- **In progress:** step 1.
+- **Step 1 done:** `VISION.md` written (principles + works-today vs future).
+- **Step 2 done:** saves are now format version 2. `genesis/save.py` migrates
+  version 1 -> 2: fills missing config keys / stats / agent fields with
+  defaults, logs every fill in `world["migration_log"]`, keeps unknown keys,
+  rejects newer versions and saves missing essentials with plain messages.
+  5 new tests (30 total, all pass). The real `saves/quicksave.json` (v1) loads.
+- **In progress:** step 3 (`--set`).
 
 ## What this project is
 

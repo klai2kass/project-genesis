@@ -10,7 +10,7 @@ import copy
 from .config import DEFAULT_CONFIG
 from .rng import Rng, seed_to_state
 
-SAVE_VERSION = 1
+SAVE_VERSION = 2
 
 # Terrain codes stored in world["terrain"]
 WATER, GRASS, FOREST = 0, 1, 2

@@ -53,5 +53,64 @@ class SaveLoad(unittest.TestCase):
             world_from_json("not a save file")
 
 
+class OldAndOddSaves(unittest.TestCase):
+    def _v1_text(self, mutate=None):
+        world = create_world(5)
+        run(world, 60)
+        world["version"] = 1
+        if mutate:
+            mutate(world)
+        return world_to_json(world)
+
+    def test_old_format_save_loads_and_continues(self):
+        loaded = world_from_json(self._v1_text())
+        self.assertEqual(loaded["version"], 2)
+        self.assertNotIn("migration_log", loaded)   # nothing needed fixing
+        reference = create_world(5)
+        run(reference, 60)
+        run(reference, 100)
+        run(loaded, 100)
+        self.assertEqual(loaded["agents"], reference["agents"])
+
+    def test_missing_config_key_gets_default_and_is_logged(self):
+        def drop(w):
+            del w["config"]["vision"]
+            del w["config"]["regrow_per_tick"]
+            del w["stats"]["births"]
+            del w["agents"][0]["cooldown"]
+        loaded = world_from_json(self._v1_text(drop))
+        self.assertEqual(loaded["config"]["vision"], 4)
+        self.assertEqual(loaded["stats"]["births"], 0)
+        self.assertEqual(loaded["agents"][0]["cooldown"], 0)
+        log = " ".join(loaded["migration_log"])
+        self.assertIn("config.vision", log)
+        self.assertIn("config.regrow_per_tick", log)
+        run(loaded, 20)   # must not crash
+
+    def test_saved_values_beat_defaults(self):
+        def change(w):
+            w["config"]["vision"] = 7
+        loaded = world_from_json(self._v1_text(change))
+        self.assertEqual(loaded["config"]["vision"], 7)
+
+    def test_unknown_extra_keys_are_kept(self):
+        def extra(w):
+            w["future_thing"] = {"a": [1, 2]}
+            w["config"]["new_setting"] = 9
+            w["agents"][0]["mood"] = "calm"
+        loaded = world_from_json(self._v1_text(extra))
+        self.assertEqual(loaded["future_thing"], {"a": [1, 2]})
+        self.assertEqual(loaded["config"]["new_setting"], 9)
+        self.assertEqual(loaded["agents"][0]["mood"], "calm")
+        again = world_from_json(world_to_json(loaded))
+        self.assertEqual(again["future_thing"], {"a": [1, 2]})
+
+    def test_newer_version_and_missing_essentials_are_rejected(self):
+        with self.assertRaises(ValueError):
+            world_from_json('{"version": 3}')
+        with self.assertRaises(ValueError):
+            world_from_json('{"version": 1, "seed": "1"}')
+
+
 if __name__ == "__main__":
     unittest.main()
