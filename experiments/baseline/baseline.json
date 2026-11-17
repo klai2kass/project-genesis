@@ -1,0 +1,78 @@
+{
+ "long": {
+  "1": {
+   "births": 918,
+   "end_pop": 91,
+   "mean_age_at_death": 293.1,
+   "mean_pop_after_500": 88.9,
+   "starved": 588,
+   "starved_share_pct": 67.0
+  },
+  "2": {
+   "births": 925,
+   "end_pop": 96,
+   "mean_age_at_death": 294.8,
+   "mean_pop_after_500": 89.0,
+   "starved": 607,
+   "starved_share_pct": 69.1
+  },
+  "3": {
+   "births": 918,
+   "end_pop": 97,
+   "mean_age_at_death": 293.0,
+   "mean_pop_after_500": 88.6,
+   "starved": 592,
+   "starved_share_pct": 68.0
+  },
+  "4": {
+   "births": 909,
+   "end_pop": 90,
+   "mean_age_at_death": 297.1,
+   "mean_pop_after_500": 89.5,
+   "starved": 584,
+   "starved_share_pct": 67.2
+  },
+  "42": {
+   "births": 918,
+   "end_pop": 95,
+   "mean_age_at_death": 297.8,
+   "mean_pop_after_500": 89.6,
+   "starved": 588,
+   "starved_share_pct": 67.4
+  }
+ },
+ "note": "Milestone 1 decision rules, regrow_per_tick=6. Do not regenerate on changed code.",
+ "save": {
+  "behaviour_digest": "8390066e2e40e17f",
+  "tick": 500
+ },
+ "short": {
+  "1": {
+   "alive": 82,
+   "behaviour_digest": "391f7ad01feacb0c",
+   "births": 171,
+   "event_digest": "5095cd40c4e32eb4",
+   "fingerprint": "7aff3c85fe7f87ef",
+   "old_age": 28,
+   "starved": 111
+  },
+  "2": {
+   "alive": 88,
+   "behaviour_digest": "d8f68a917af6b850",
+   "births": 189,
+   "event_digest": "781b8d508d9adc25",
+   "fingerprint": "9caa50ebb1741d6f",
+   "old_age": 26,
+   "starved": 125
+  },
+  "42": {
+   "alive": 79,
+   "behaviour_digest": "8390066e2e40e17f",
+   "births": 175,
+   "event_digest": "d93a6295d5eee4fc",
+   "fingerprint": "61e8b205b6228bc9",
+   "old_age": 34,
+   "starved": 112
+  }
+ }
+}

@@ -38,6 +38,14 @@ Newest first. A fresh session should read this section first.
   age 50). 46% of all decisions are "search, nothing in sight". One small
   flaw: 6.2% starve one tick after picking up food (gather and eat are two
   separate ticks). Nothing in code changed; defaults untouched.
+- **Step 2 done (review of the ChatGPT review).** `docs/MILESTONE2_REVIEW.md`:
+  verdicts: 1 agree (now done), 2 partly, 3 agree, 4 agree, 5 agree (nothing
+  tracked yet), 6 agree, 7 partly. Extra finds: new dice draws or new agent
+  fields break fingerprints, so I added `genesis/digest.py` (behaviour
+  digest that ignores new fields), `experiments/baseline/` (frozen results
+  of today's rules), a real v2 save in `tests/fixtures/`, and
+  `tests/test_baseline.py` (4 tests). Full suite: 68 tests OK (28 s).
+  Fingerprint seed 42 / 500 ticks still `61e8b205b6228bc9`.
 
 ### Session 2026-11-17 (steps 0-9 plan)
 - **Step 0 verified by running:** git clean, 8 commits. 25 tests pass (6.3 s).
