@@ -45,7 +45,12 @@ Newest first. A fresh session should read this section first.
   Seed 42 alone: starved 285 of 427 births -> 279 of 414.
   Cost: speed fell from ~1.1 s to ~1.9 s per 2,000 ticks (~1,050 ticks/s).
   7 new tests in `tests/test_movement.py` (48 total, all pass).
-- **In progress:** step 5 (`--summary`).
+- **Step 5 done (`--summary`).** New `genesis/summary.py` (`RunRecorder`),
+  `--summary` flag in `run_headless.py`, die events now carry `age` and
+  `cause`. Checked: its counts equal the world's own counters and
+  start + births - deaths = end (seed 42, 2000 ticks: 50 + 414 - 410 = 54).
+  5 new tests (53 total). README documented.
+- **In progress:** step 6 (browser load message).
 
 ## What this project is
 

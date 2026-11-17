@@ -96,6 +96,19 @@ message that lists the valid names. With `--load`, map-building settings
 (`width`, `height`, `water_share`, `forest_share`, `start_food_share`,
 `start_agents`, `start_energy`) are refused because the world already exists.
 
+## A report about a run (`--summary`)
+
+```bash
+python3 run_headless.py --seed 42 --ticks 2000 --every 0 --summary
+```
+
+Prints: seed, ticks, population (start, end, lowest, highest), births,
+deaths by cause, the starved share, average age at death, how many died
+before adulthood, the population at ten points in time, and how much food
+lay on the map. It ends with a "Not tracked" list of things the simulation
+does not record, so nothing is made up. With `--load`, the counts cover only
+the ticks of that run. Combine with `--set` to compare settings.
+
 ## Ask why one agent did something
 
 List who is alive after 300 ticks:

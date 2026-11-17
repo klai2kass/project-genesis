@@ -20,9 +20,13 @@ def step(world):
 
     def log(agent, action, why, need=None, options=None):
         # x, y is where the agent stands AFTER the action.
-        events.append({"tick": tick, "agent": agent["id"], "action": action,
-                       "need": need, "options": options or [], "why": why,
-                       "x": agent["x"], "y": agent["y"]})
+        event = {"tick": tick, "agent": agent["id"], "action": action,
+                 "need": need, "options": options or [], "why": why,
+                 "x": agent["x"], "y": agent["y"]}
+        if action == "die":
+            event["age"] = agent["age"]
+            event["cause"] = "starved" if why.startswith("starved") else "old age"
+        events.append(event)
 
     _regrow_food(world, rng)
 

@@ -6,12 +6,14 @@ Examples:
     python3 run_headless.py --load saves/day500.json --ticks 500
     python3 run_headless.py --seed 42 --ticks 200 --log decisions.jsonl
     python3 run_headless.py --seed 42 --ticks 500 --set regrow_per_tick=6 --set vision=6
+    python3 run_headless.py --seed 42 --ticks 2000 --every 0 --summary
 """
 
 import argparse
 import json
 
 from genesis import create_world, fingerprint, load_world, save_world, step
+from genesis.summary import RunRecorder
 from genesis.overrides import add_set_option, make_world_from_args
 
 
@@ -24,10 +26,13 @@ def main():
     parser.add_argument("--log", help="write every decision (with its why) to this file")
     parser.add_argument("--every", type=int, default=100,
                         help="print a status line every N ticks (0 = quiet)")
+    parser.add_argument("--summary", action="store_true",
+                        help="print a report about the run at the end")
     add_set_option(parser)
     args = parser.parse_args()
 
     world = make_world_from_args(args, parser, create_world, load_world)
+    recorder = RunRecorder(world) if args.summary else None
     log_file = open(args.log, "w", encoding="utf-8") if args.log else None
 
     if args.every:
@@ -35,6 +40,8 @@ def main():
               ("tick", "alive", "births", "starved", "old age", "food"))
     for _ in range(args.ticks):
         events = step(world)
+        if recorder:
+            recorder.update(world, events)
         if log_file:
             for event in events:
                 log_file.write(json.dumps(event) + "\n")
@@ -54,6 +61,10 @@ def main():
     if args.save:
         save_world(world, args.save)
         print("Saved to", args.save)
+    if recorder:
+        print()
+        print(recorder.report(world))
+        print()
     print("seed=%s tick=%d alive=%d fingerprint=%s" %
           (world["seed"], world["tick"], len(world["agents"]), fingerprint(world)))
 
