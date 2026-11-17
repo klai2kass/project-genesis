@@ -31,6 +31,9 @@ from .world import SAVE_VERSION
 #      home_radius=0 (homes are remembered but never used) and each living
 #      agent's home is set to where it stands now (its birthplace was never
 #      recorded). To try homes on an old world: --set home_radius=6.
+#   5  Milestone 3 step 2: every agent has a memory of agents it met
+#      (genesis/memory.py). Older saves start with empty memories. Memory
+#      never changes behaviour, so no old rule needs keeping.
 # Every change made while loading is written to world["migration_log"] (only
 # when something changed), so nothing happens silently.
 # To add a new version: bump SAVE_VERSION in world.py, write a function
@@ -46,6 +49,7 @@ AGENT_DEFAULTS = {
     "last_action": "unknown (old save)", "last_why": "unknown (old save)",
     "needs": {"rest": 100}, "resting": False, "drain_acc": 0, "tire_acc": 0,
     "traits": {"curiosity": 50, "industriousness": 50},
+    "memory": [],
 }
 
 # Settings that make the Milestone 2 rules behave exactly like Milestone 1.
@@ -151,7 +155,20 @@ def _migrate_3_to_4(world):
     world["version"] = 4
 
 
-MIGRATIONS = {1: _migrate_1_to_2, 2: _migrate_2_to_3, 3: _migrate_3_to_4}
+def _migrate_4_to_5(world):
+    changed = 0
+    for agent in world["agents"]:
+        if "memory" not in agent:
+            agent["memory"] = []
+            changed += 1
+    if changed:
+        _note(world, "version 4 -> 5: %d agents start with an empty memory of "
+                     "meetings (meetings were not recorded before version 5)" % changed)
+    world["version"] = 5
+
+
+MIGRATIONS = {1: _migrate_1_to_2, 2: _migrate_2_to_3, 3: _migrate_3_to_4,
+              4: _migrate_4_to_5}
 
 
 def world_from_json(text):

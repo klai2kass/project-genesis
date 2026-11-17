@@ -11,6 +11,7 @@ from genesis.config import DEFAULT_CONFIG  # noqa: E402
 from genesis.digest import EventDigest  # noqa: E402
 from genesis.save import MILESTONE1_RULES  # noqa: E402
 from genesis.traits import child_traits  # noqa: E402
+from genesis.world import SAVE_VERSION  # noqa: E402
 
 NAMES = ("curiosity", "industriousness")
 
@@ -86,7 +87,7 @@ class SaveLoadWithNewRules(unittest.TestCase):
         self.assertTrue(any(x["resting"] or x["tire_acc"] or x["drain_acc"]
                             for x in b["agents"]))
         b = world_from_json(world_to_json(b))
-        self.assertEqual(b["version"], 4)
+        self.assertEqual(b["version"], SAVE_VERSION)
         self.assertNotIn("migration_log", b)
         da, db = EventDigest(), EventDigest()
         for _ in range(300):

@@ -70,6 +70,10 @@ DEFAULT_CONFIG = {
     # full) that is more than home_radius tiles from home steps back toward
     # it. 0 = off (old saves load with 0 and keep their old behaviour).
     "home_radius": 6,
+    # Encounter memory (Milestone 3 step 2; genesis/memory.py): how many
+    # agents each agent remembers meeting. 0 = no memory. Never changes
+    # behaviour; it is a record.
+    "memory_keep": 10,
 
     # --- Memory of decisions (kept in saves) ---
     "history_keep": 20,        # recent decisions remembered per agent

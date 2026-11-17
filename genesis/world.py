@@ -11,7 +11,7 @@ from .config import DEFAULT_CONFIG
 from .rng import Rng, seed_to_state
 from .traits import founder_traits, neutral_traits
 
-SAVE_VERSION = 4
+SAVE_VERSION = 5
 
 # Terrain codes stored in world["terrain"]
 WATER, GRASS, FOREST = 0, 1, 2
@@ -46,6 +46,7 @@ def make_agent(agent_id, x, y, energy, age, rng, cfg, parent=None, generation=0,
         "generation": generation,
         "target": None,            # food it is walking to: [x, y], or None
         "home": [x, y],            # Milestone 3: where it was born (never changes)
+        "memory": [],              # agents it met: see genesis/memory.py
         # Milestone 2 (whole numbers; see genesis/needs.py and traits.py)
         "needs": {"rest": 100},    # 100 = fully rested
         "resting": False,          # was its last action a voluntary rest?

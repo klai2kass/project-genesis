@@ -7,6 +7,7 @@ a short "why", so you can always ask "why did agent #12 do that?".
 
 from .agents import DIRS, decide
 from .history import record
+from .memory import update_memories
 from .needs import apply_move, apply_rest
 from .traits import child_traits
 from .rng import Rng
@@ -74,6 +75,8 @@ def step(world):
 
     # Newborns join at the end and take their first turn next tick.
     world["agents"] = survivors + newborns
+    # Who is now within 1 tile of whom (a record only; see genesis/memory.py).
+    update_memories(world)
     world["rng"] = rng.state
     return events
 

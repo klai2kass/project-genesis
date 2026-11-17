@@ -19,7 +19,7 @@ from genesis import (create_world, load_world, step, world_from_json,  # noqa: E
 from genesis.digest import EventDigest, behaviour_digest  # noqa: E402
 from genesis.rng import Rng  # noqa: E402
 from genesis.save import MILESTONE2_RULES  # noqa: E402
-from genesis.world import GRASS, WATER, make_agent  # noqa: E402
+from genesis.world import GRASS, SAVE_VERSION, WATER, make_agent  # noqa: E402
 
 REF = json.load(open(os.path.join(ROOT, "experiments", "baseline", "milestone2.json")))
 FIXTURE_V3 = os.path.join(ROOT, "tests", "fixtures", "save_v3_seed42_t300.json")
@@ -69,7 +69,7 @@ class HomesOffIsMilestoneTwo(unittest.TestCase):
 
     def test_v3_save_migrates_keeps_its_rules_and_continues_the_same(self):
         w = load_world(FIXTURE_V3)
-        self.assertEqual(w["version"], 4)
+        self.assertEqual(w["version"], SAVE_VERSION)
         self.assertEqual(w["config"]["home_radius"], 0)
         self.assertTrue(all(a["home"] == [a["x"], a["y"]] for a in w["agents"]))
         log = w["migration_log"]
