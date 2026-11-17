@@ -7,7 +7,7 @@ a short "why", so you can always ask "why did agent #12 do that?".
 
 from .agents import DIRS, decide
 from .history import record
-from .memory import update_memories
+from .memory import note_gift, update_memories
 from .needs import apply_move, apply_rest
 from .traits import child_traits
 from .rng import Rng
@@ -22,11 +22,13 @@ def step(world):
     tick = world["tick"]
     events = []
 
-    def log(agent, action, why, need=None, options=None):
+    def log(agent, action, why, need=None, options=None, to=None):
         # x, y is where the agent stands AFTER the action.
         event = {"tick": tick, "agent": agent["id"], "action": action,
                  "need": need, "options": options or [], "why": why,
                  "x": agent["x"], "y": agent["y"]}
+        if to is not None:
+            event["to"] = to          # "give": who received the food
         if action == "die":
             event["age"] = agent["age"]
             event["cause"] = "starved" if why.startswith("starved") else "old age"
@@ -63,7 +65,7 @@ def step(world):
         agent["last_action"] = decision["action"]
         agent["last_why"] = decision["why"]
         log(agent, decision["action"], decision["why"],
-            decision["need"], decision["options"])
+            decision["need"], decision["options"], decision.get("to"))
         survivors.append(agent)
 
         if child is not None:
@@ -111,6 +113,12 @@ def _apply(world, agent, decision, rng):
     elif action == "gather":
         world["food"][tile_index(world, agent["x"], agent["y"])] -= 1
         agent["food"] += 1
+    elif action == "give":
+        receiver = decision["receiver"]
+        agent["food"] -= 1
+        receiver["food"] += 1
+        world["stats"]["gifts"] += 1
+        note_gift(agent, receiver)
     elif action == "move":
         agent["x"] += decision["dx"]
         agent["y"] += decision["dy"]

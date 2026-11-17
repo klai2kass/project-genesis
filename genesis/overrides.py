@@ -47,6 +47,7 @@ RULES = {
     "trait_mutation": ("int", 0, 100),
     "home_radius": ("int", 0, 200),
     "memory_keep": ("int", 0, 1000),
+    "share_min_meetings": ("int", 0, 1000),
 }
 
 # Only used while a world is being created; changing them on a loaded world

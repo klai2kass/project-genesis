@@ -108,10 +108,56 @@ def _option(action, ok, note):
     return {"action": action, "ok": ok, "note": note}
 
 
+def starving(other):
+    """Starving = energy 20 or less and nothing in the pack."""
+    return other["energy"] <= 20 and other["food"] == 0
+
+
+def _alive(other):
+    # An agent that died earlier this tick is still in the list until the
+    # tick ends; it has energy 0 or has reached its lifespan.
+    return other["energy"] > 0 and other["age"] < other["max_age"]
+
+
+def who_to_help(world, agent):
+    """Milestone 3 step 3 (sharing). Returns (other, meetings, note): the
+    starving agent this one would give 1 food to, or (None, 0, why not).
+    Gives only when: sharing is on, it is not hungry, it carries food, and an
+    agent within 1 tile is starving and has share_min_meetings or more
+    meetings in its memory. Several: most meetings, then lowest energy, then
+    lowest id. No dice."""
+    cfg = world["config"]
+    need = cfg["share_min_meetings"]
+    if need <= 0:
+        return None, 0, "sharing is off in this world"
+    if agent["energy"] <= cfg["eat_below"]:
+        return None, 0, "I am hungry myself (energy %d)" % agent["energy"]
+    if agent["food"] == 0:
+        return None, 0, "no food in my pack to give"
+    known = {e[0]: e[3] for e in agent["memory"] if e[3] >= need}
+    if not known:
+        return None, 0, "I know nobody well enough (met %d+ times)" % need
+    best = None
+    x, y = agent["x"], agent["y"]
+    for other in world["agents"]:
+        oid = other["id"]
+        if (oid in known and abs(other["x"] - x) <= 1 and abs(other["y"] - y) <= 1
+                and _alive(other) and starving(other)):
+            key = (-known[oid], other["energy"], oid)
+            if best is None or key < best[0]:
+                best = (key, other)
+    if best is None:
+        return None, 0, "nobody I know nearby is starving"
+    other = best[1]
+    return other, known[other["id"]], "#%d is starving next to me (energy %d)" % (
+        other["id"], other["energy"])
+
+
 def decide(world, agent, rng):
     """Pick one action for this tick.
 
-    The rules are tried in a fixed order (eat, reproduce, gather, rest, move) and
+    The rules are tried in a fixed order (eat, reproduce, give, gather, rest,
+    move) and
     the first one that fits wins. The result records three things so you can
     always see WHY:
       need    - what the agent most needs right now
@@ -127,6 +173,8 @@ def decide(world, agent, rng):
     can_eat = pack > 0 and energy <= cfg["eat_below"]
     can_reproduce = (energy >= cfg["repro_min_energy"]
                      and age >= cfg["repro_min_age"] and agent["cooldown"] == 0)
+    receiver, met, give_note = who_to_help(world, agent)
+    can_give = receiver is not None
     can_gather = here > 0 and pack < carry_max
     can_rest, rest_note = wants_rest(agent, cfg)
     rest_level = agent["needs"]["rest"]
@@ -138,6 +186,9 @@ def decide(world, agent, rng):
         need = "food (energy %d of %d)" % (energy, cfg["max_energy"])
     elif can_reproduce:
         need = "a child (strong, adult and rested)"
+    elif can_give:
+        need = "to help #%d, who is starving (we have met %d times)" % (
+            receiver["id"], met)
     elif can_rest:
         need = "rest (rest %d of 100)" % rest_level
     elif pack < carry_max:
@@ -171,6 +222,7 @@ def decide(world, agent, rng):
 
     options = [_option("eat", can_eat, eat_note),
                _option("reproduce", can_reproduce, repro_note),
+               _option("give", can_give, give_note),
                _option("gather", can_gather, gather_note),
                _option("rest", can_rest, rest_note)]
 
@@ -184,6 +236,12 @@ def decide(world, agent, rng):
                     "why": "energy %d is at least %d, I am an adult (age %d) "
                            "and rested since my last child"
                            % (energy, cfg["repro_min_energy"], age)}
+    elif can_give:
+        decision = {"action": "give", "to": receiver["id"], "receiver": receiver,
+                    "why": "gave 1 food to #%d (we have met %d times); it is "
+                           "starving (energy %d, empty pack) and I am not hungry "
+                           "(energy %d)" % (receiver["id"], met,
+                                            receiver["energy"], energy)}
     elif can_gather:
         decision = {"action": "gather",
                     "why": "%d food on this tile and my pack has room (%d/%d)"
@@ -199,7 +257,7 @@ def decide(world, agent, rng):
         options.append(_option("move", True, decision.pop("note")))
     elif decision["action"] == "rest" and not decision.get("voluntary"):
         options.append(_option("move", False, "water on every side"))
-        options[3] = _option("rest", True, "nothing else is possible (boxed in by water)")
+        options[4] = _option("rest", True, "nothing else is possible (boxed in by water)")
     else:
         options.append(_option("move", True, "always possible, but a rule above fits first"))
 

@@ -74,6 +74,11 @@ DEFAULT_CONFIG = {
     # agents each agent remembers meeting. 0 = no memory. Never changes
     # behaviour; it is a record.
     "memory_keep": 10,
+    # Sharing (Milestone 3 step 3; genesis/agents.py who_to_help): a
+    # not-hungry agent carrying food gives 1 food to a starving agent within
+    # 1 tile that it has met at least this many times. 0 = no sharing (old
+    # saves load with 0 and keep their behaviour).
+    "share_min_meetings": 2,
 
     # --- Memory of decisions (kept in saves) ---
     "history_keep": 20,        # recent decisions remembered per agent

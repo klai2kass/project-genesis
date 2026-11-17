@@ -14,7 +14,7 @@ sys.path.insert(0, ROOT)
 from genesis import (create_world, format_agent_history,  # noqa: E402
                      format_decision, run)
 
-DECISIONS = ("eat", "reproduce", "gather", "move", "rest")
+DECISIONS = ("eat", "reproduce", "give", "gather", "move", "rest")
 
 
 class WhyLog(unittest.TestCase):

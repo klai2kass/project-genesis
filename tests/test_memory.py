@@ -58,9 +58,13 @@ class RecordOnly(unittest.TestCase):
 
     def test_memory_on_or_off_reproduces_frozen_homes_world(self):
         for seed, ref in REF["short"].items():
-            w, now = self._short(seed, None)
+            # Sharing (step 3) is the first thing that READS memory, so it is
+            # switched off here; memory alone must change nothing.
+            w, now = self._short(seed, {"share_min_meetings": 0})
             self.assertEqual(now, ref, "memory on, seed " + seed)
             self.assertTrue(any(a["memory"] for a in w["agents"]))
+            # Memory off: nobody knows anybody, so even with sharing on
+            # nobody gives, and the world is the homes world again.
             w, now = self._short(seed, {"memory_keep": 0})
             self.assertEqual(now, ref, "memory off, seed " + seed)
             self.assertFalse(any(a["memory"] for a in w["agents"]))
@@ -84,13 +88,13 @@ class Counting(unittest.TestCase):
         a, b = w["agents"]
         self.assertEqual(tick(w), 1)                    # tick 1: they meet
         self.assertEqual(tick(w), 0)                    # tick 2: still together
-        self.assertEqual(entry(a, 2), [2, 1, 2, 1, 5, 5])
-        self.assertEqual(entry(b, 1), [1, 1, 2, 1, 6, 6])
+        self.assertEqual(entry(a, 2), [2, 1, 2, 1, 5, 5, 0, 0])
+        self.assertEqual(entry(b, 1), [1, 1, 2, 1, 6, 6, 0, 0])
         self.assertEqual(tick(w, [(5, 5), (8, 8)]), 0)  # tick 3: apart
-        self.assertEqual(entry(a, 2), [2, 1, 2, 1, 5, 5])
+        self.assertEqual(entry(a, 2), [2, 1, 2, 1, 5, 5, 0, 0])
         self.assertEqual(tick(w, [(9, 9), (8, 8)]), 1)  # tick 4: together again
-        self.assertEqual(entry(a, 2), [2, 1, 4, 2, 9, 9])
-        self.assertEqual(entry(b, 1), [1, 1, 4, 2, 8, 8])
+        self.assertEqual(entry(a, 2), [2, 1, 4, 2, 9, 9, 0, 0])
+        self.assertEqual(entry(b, 1), [1, 1, 4, 2, 8, 8, 0, 0])
 
     def test_same_tile_counts_two_tiles_apart_does_not(self):
         w = tiny_world([(5, 5), (5, 5), (7, 5)])

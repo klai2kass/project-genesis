@@ -11,7 +11,7 @@ from .config import DEFAULT_CONFIG
 from .rng import Rng, seed_to_state
 from .traits import founder_traits, neutral_traits
 
-SAVE_VERSION = 5
+SAVE_VERSION = 6
 
 # Terrain codes stored in world["terrain"]
 WATER, GRASS, FOREST = 0, 1, 2
@@ -101,7 +101,7 @@ def create_world(seed, config=None):
         "next_id": cfg["start_agents"] + 1,
         "history": {},
         "history_dead": [],
-        "stats": {"births": 0, "deaths_starved": 0, "deaths_old_age": 0},
+        "stats": {"births": 0, "deaths_starved": 0, "deaths_old_age": 0, "gifts": 0},
     }
 
 

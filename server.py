@@ -48,7 +48,8 @@ def _known(agent, agents, cfg):
     marked where the world still knows it (living agents carry `parent`)."""
     living = {a["id"]: a for a in agents}
     out = []
-    for other_id, first, last, meetings, x, y in strongest(agent, 5):
+    for entry in strongest(agent, 5):
+        other_id, first, last, meetings, x, y, gave, got = entry
         other = living.get(other_id)
         if other_id == agent["parent"]:
             family = "parent"
@@ -60,7 +61,8 @@ def _known(agent, agents, cfg):
         else:
             family = ""
         out.append({"id": other_id, "first": first, "last": last, "meetings": meetings,
-                    "x": x, "y": y, "alive": other is not None, "family": family})
+                    "x": x, "y": y, "alive": other is not None, "family": family,
+                    "gave": gave, "got": got})
     return {"count": len(agent["memory"]), "keep": cfg["memory_keep"], "top": out}
 
 class Game:

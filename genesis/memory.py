@@ -6,12 +6,14 @@ close it is ONE meeting; walking apart and coming back is a new one.
 
 Each agent keeps a short list, agent["memory"], one entry per agent it met:
 
-    [other_id, first_tick, last_tick, meetings, x, y]
+    [other_id, first_tick, last_tick, meetings, x, y, gave, got]
 
     first_tick  tick of the very first meeting
     last_tick   last tick they were within 1 tile
     meetings    how many separate meetings
     x, y        where THIS agent stood when the latest meeting began
+    gave, got   food this agent gave to / received from the other (sharing,
+                Milestone 3 step 3; save version 6 added these two)
 
 How "same meeting" is known without saving anything extra: memory is updated
 every tick, so an entry whose last_tick is the previous tick means they were
@@ -67,7 +69,7 @@ def _remember(agent, other_id, tick):
             entry[3] += 1
             entry[4], entry[5] = agent["x"], agent["y"]
             return True
-    agent["memory"].append([other_id, tick, tick, 1, agent["x"], agent["y"]])
+    agent["memory"].append([other_id, tick, tick, 1, agent["x"], agent["y"], 0, 0])
     return True
 
 
@@ -103,3 +105,16 @@ def strongest(agent, n=5):
     """The n entries with the most meetings (ties: met more recently, then
     lower id). For the page and reports."""
     return sorted(agent["memory"], key=lambda e: (-e[3], -e[2], e[0]))[:n]
+
+
+def note_gift(giver, receiver):
+    """Count a gift of food in both memories (if each still remembers the
+    other; a forgotten partner is not re-added)."""
+    for entry in giver["memory"]:
+        if entry[0] == receiver["id"]:
+            entry[6] += 1
+            break
+    for entry in receiver["memory"]:
+        if entry[0] == giver["id"]:
+            entry[7] += 1
+            break
