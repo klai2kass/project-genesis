@@ -24,8 +24,21 @@ REF = json.load(open(mb.PATH))
 
 class BaselineTest(unittest.TestCase):
     def test_short_runs_match_reference(self):
+        # Milestone 2 code with MILESTONE1_RULES (nobody rests, traits 50) must
+        # behave exactly like the frozen Milestone 1 code: same counters, same
+        # behaviour digest, same event digest. Only the whole-world fingerprint
+        # differs, because agents now carry new fields (expected, documented).
         for seed in mb.SHORT_SEEDS:
-            self.assertEqual(mb.short_run(seed), REF["short"][seed], "seed " + seed)
+            now, ref = mb.short_run(seed), dict(REF["short"][seed])
+            self.assertNotEqual(now.pop("fingerprint"), None)
+            ref.pop("fingerprint")
+            self.assertEqual(now, ref, "seed " + seed)
+
+    def test_new_rules_do_change_behaviour(self):
+        # Sanity check the other way round: with the real Milestone 2 defaults
+        # (rest on, varied traits) the events are NOT the Milestone 1 events.
+        now = mb.short_run("42", rules={})
+        self.assertNotEqual(now["event_digest"], REF["short"]["42"]["event_digest"])
 
     def test_v2_save_loads_and_continues_the_same(self):
         self.assertEqual(mb.fixture_run(), REF["save"])

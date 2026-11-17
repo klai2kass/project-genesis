@@ -1,0 +1,13 @@
+seeds 42,1,2,3,4, 3000 ticks. Means over seeds. pop = mean population after tick 500.
+run                         pop    end  births starved%    age   <80%  rest%   rest  tiles  gath%    cur    ind tick/s  died out
+frozen M1 baseline         89.1   93.8     918     67.7    295   (frozen baseline.json, Milestone 1 code)
+M1 rules (new code)        89.1   93.8     918     67.7    295   17.7    0.0   19.2   66.6    5.5   50.0   50.0   585  0/5
+M2 defaults                93.0   92.2     946     66.5    300   17.2    8.7   33.3   63.5    5.3   50.4   50.8   545  0/5
+M2, all industrious 10     95.0   92.2     965     67.5    300   17.6   11.1   28.4   62.1    5.2   49.6   10.0   526  0/5
+M2, all industrious 90     92.1   93.4     938     66.3    300   17.6    5.9   43.4   64.7    5.4   51.2   90.0   566  0/5
+M2, all curiosity 10       93.3   90.8     949     66.9    299   17.0    8.6   33.3   65.1    5.3   10.0   51.5   577  0/5
+M2, all curiosity 90       93.3   92.4     934     65.8    303   16.6    8.5   32.3   61.6    5.3   90.0   48.7   578  0/5
+rest% = share of decisions that are rest; rest = mean rest need of the living;
+tiles = distinct tiles visited per 100 ticks of an agent's life; gath% = gathers per
+100 decisions; cur/ind = mean trait of the living at the end; tick/s on this Mac.
+done

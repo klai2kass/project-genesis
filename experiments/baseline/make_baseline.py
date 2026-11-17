@@ -4,8 +4,14 @@ Why this exists: Milestone 2 changes decisions. Instead of keeping two
 decision systems alive in the program, we freeze what the OLD rules produce
 here and compare later code against it.
 
-  python3 experiments/baseline/make_baseline.py            # write baseline.json (only do this on unchanged Milestone 1 code!)
   python3 experiments/baseline/make_baseline.py --check    # recompute and compare, print differences
+
+baseline.json is FROZEN (made on 2026-11-17 from the unchanged Milestone 1
+code). Since Milestone 2 the check runs the new code with MILESTONE1_RULES
+(nobody rests, all traits 50), which must reproduce Milestone 1 exactly. The
+full-world `fingerprint` is shown but not compared: Milestone 2 agents carry
+new fields, so it changes by design; the behaviour and event digests are the
+real guard. Writing a new baseline.json needs --rewrite-frozen (do not).
 
 baseline.json holds
   short: per seed, 500 ticks at default settings: behaviour digest, event
@@ -26,6 +32,7 @@ sys.path.insert(0, ROOT)
 
 from genesis import create_world, fingerprint, load_world, step  # noqa: E402
 from genesis.digest import EventDigest, behaviour_digest  # noqa: E402
+from genesis.save import MILESTONE1_RULES  # noqa: E402
 
 PATH = os.path.join(ROOT, "experiments", "baseline", "baseline.json")
 FIXTURE = os.path.join(ROOT, "tests", "fixtures", "save_v2_seed42_t300.json")
@@ -34,8 +41,8 @@ LONG_SEEDS, LONG_TICKS = ["42", "1", "2", "3", "4"], 3000
 FIXTURE_MORE_TICKS = 200
 
 
-def short_run(seed):
-    world = create_world(seed)
+def short_run(seed, rules=MILESTONE1_RULES):
+    world = create_world(seed, dict(rules))
     ed = EventDigest()
     for _ in range(SHORT_TICKS):
         ed.add(step(world))
@@ -46,8 +53,10 @@ def short_run(seed):
             "event_digest": ed.hexdigest(), "fingerprint": fingerprint(world)}
 
 
-def long_run(seed):
-    world = create_world(seed, {"history_keep": 0})
+def long_run(seed, rules=MILESTONE1_RULES):
+    cfg = dict(rules)
+    cfg["history_keep"] = 0
+    world = create_world(seed, cfg)
     pops, ages = [], []
     for _ in range(LONG_TICKS):
         for e in step(world):
@@ -79,6 +88,9 @@ def compute(with_long=True):
 
 def main():
     check = "--check" in sys.argv
+    if not check and "--rewrite-frozen" not in sys.argv:
+        print("baseline.json is frozen. Use --check (or --rewrite-frozen to overwrite it).")
+        return
     new = compute()
     if not check:
         with open(PATH, "w") as f:
@@ -86,6 +98,9 @@ def main():
         print("wrote", PATH)
         return
     old = json.load(open(PATH))
+    for part in (old, new):
+        for run in part["short"].values():
+            run.pop("fingerprint", None)   # changes by design since Milestone 2
     bad = 0
     for part in ("short", "long", "save"):
         if old.get(part) != new.get(part):

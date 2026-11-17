@@ -7,6 +7,8 @@ a short "why", so you can always ask "why did agent #12 do that?".
 
 from .agents import DIRS, decide
 from .history import record
+from .needs import apply_move, apply_rest
+from .traits import child_traits
 from .rng import Rng
 from .world import is_land, make_agent, tile_index
 
@@ -27,6 +29,8 @@ def step(world):
         if action == "die":
             event["age"] = agent["age"]
             event["cause"] = "starved" if why.startswith("starved") else "old age"
+            event["traits"] = dict(agent["traits"])
+            event["needs"] = dict(agent["needs"])
         events.append(event)
         record(world, event)
 
@@ -54,6 +58,7 @@ def step(world):
 
         decision = decide(world, agent, rng)
         child = _apply(world, agent, decision, rng)
+        agent["resting"] = bool(decision.get("voluntary"))
         agent["last_action"] = decision["action"]
         agent["last_why"] = decision["why"]
         log(agent, decision["action"], decision["why"],
@@ -106,6 +111,7 @@ def _apply(world, agent, decision, rng):
         agent["x"] += decision["dx"]
         agent["y"] += decision["dy"]
         agent["heading"] = decision["heading"]
+        apply_move(agent, cfg)
     elif action == "reproduce":
         agent["energy"] -= cfg["repro_cost"]
         agent["cooldown"] = cfg["repro_cooldown"]
@@ -115,8 +121,12 @@ def _apply(world, agent, decision, rng):
         cx, cy = rng.choice(spots) if spots else (agent["x"], agent["y"])
         child = make_agent(world["next_id"], cx, cy, cfg["repro_cost"], 0, rng,
                            cfg, parent=agent["id"],
-                           generation=agent["generation"] + 1)
+                           generation=agent["generation"] + 1,
+                           traits=child_traits(world["seed"], world["next_id"],
+                                               agent["traits"], cfg))
         world["next_id"] += 1
         return child
-    # "rest" changes nothing.
+    elif action == "rest" and decision.get("voluntary"):
+        apply_rest(agent, cfg)
+    # A "rest" because the agent is boxed in by water changes nothing.
     return None

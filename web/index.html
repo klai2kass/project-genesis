@@ -26,6 +26,7 @@
         <li><i class="swatch food"></i>Food (bigger = more)</li>
         <li><i class="dot healthy"></i>Agent, well fed</li>
         <li><i class="dot hungry"></i>Agent, starving</li>
+        <li><i class="dot healthy resting"></i>Agent, resting</li>
       </ul>
     </section>
 
@@ -68,6 +69,9 @@
           <div><dt>Old age</dt><dd id="s-old">0</dd></div>
           <div><dt>Avg energy</dt><dd id="s-energy">0</dd></div>
           <div><dt>Food on map</dt><dd id="s-food">0</dd></div>
+          <div><dt>Resting now</dt><dd id="s-resting">0</dd></div>
+          <div><dt>Avg curiosity</dt><dd id="s-curiosity">0</dd></div>
+          <div><dt>Avg industrious</dt><dd id="s-industrious">0</dd></div>
         </dl>
         <h2>Population</h2>
         <canvas id="chart" height="70"></canvas>
@@ -80,6 +84,9 @@
           <p class="agent-title"><strong id="a-name"></strong> <span id="a-meta" class="muted"></span></p>
           <div class="bar" aria-hidden="true"><span id="a-bar"></span></div>
           <p id="a-numbers" class="muted"></p>
+          <div class="bar rest" aria-hidden="true"><span id="a-rest-bar"></span></div>
+          <p id="a-rest" class="muted"></p>
+          <p id="a-traits" class="muted"></p>
           <p class="why"><span id="a-action" class="tag"></span> <span id="a-why"></span></p>
           <p id="a-need" class="need"></p>
           <ul id="a-options" class="options" aria-label="Options it considered"></ul>

@@ -19,6 +19,13 @@ from .world import SAVE_VERSION
 #   2  same layout, but loading (any version) repairs older/partial saves: settings and
 #      fields missing from the file are filled with the documented defaults
 #      below. Anything the file has that we do not know is kept untouched.
+#   3  Milestone 2: agents have needs (rest), traits (curiosity,
+#      industriousness) and two counters. A version 1 or 2 save is migrated so
+#      that it KEEPS ITS OLD RULES: every agent gets neutral traits (50) and
+#      the world gets rest_below=0 (nobody ever rests) and neutral trait
+#      settings for newborns. So an old world continues exactly as before
+#      (tested against the frozen baseline). To try the new rules on an old
+#      world: --set rest_below=30 --set trait_mutation=5.
 # Every change made while loading is written to world["migration_log"] (only
 # when something changed), so nothing happens silently.
 # To add a new version: bump SAVE_VERSION in world.py, write a function
@@ -32,7 +39,14 @@ REQUIRED_KEYS = ["seed", "tick", "rng", "config", "terrain", "food", "agents"]
 AGENT_DEFAULTS = {
     "food": 0, "heading": 0, "target": None, "cooldown": 0, "parent": None, "generation": 0,
     "last_action": "unknown (old save)", "last_why": "unknown (old save)",
+    "needs": {"rest": 100}, "resting": False, "drain_acc": 0, "tire_acc": 0,
+    "traits": {"curiosity": 50, "industriousness": 50},
 }
+
+# Settings that make the Milestone 2 rules behave exactly like Milestone 1.
+# Used when migrating a version 1/2 save, so old worlds keep their rules.
+MILESTONE1_RULES = {"rest_below": 0, "trait_founder_min": 50,
+                    "trait_founder_max": 50, "trait_mutation": 0}
 
 # Defaults for the counters in world["stats"].
 STATS_DEFAULTS = {"births": 0, "deaths_starved": 0, "deaths_old_age": 0}
@@ -87,7 +101,27 @@ def _migrate_1_to_2(world):
     world["version"] = 2   # same layout; the repair step does the real work
 
 
-MIGRATIONS = {1: _migrate_1_to_2}
+def _migrate_2_to_3(world):
+    cfg = world["config"]
+    for key, value in MILESTONE1_RULES.items():
+        if key not in cfg:
+            cfg[key] = value
+            _note(world, "config.%s missing (save from before Milestone 2): set "
+                         "to %r so this world keeps its old rules" % (key, value))
+    changed = 0
+    for agent in world["agents"]:
+        missing = [k for k in ("needs", "resting", "drain_acc", "tire_acc", "traits")
+                   if k not in agent]
+        for key in missing:
+            agent[key] = copy.deepcopy(AGENT_DEFAULTS[key])
+        changed += bool(missing)
+    if changed:
+        _note(world, "version 2 -> 3: %d agents given rest 100 and neutral traits "
+                     "(curiosity 50, industriousness 50)" % changed)
+    world["version"] = 3
+
+
+MIGRATIONS = {1: _migrate_1_to_2, 2: _migrate_2_to_3}
 
 
 def world_from_json(text):

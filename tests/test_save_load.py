@@ -64,7 +64,7 @@ class OldAndOddSaves(unittest.TestCase):
 
     def test_old_format_save_loads_and_continues(self):
         loaded = world_from_json(self._v1_text())
-        self.assertEqual(loaded["version"], 2)
+        self.assertEqual(loaded["version"], 3)   # migrated 1 -> 2 -> 3
         self.assertNotIn("migration_log", loaded)   # nothing needed fixing
         reference = create_world(5)
         run(reference, 60)
@@ -107,9 +107,23 @@ class OldAndOddSaves(unittest.TestCase):
 
     def test_newer_version_and_missing_essentials_are_rejected(self):
         with self.assertRaises(ValueError):
-            world_from_json('{"version": 3}')
+            world_from_json('{"version": 4}')     # newer than this program
         with self.assertRaises(ValueError):
             world_from_json('{"version": 1, "seed": "1"}')
+
+
+class MilestoneTwoMigration(unittest.TestCase):
+    def test_v2_fixture_migrates_to_v3_and_keeps_its_old_rules(self):
+        from genesis import load_world
+        w = load_world(os.path.join(ROOT, "tests", "fixtures", "save_v2_seed42_t300.json"))
+        self.assertEqual(w["version"], 3)
+        self.assertEqual(w["config"]["rest_below"], 0)            # nobody rests
+        self.assertEqual(w["config"]["trait_mutation"], 0)        # newborns stay 50
+        self.assertTrue(all(a["traits"] == {"curiosity": 50, "industriousness": 50}
+                            and a["needs"] == {"rest": 100} and a["tire_acc"] == 0
+                            for a in w["agents"]))
+        self.assertTrue(any("version 2 -> 3" in line for line in w["migration_log"]))
+        self.assertTrue(any("keeps its old rules" in line for line in w["migration_log"]))
 
 
 if __name__ == "__main__":

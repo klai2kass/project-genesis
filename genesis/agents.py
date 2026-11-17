@@ -8,6 +8,8 @@ That split matters for later: a smarter brain (for example an LLM) can
 replace `decide()` without touching the rest of the simulation.
 """
 
+from .needs import wants_rest
+from .traits import turn_percent
 from .world import is_land, tile_index
 
 # The 8 directions an agent can step in: N, NE, E, SE, S, SW, W, NW
@@ -50,7 +52,10 @@ def _wander(world, agent, rng, note, why):
     x, y = agent["x"], agent["y"]
     heading = agent["heading"]
     dx, dy = DIRS[heading]
-    if rng.chance(0.15) or not is_land(world, x + dx, y + dy):
+    # Curiosity sets the chance of a voluntary turn (15% at curiosity 50,
+    # identical to Milestone 1's rng.chance(0.15)). Water ahead forces a turn.
+    turn = rng.below(100) < turn_percent(agent, world["config"])
+    if turn or not is_land(world, x + dx, y + dy):
         open_ways = [i for i, (ddx, ddy) in enumerate(DIRS)
                      if is_land(world, x + ddx, y + ddy)]
         if not open_ways:
@@ -69,7 +74,7 @@ def _option(action, ok, note):
 def decide(world, agent, rng):
     """Pick one action for this tick.
 
-    The rules are tried in a fixed order (eat, reproduce, gather, move) and
+    The rules are tried in a fixed order (eat, reproduce, gather, rest, move) and
     the first one that fits wins. The result records three things so you can
     always see WHY:
       need    - what the agent most needs right now
@@ -86,6 +91,8 @@ def decide(world, agent, rng):
     can_reproduce = (energy >= cfg["repro_min_energy"]
                      and age >= cfg["repro_min_age"] and agent["cooldown"] == 0)
     can_gather = here > 0 and pack < carry_max
+    can_rest, rest_note = wants_rest(agent, cfg)
+    rest_level = agent["needs"]["rest"]
 
     # --- What does it need most? ---
     if energy <= 20:
@@ -94,6 +101,8 @@ def decide(world, agent, rng):
         need = "food (energy %d of %d)" % (energy, cfg["max_energy"])
     elif can_reproduce:
         need = "a child (strong, adult and rested)"
+    elif can_rest:
+        need = "rest (rest %d of 100)" % rest_level
     elif pack < carry_max:
         need = "to stock up on food (pack %d of %d)" % (pack, carry_max)
     else:
@@ -125,7 +134,8 @@ def decide(world, agent, rng):
 
     options = [_option("eat", can_eat, eat_note),
                _option("reproduce", can_reproduce, repro_note),
-               _option("gather", can_gather, gather_note)]
+               _option("gather", can_gather, gather_note),
+               _option("rest", can_rest, rest_note)]
 
     # --- Choose: the first rule that fits. ---
     if can_eat:
@@ -141,14 +151,18 @@ def decide(world, agent, rng):
         decision = {"action": "gather",
                     "why": "%d food on this tile and my pack has room (%d/%d)"
                            % (here, pack, carry_max)}
+    elif can_rest:
+        decision = {"action": "rest", "voluntary": True,
+                    "why": "%s, not hungry (energy %d), so resting at half the "
+                           "energy cost" % (rest_note, energy)}
     else:
         decision = _choose_move(world, agent, rng)
 
     if decision["action"] == "move":
         options.append(_option("move", True, decision.pop("note")))
-    elif decision["action"] == "rest":
+    elif decision["action"] == "rest" and not decision.get("voluntary"):
         options.append(_option("move", False, "water on every side"))
-        options.append(_option("rest", True, "nothing else is possible"))
+        options[3] = _option("rest", True, "nothing else is possible (boxed in by water)")
     else:
         options.append(_option("move", True, "always possible, but a rule above fits first"))
 

@@ -32,12 +32,26 @@ RULES = {
     "max_age_max": ("int", 1, 100000),
     "history_keep": ("int", 0, 1000),
     "dead_history_keep": ("int", 0, 100000),
+    "rest_below": ("int", 0, 101),
+    "rest_resume": ("int", 0, 101),
+    "rest_gain": ("int", 0, 100),
+    "rest_drain_units": ("int", 0, 1000),
+    "drain_units_per_energy": ("int", 1, 1000),
+    "tire_base": ("int", 0, 10000),
+    "tire_span": ("int", 0, 10000),
+    "tire_scale": ("int", 1, 10000),
+    "turn_chance": ("int", 0, 100),
+    "turn_span": ("int", 0, 200),
+    "trait_founder_min": ("int", 0, 100),
+    "trait_founder_max": ("int", 0, 100),
+    "trait_mutation": ("int", 0, 100),
 }
 
 # Only used while a world is being created; changing them on a loaded world
 # would do nothing or break the map.
 CREATION_ONLY = ["width", "height", "water_share", "forest_share",
-                 "start_food_share", "start_agents", "start_energy"]
+                 "start_food_share", "start_agents", "start_energy",
+                 "trait_founder_min", "trait_founder_max"]
 
 
 def valid_names():
@@ -100,6 +114,11 @@ def check_combined(config):
         _bad("max_age_min must not be larger than max_age_max.")
     if config["start_energy"] > config["max_energy"]:
         _bad("start_energy must not be larger than max_energy.")
+    if config["trait_founder_min"] > config["trait_founder_max"]:
+        _bad("trait_founder_min must not be larger than trait_founder_max.")
+    if config["rest_drain_units"] > config["drain_units_per_energy"]:
+        _bad("rest_drain_units must not be larger than drain_units_per_energy "
+             "(resting may not cost more than moving).")
 
 
 def apply_to_loaded(world, overrides):

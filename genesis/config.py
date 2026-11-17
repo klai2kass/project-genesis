@@ -38,6 +38,32 @@ DEFAULT_CONFIG = {
     "max_age_min": 400,
     "max_age_max": 700,
 
+    # --- Rest (Milestone 2; see docs/MILESTONE2_V2.md section 4) ---
+    # A not-hungry agent rests when rest < rest_below and keeps resting
+    # until rest >= rest_resume. Each resting tick gives rest_gain rest.
+    "rest_below": 30,
+    "rest_resume": 70,
+    "rest_gain": 3,
+    # Resting halves the energy drain: each resting tick adds
+    # rest_drain_units to a counter; 1 energy is paid per
+    # drain_units_per_energy units (1 of 2 = half rate). Whole numbers only.
+    "rest_drain_units": 1,
+    "drain_units_per_energy": 2,
+    # Tiring while moving, in 1/tire_scale rest points per move:
+    # tire_base - (industriousness - 50) * tire_span / 100  -> 150..50
+    "tire_base": 100,
+    "tire_span": 100,
+    "tire_scale": 100,
+
+    # --- Personality traits (0-100, 50 = neutral) ---
+    # Chance (percent) to turn on each wandering tick:
+    # turn_chance + (curiosity - 50) * turn_span / 100  -> 5..25
+    "turn_chance": 15,
+    "turn_span": 20,
+    "trait_founder_min": 40,   # first agents: each trait in this range
+    "trait_founder_max": 60,
+    "trait_mutation": 5,       # child = parent +/- up to this, per trait
+
     # --- Memory of decisions (kept in saves) ---
     "history_keep": 20,        # recent decisions remembered per agent
     "dead_history_keep": 50,   # how many dead agents' decisions are kept

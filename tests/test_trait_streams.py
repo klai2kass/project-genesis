@@ -1,11 +1,9 @@
 """Design check for the planned per-agent trait dice (docs/MILESTONE2_V2.md, section 2a).
 
-Nothing of Milestone 2 exists yet. These tests use only the EXISTING Rng and
-seed_to_state to prove the derivation rule we plan to use is deterministic,
-independent of the main dice, unaffected by save/load, and well spread.
-The helper `trait_stream` below is the exact rule from the document. When
-`genesis/traits.py` is written (stage 2) it must reproduce the golden numbers
-here, and these tests should then call that module instead of the helper.
+These tests call the real genesis/traits.py. The golden numbers were fixed
+before the module existed (from the documented rule), and the module
+reproduces them: the derivation is deterministic, independent of the main
+dice, unaffected by save/load, and well spread.
 """
 import os
 import sys
@@ -15,17 +13,16 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
 from genesis import create_world, step, world_from_json, world_to_json  # noqa: E402
-from genesis.rng import Rng, seed_to_state  # noqa: E402
-
-
-def trait_stream(seed, agent_id):
-    """The planned rule: a fresh generator from (seed text, agent id) only."""
-    return Rng(seed_to_state("%s|traits|%d" % (seed, agent_id)))
+from genesis import traits  # noqa: E402
+from genesis.config import DEFAULT_CONFIG  # noqa: E402
+from genesis.rng import seed_to_state  # noqa: E402
+from genesis.traits import trait_stream  # noqa: E402
 
 
 def founder_traits(seed, agent_id):
-    r = trait_stream(seed, agent_id)
-    return r.between(40, 60), r.between(40, 60)      # curiosity, industriousness
+    """The real genesis.traits code, with the default founder range 40..60."""
+    t = traits.founder_traits(seed, agent_id, DEFAULT_CONFIG)
+    return t["curiosity"], t["industriousness"]
 
 
 class TraitStreams(unittest.TestCase):

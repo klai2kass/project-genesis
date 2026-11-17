@@ -9,8 +9,9 @@ import copy
 
 from .config import DEFAULT_CONFIG
 from .rng import Rng, seed_to_state
+from .traits import founder_traits, neutral_traits
 
-SAVE_VERSION = 2
+SAVE_VERSION = 3
 
 # Terrain codes stored in world["terrain"]
 WATER, GRASS, FOREST = 0, 1, 2
@@ -29,7 +30,8 @@ def is_land(world, x, y):
     return world["terrain"][y * cfg["width"] + x] != WATER
 
 
-def make_agent(agent_id, x, y, energy, age, rng, cfg, parent=None, generation=0):
+def make_agent(agent_id, x, y, energy, age, rng, cfg, parent=None, generation=0,
+               traits=None):
     return {
         "id": agent_id,
         "x": x,
@@ -43,6 +45,12 @@ def make_agent(agent_id, x, y, energy, age, rng, cfg, parent=None, generation=0)
         "parent": parent,
         "generation": generation,
         "target": None,            # food it is walking to: [x, y], or None
+        # Milestone 2 (whole numbers; see genesis/needs.py and traits.py)
+        "needs": {"rest": 100},    # 100 = fully rested
+        "resting": False,          # was its last action a voluntary rest?
+        "drain_acc": 0,            # half-rate energy drain counter (resting)
+        "tire_acc": 0,             # tiring counter (moving)
+        "traits": traits if traits is not None else neutral_traits(),
         "last_action": "born",
         "last_why": "placed in the world at the start" if parent is None
                     else "child of #%d" % parent,
@@ -73,7 +81,8 @@ def create_world(seed, config=None):
         spot = rng.choice(land)
         age = rng.between(0, 200)
         agent = make_agent(agent_id, spot % width, spot // width,
-                           cfg["start_energy"], age, rng, cfg)
+                           cfg["start_energy"], age, rng, cfg,
+                           traits=founder_traits(str(seed), agent_id, cfg))
         # Stagger first children too, so there is no baby boom at tick 1.
         agent["cooldown"] = rng.between(0, cfg["repro_cooldown"])
         agents.append(agent)

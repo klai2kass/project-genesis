@@ -109,14 +109,15 @@ function drawMap() {
     }
   }
   const starving = [229, 86, 75], fed = [255, 243, 209];
-  for (const [id, x, y, energy] of s.agents) {
+  for (const [id, x, y, energy, resting] of s.agents) {
     const cx = x * TILE + TILE / 2, cy = y * TILE + TILE / 2;
     mapCtx.beginPath();
     mapCtx.arc(cx, cy, 4.2, 0, Math.PI * 2);
     mapCtx.fillStyle = mix(starving, fed, Math.min(1, energy / 60));
     mapCtx.fill();
     mapCtx.lineWidth = 1.5;
-    mapCtx.strokeStyle = "#101114";
+    // A resting agent gets a violet ring instead of the dark outline.
+    mapCtx.strokeStyle = resting ? "#8a7ce0" : "#101114";
     mapCtx.stroke();
     if (id === selectedId) {
       mapCtx.beginPath();
@@ -238,12 +239,25 @@ function renderAgent() {
       " of " + a.max_age + " · at (" + a.x + ", " + a.y + ")";
     $("a-action").textContent = a.last_action;
     $("a-why").textContent = a.last_why;
+    const fx = sel.effects || {};
+    const rest = a.needs ? a.needs.rest : 100;
+    $("a-rest-bar").style.width = rest + "%";
+    $("a-rest").textContent = "Rest " + rest + "/100" +
+      (a.resting ? " · resting (until " + fx.rest_resume + ")"
+                 : " · rests below " + fx.rest_below + " when not hungry");
+    const t = a.traits || {};
+    $("a-traits").textContent = "Curiosity " + t.curiosity + " (turns " + fx.turn_percent +
+      "% of wandering ticks) · industriousness " + t.industriousness + " (loses " +
+      (fx.tire_rate / fx.tire_scale).toFixed(2) + " rest per move)";
   } else {
     const last = sel.trail[sel.trail.length - 1];
     $("a-name").textContent = "Agent #" + sel.id;
     $("a-meta").textContent = "has died";
     $("a-bar").style.width = "0%";
     $("a-numbers").textContent = "";
+    $("a-rest-bar").style.width = "0%";
+    $("a-rest").textContent = "";
+    $("a-traits").textContent = "";
     $("a-action").textContent = "die";
     $("a-why").textContent = last ? last.why : "It is no longer in the world.";
   }
@@ -282,6 +296,9 @@ function render() {
   $("s-old").textContent = s.stats.old_age.toLocaleString();
   $("s-energy").textContent = s.stats.avg_energy;
   $("s-food").textContent = s.stats.food.toLocaleString();
+  $("s-resting").textContent = s.stats.resting;
+  $("s-curiosity").textContent = s.stats.avg_curiosity;
+  $("s-industrious").textContent = s.stats.avg_industriousness;
 
   for (const button of $("speeds").children) {
     button.classList.toggle("on", Number(button.dataset.speed) === s.speed);

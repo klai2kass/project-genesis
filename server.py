@@ -23,6 +23,7 @@ from urllib.parse import parse_qs, urlparse
 
 from genesis import create_world, load_world, save_world, step
 from genesis.history import events_for
+from genesis.traits import tire_rate, turn_percent
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 WEB_DIR = os.path.join(ROOT, "web")
@@ -118,7 +119,15 @@ class Game:
                 # so it survives save and load.
                 trail = events_for(world, agent_id)
                 if agent is not None:
-                    selected = {"alive": True, "agent": agent, "trail": trail}
+                    # What its traits mean right now, worked out by the same
+                    # code the simulation uses (so the page never guesses).
+                    effects = {"turn_percent": turn_percent(agent, cfg),
+                               "tire_rate": tire_rate(agent, cfg),
+                               "tire_scale": cfg["tire_scale"],
+                               "rest_below": cfg["rest_below"],
+                               "rest_resume": cfg["rest_resume"]}
+                    selected = {"alive": True, "agent": agent, "trail": trail,
+                                "effects": effects}
                 else:
                     selected = {"alive": False, "id": agent_id, "trail": trail}
 
@@ -136,7 +145,8 @@ class Game:
                 "carry_max": cfg["carry_max"],
                 "terrain": "".join(str(t) for t in world["terrain"]),
                 "food": world["food"],
-                "agents": [[a["id"], a["x"], a["y"], a["energy"]] for a in agents],
+                "agents": [[a["id"], a["x"], a["y"], a["energy"], 1 if a.get("resting") else 0]
+                           for a in agents],
                 "stats": {
                     "alive": len(agents),
                     "births": world["stats"]["births"],
@@ -145,6 +155,12 @@ class Game:
                     "avg_energy": round(energy_total / len(agents)) if agents else 0,
                     "food": sum(world["food"]),
                     "generation": max((a["generation"] for a in agents), default=0),
+                    "resting": sum(1 for a in agents if a.get("resting")),
+                    "avg_curiosity": round(sum(a["traits"]["curiosity"] for a in agents)
+                                           / len(agents)) if agents else 0,
+                    "avg_industriousness": round(sum(a["traits"]["industriousness"]
+                                                     for a in agents) / len(agents))
+                                           if agents else 0,
                 },
                 "history": list(self.history),
                 "events": events,

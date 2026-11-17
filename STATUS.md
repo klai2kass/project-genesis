@@ -2,15 +2,79 @@
 
 Last checked: 2026-11-17, by running the commands in this file (not from memory).
 
-**Milestone 1 is complete. Milestone 2 is NOT built.** It exists as a proposal
-(`docs/MILESTONE2.md`), a review (`docs/MILESTONE2_REVIEW.md`) and a revised
-staged plan (`docs/MILESTONE2_V2.md`, with your questions). Starvation is
-explained in `docs/STARVATION.md`. Read the
-"Session log" first, then "Next 5 tasks" and "Decisions you need to make".
+**Milestone 1 is complete. Milestone 2 (rest, curiosity, industriousness) is
+IMPLEMENTED and committed (not pushed).** Design:
+`docs/MILESTONE2_V2.md`. Starvation background: `docs/STARVATION.md`. Read the
+"Session log" first.
 
 ## Session log
 
 Newest first. A fresh session should read this section first.
+
+### Session 2026-11-17 (part 3: Milestone 2 implementation, committed after your review)
+- **Built (approved design, no scoring, no company):**
+  - `genesis/traits.py` (new): curiosity and industriousness, 0-100. Each
+    agent's own dice stream `Rng(seed_to_state("<seed>|traits|<id>"))`;
+    founders 40-60, children parent +/-5 per trait, clamped. Main dice untouched.
+  - `genesis/needs.py` (new): rest rule (only when energy > 80; start below 30,
+    continue to 70; +3 per tick), half-rate energy drain with `drain_acc`,
+    tiring per move with `tire_acc` (150/100/50 hundredths at industriousness
+    0/50/100).
+  - `genesis/agents.py`: rest rule after gather; curiosity sets the wandering
+    turn chance (`rng.below(100) < p`, 5-25%, 15% at 50 = old behaviour).
+  - `genesis/sim.py`, `world.py`: new agent fields (`needs`, `resting`,
+    `drain_acc`, `tire_acc`, `traits`); die events carry traits and needs.
+  - `genesis/config.py`, `overrides.py`: 13 new settings, all `--set`-able.
+    No existing default changed.
+  - `genesis/save.py`: save format 3. Version 1/2 saves are migrated so they
+    KEEP THEIR OLD RULES (rest_below=0, traits 50, newborns 50), logged.
+    Try new rules on an old save with `--set rest_below=30 --set trait_mutation=5`.
+  - Browser: agent panel shows a rest bar, rest state, traits and what they do
+    (turn %, rest lost per move); stats show resting now and average traits;
+    resting agents have a violet ring on the map (legend updated).
+  - `experiments/stage_compare.py` (new), `experiments/baseline/make_baseline.py`
+    (check now runs the new code with Milestone 1 rules; baseline.json is
+    untouched and can only be overwritten with `--rewrite-frozen`).
+- **Frozen baseline preserved (FACT):** new code with `MILESTONE1_RULES`
+  reproduces `baseline.json` exactly: same counters, behaviour digest and event
+  digest for seeds 42/1/2, the v2 fixture continues identically, and the
+  5-seed x 3,000-tick numbers are identical (pop 89.1, births 918, starved
+  67.7%, age 295). Only the whole-world fingerprint differs (new fields):
+  seed 42, 500 ticks: M1 rules -> 79 alive, `54cf2357346770e0`;
+  defaults -> 92 alive, `63826e5a26ffdded`.
+- **Tests (run this session):** `python3 -m unittest discover -s tests` ->
+  `Ran 109 tests ... OK`. New: `tests/test_rest.py` (12, real sim: tiring
+  1,2/0,1 patterns, first rest after 48/142 moves, 14-tick stints ending at
+  70/71, shares 1/3, 1/4, 1/7, 7 energy per stint, never rests while hungry
+  incl. 2 real seeds x 1,500 ticks, curiosity turn rates), `tests/test_traits.py`
+  (8), migration test in `test_save_load.py`, baseline tests updated
+  (compare digests, not fingerprint; new rules must differ).
+  `test_trait_streams.py` now calls the real module (same golden numbers).
+- **Measured, 5 seeds x 3,000 ticks** (`experiments/results/stage_compare.txt`):
+
+  | run | pop | births | starved % | age | rest % of decisions | tiles/100 ticks | ticks/s |
+  | --- | --- | --- | --- | --- | --- | --- | --- |
+  | M1 rules | 89.1 | 918 | 67.7 | 295 | 0.0 | 66.6 | 585 |
+  | M2 defaults | 93.0 | 946 | 66.5 | 300 | 8.7 | 63.5 | 545 |
+  | all industrious 10 | 95.0 | 965 | 67.5 | 300 | 11.1 | 62.1 | 526 |
+  | all industrious 90 | 92.1 | 938 | 66.3 | 300 | 5.9 | 64.7 | 566 |
+  | all curiosity 10 | 93.3 | 949 | 66.9 | 299 | 8.6 | 65.1 | 577 |
+  | all curiosity 90 | 93.3 | 934 | 65.8 | 303 | 8.5 | 61.6 | 578 |
+
+  Plain reading: all stage 3 bands hold (pop 80-98, starved 62-73, births
+  830-1010, age 265-325, nobody died out). Resting is 8.7% of decisions, not the
+  25% of the never-hungry model, because agents are often hungry. Lazy agents
+  rest about twice as often as industrious ones. Low curiosity covers about 6%
+  more ground than high. Effects on survival are small so far; whether that
+  matters is your call. Speed about 7% slower.
+- **Browser:** the app's preview launcher could not read the Desktop folder
+  (macOS "Operation not permitted"), so the server was started from the shell
+  at http://localhost:8765 and checked: no console errors, agent panel and
+  new stats display.
+- **Not done:** curiosity probe with straightness and
+  episode length, emergence report (stage 5) not written; README not updated
+  for the new settings.
+
 
 ### Session 2026-11-17 (part 2: starvation + Milestone 2 review plan)
 - **Step 0 verified by running (not trusted):** git clean on `main`;
@@ -278,7 +342,7 @@ blocks the port). Stop with Ctrl+C:
 python3 server.py
 ```
 
-All automatic checks (end should say `Ran 87 tests` and `OK`):
+All automatic checks (end should say `Ran 109 tests` and `OK`):
 
 ```bash
 python3 -m unittest discover -s tests
@@ -323,8 +387,8 @@ python3 experiments/baseline/make_baseline.py --check
 
 ## 10. Next 5 tasks
 
-1. **Say "go" for stage 1** of `docs/MILESTONE2_V2.md` (design approved).
-   Nothing is built before this.
+1. **Curiosity probe and emergence report** (stage 4 probe, stage 5 of
+   `docs/MILESTONE2_V2.md`), and README notes for the 13 new settings.
 2. **Check the real page by hand.** Run `python3 server.py` in your own
    Terminal, press Save, then Load, and confirm the pop-up at the top fades;
    click an agent after loading and confirm earlier decisions are listed.

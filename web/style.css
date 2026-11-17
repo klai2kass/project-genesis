@@ -81,6 +81,7 @@ body {
 .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; border: 1.5px solid #101114; }
 .dot.healthy { background: #fff3d1; }
 .dot.hungry { background: var(--danger); }
+.dot.resting { border-color: #8a7ce0; }
 
 .side { display: grid; gap: 12px; min-width: 0; }
 .card {
@@ -146,6 +147,8 @@ button.primary {
 .agent-title { margin: 0 0 6px; }
 .bar { height: 6px; border-radius: 99px; background: var(--panel-2); overflow: hidden; }
 .bar span { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 99px; }
+.bar.rest span { background: var(--rest, #8a7ce0); }
+#a-rest, #a-traits { margin: 4px 0 8px; font-size: 12.5px; font-variant-numeric: tabular-nums; }
 #a-numbers { margin: 6px 0 8px; font-size: 12.5px; font-variant-numeric: tabular-nums; }
 .why { margin: 0 0 8px; overflow-wrap: anywhere; }
 .tag {
