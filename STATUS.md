@@ -2,10 +2,11 @@
 
 Last checked: 2026-11-17, by running the commands in this file (not from memory).
 
-**Milestones 1 and 2 are done. Milestone 3, step 1 ("a home") is built,
-tested and measured.** Every agent remembers where it was born and wanders
-within 6 tiles of it; families now meet twice as often and survival is
-unchanged (`docs/MILESTONE3.md`). **Proposed next: step 2, encounter memory**
+**Milestones 1 and 2 are done. Milestone 3 steps 1 (a home) and 2
+(encounter memory) are built, tested and measured** (`docs/MILESTONE3.md`).
+Every agent stays near its birthplace and remembers up to 10 agents it met,
+how often, when and where. Memory changes no behaviour yet. **Proposed next:
+step 3, the first use of memory: share food with a starving agent you know**
 (section 5); not started, it waits for your go. GitHub (`origin/main`) has
 everything up to `e3e07c3`; this session's commits are local only.
 
@@ -19,31 +20,33 @@ is equal only when two worlds are exactly equal. **Headless** = no window.
       reproduce and die. Same seed = same world.
 - [x] Rest need and traits (curiosity, industriousness), inherited +/-5.
 - [x] **Homes**: `home` per agent (birth tile), `home_radius` 6 (0 = off).
+- [x] **Encounter memory**: `memory` per agent, `memory_keep` 10 (0 = off);
+      shown in the agent panel. A record only.
 - [x] Every decision has a "why"; recent decisions are kept in saves.
-- [x] Saves version 4; versions 1, 2 and 3 load and keep their old rules.
-- [x] Milestone 1 and Milestone 2 behaviour frozen and reproduced exactly:
-      `tests/test_baseline.py`, `tests/test_home.py`,
-      `experiments/baseline/make_baseline.py --check`.
-- [x] Browser page, including the clicked agent's home (checked this
-      session at http://127.0.0.1:8766, see 3).
+- [x] Saves version 5; versions 1 to 4 load and keep their old rules.
+- [x] Milestone 1, Milestone 2 and homes behaviour frozen and reproduced
+      exactly: `tests/test_baseline.py`, `tests/test_home.py`,
+      `tests/test_memory.py`, `experiments/baseline/make_baseline.py --check`.
+- [x] Browser page, including the clicked agent's home and whom it knows
+      (checked this session at http://127.0.0.1:8766, see 3).
 - [x] Measurement scripts in `experiments/`, results in `experiments/results/`.
 - [ ] `why.py --load` reads the stored history (it still replays instead).
 - [ ] `--summary` does not report action mix or trait averages.
 
 ## 2. Tests (run this session)
 
-`python3 -m unittest discover -s tests` -> `Ran 121 tests`, `OK` (about 47 s).
-By file: baseline 5, controls 11, determinism 7, history 8, home 12,
-movement 7, overrides 11, rest 12, rest_design 14, save_load 10, summary 5,
-trait_streams 5, traits 8, why_log 6.
-Changed tests (on purpose): `test_save_load.py` and `test_traits.py` expect
-save version 4; the curiosity turning test in `test_rest.py` runs with
-`home_radius=0` (it measures turning alone).
+`python3 -m unittest discover -s tests` -> `Ran 132 tests`, `OK` (about 55 s
+on a quiet Mac). By file: baseline 5, controls 11, determinism 7, history 8,
+home 12, memory 11, movement 7, overrides 11, rest 12, rest_design 14,
+save_load 10, summary 5, trait_streams 5, traits 8, why_log 6.
+Changed tests (on purpose): save-version checks now use `SAVE_VERSION`
+instead of a fixed number; the curiosity turning test in `test_rest.py`
+runs with `home_radius=0`.
 `make_baseline.py --check` -> ALL SAME (Milestone 1 unchanged).
 Reference run: `python3 run_headless.py --seed 42 --ticks 500 --every 0` ->
-100 alive, fingerprint `36327594028337c8` (with homes; before homes it was
-92 alive, `63826e5a26ffdded`, and `--set home_radius=0` still gives the same
-behaviour as then, see `tests/test_home.py`).
+100 alive (homes on). Frozen references: `experiments/baseline/baseline.json`
+(Milestone 1), `milestone2.json` (before homes), `milestone3_home.json`
+(homes, before memory).
 
 ## 3. Browser check (this session)
 
@@ -57,12 +60,28 @@ so it ran outside the sandbox), page opened in the app's browser.
   where it was born · 6 tiles away · wanders within 6 tiles of it"; its
   earlier decisions include "... I am 7 tiles from home (55, 6) and stay
   within 6, so heading home". Legend has the new entry. **No console errors.**
+- Memory check (fresh tab): clicking an agent shows "Knows 10 agents
+  (remembers up to 10). Met most:" and a list such as "#231 · met 3 times,
+  last at tick 664 near (26, 27)", with "has died" where right. **No console
+  errors.**
 Small things noticed (not fixed): the population graph starts empty after a
 load (not stored in saves); the rest bar shows the value after this tick's
 rest while the decision text shows the value at decision time. The test save
 `saves/claude_browsercheck.json` is still in `saves/` (ignored by git).
 
 ## 4. Measured results
+
+**Encounter memory** (`docs/MILESTONE3.md`; `experiments/memory_probe.py`,
+5 seeds x 3,000 ticks): an adult has met about 31 agents and remembers 10;
+its most-met agent about 11 times; it keeps 76% of the agents it met 5+
+times (the first cap rule kept only 50%, so it was replaced); 12% of what
+it remembers is family. Behaviour identical with memory on or off. Cost:
+about 6-13% slower depending on the timing, saves about 2.5% bigger.
+
+**Could memory be used for something? (`experiments/sharing_opportunity.py`)**
+One starvation death in three (33.7%) happened to an agent that, in its last
+20 ticks, stood next to a well-fed agent carrying food; in one in five
+(19.4%) that agent had met it before; family only 4.6%.
 
 **Homes** (`docs/MILESTONE3.md`; `experiments/encounter_probe.py`, 5 seeds x
 3,000 ticks; `stage_compare.py`):
@@ -86,61 +105,79 @@ disappears** (25 of 40, within luck), because homes keep every agent near
 its patch, which was the zigzaggers' edge. In normal runs no trait is
 selected beyond chance.
 
-## 5. Next step: Milestone 3, step 2, encounter memory (recommended)
+## 5. Next step: Milestone 3, step 3, share food with someone you know (recommended)
 
-**What:** each agent keeps a small list of the agents it has met: id, first
-tick, last tick, how many separate meetings, and where the last one was.
-**At first it changes no behaviour.** It is shown in the agent panel ("knows
-12 agents; met #31, its sister, 9 times") and measured.
+**What:** the first behaviour that uses memory. A well-fed agent (energy
+above 80) carrying food, standing within 1 tile of a **starving** agent
+(energy 20 or less, empty pack) that it has **met at least twice before**,
+gives it 1 food. The receiver eats it next tick by its normal eat rule.
 
-**Why now (evidence):** homes made repeated contact common (21% of pairs
-meet 5+ times, 13% of meetings are family; section 4), so a memory now has
-something to remember. Before homes it would have been mostly one-off
-strangers. Recording before using keeps the step small and testable: the
-world must behave exactly as it does now.
+**Why (evidence, section 4):** 33.7% of starvation deaths had a fed giver
+with food right next to them in their last 20 ticks; 19.4% had one that
+knew them. That is a concrete situation the memory can act on, which
+nothing else in the world handles. It is also the smallest step toward the
+vision's relationships and exchange: who helps whom, and does help come
+back, can then be measured.
 
-**Alternative rejected for now: curiosity as roaming distance** (each
-agent's own radius = 6 plus or minus a little by curiosity). It would give
-curiosity a real job again, but it changes behaviour and does not move toward
-relationships. Listed as decision 2 below.
+**Alternatives considered:**
+- *Family-only sharing* (uses the existing `parent` field, no memory):
+  rejected as the first rule, it reaches only 4.6% of starvation deaths,
+  a quarter of "someone I know".
+- *Seeking company* (walk toward known agents): rejected, no measured payoff
+  (the Milestone 2 gate still applies).
+- *Do nothing social yet; give curiosity a job first* (decision 2): smaller,
+  but does not move toward relationships.
+
+**Prediction to test (not assumed):** `docs/STARVATION.md` showed that food
+supply, not food finding, sets how many agents live. So sharing will
+probably NOT lower the starved share much; it changes WHO starves (fewer
+young, maybe more givers). That is still the interesting part: whether
+gifts flow back (reciprocity) and whether giving families do better.
 
 **Rule (proposed):**
-- A **meeting** = two living agents within 1 tile of each other at the end
-  of a tick. A meeting that continues from the previous tick is the same
-  meeting (no new count); this needs no extra saved state: an entry with
-  `last == tick - 1` that is still adjacent just updates `last`.
-- Per agent `memory`: a list of `[id, first_tick, last_tick, count, x, y]`,
-  at most `memory_keep` entries (proposed 10). When full, the entry met
-  longest ago is dropped (ties: fewer meetings first, then lower id). No dice.
-- Done once per tick in `sim.step` after all agents acted, with a neighbour
-  grid (one pass over agents).
+- New action `give`, checked after eat and reproduce, before gather, rest
+  and move. Fits when: not hungry (energy above `eat_below`), food in the
+  pack, and some agent within 1 tile is starving with an empty pack and has
+  `share_min_meetings` (2) or more meetings in the giver's memory.
+- Several fit: the one met most often (ties: lower energy, then lower id).
+  No dice.
+- `share_min_meetings = 0` switches it off (old saves get 0 and keep their
+  behaviour).
+- Why text: "gave 1 food to #31 (we have met 6 times); it is starving
+  (energy 14) and I am not hungry (energy 88)". The receiver's history gets
+  a line too.
 
-**Files:** `genesis/memory.py` (new: find meetings, update and cap lists),
-`genesis/sim.py` (one call per tick), `genesis/world.py` (`memory: []`,
-save version 5), `genesis/save.py` (`_migrate_4_to_5`: empty memories),
-`genesis/config.py` and `overrides.py` (`memory_keep`, 0 = off),
-`server.py` and `web/` (panel list, family marked), README, `docs/MILESTONE3.md`.
+**Files:** `genesis/agents.py` (the give rule and its option line),
+`genesis/sim.py` (move 1 food, event for both), `genesis/config.py`,
+`overrides.py`, `save.py` (version 6: `share_min_meetings = 0` for old
+saves), `server.py`/`web/` (gifts given/received in the panel, "gifts" in
+the stats), README, `docs/MILESTONE3.md`. Optional small addition to memory
+entries: gifts given and received per known agent, so reciprocity can be
+read off directly.
 
-**Tests:** behaviour unchanged: the event digest and behaviour digest of
-seeds 42/1/2 with memory on equal those with `memory_keep=0` and equal a
-reference frozen from today's code before building; v4 save migrates and
-continues identically; meetings counted once per meeting, not per tick;
-cap and drop order; memory survives save and load; same seed = same world.
+**Tests:** frozen reference of today's behaviour first; `share_min_meetings
+= 0` reproduces it exactly; a v5 save migrates and continues identically;
+gives only when not hungry, only to a starving agent within 1 tile met 2+
+times; never gives the last food when itself becomes hungry (energy rule
+first); picks the most-met; same seed = same world.
 
-**Measure and success:** memory counts agree with
-`experiments/encounter_probe.py` (same definition of a meeting); speed loss
-under 10% and save size growth under 20% (seed 42, 2,000 ticks); in an
-average adult's memory at least one agent met 5+ times.
+**Measure and success:** gifts per 1,000 ticks; starved share, population,
+births and age at death inside the Milestone 2 bands; starvation deaths by
+age band before and after; reciprocity (share of gifts later returned by
+the receiver, against a shuffled control); whether pairs that exchanged
+gifts meet more often afterwards. Success = the bands hold AND gifts
+happen often enough to measure (at least a few hundred per run); the other
+numbers are reported, not targets.
 
-**Risks:** save size (10 entries x about 100 agents, small next to the
-decision history); a cap of 10 may forget family in crowded spots (measure
-how often kin are dropped); the page list must stay short.
+**Risks:** changes behaviour (all comparisons need the new frozen
+reference); givers may starve later (measure); with only 2 meetings needed,
+"knowing" is weak (try 5 as well).
 
 ## 6. Next 5 tasks
 
-1. **Your go for step 2 (encounter memory)**, then build it as in section 5.
-   Check: `python3 -m unittest discover -s tests`, then
-   `python3 experiments/encounter_probe.py`.
+1. **Your go for step 3 (sharing with someone you know)**, then build it as
+   in section 5. Check: `python3 -m unittest discover -s tests`, then
+   `python3 experiments/sharing_opportunity.py` and `stage_compare.py`.
 2. **Decide what curiosity should mean now** (decision 2). If "roaming
    distance": files `genesis/agents.py`, `genesis/traits.py`, tests; measure
    with `python3 experiments/curiosity_probe.py`.
@@ -153,7 +190,8 @@ how often kin are dropped); the page list must stay short.
 
 ## 7. Decisions for you
 
-1. **Go for encounter memory (section 5)?** Default: wait for your yes.
+1. **Go for sharing with someone you know (section 5)?** It is the first
+   social rule, so it is your call. Default: wait for your yes.
 2. **Curiosity after homes.** It now matters little. Options: (a) leave it;
    (b) let it also set each agent's roaming distance around home (curious =
    wanders further), which matches the word; (c) remove its effect.
@@ -161,7 +199,8 @@ how often kin are dropped); the page list must stay short.
 3. **`home_radius` = 6** (chosen as proposed). 3 doubles family contact
    again (20%) but agents meet fewer different agents (19 in a life) and
    reunite less after long gaps. Change anytime with `--set home_radius=3`.
-4. History caps (20 decisions per agent, 50 dead agents): kept.
+4. History caps (20 decisions per agent, 50 dead agents) and
+   `memory_keep` 10: kept.
 5. The gather-then-eat flaw (6.2% of starvation deaths happen one tick after
    picking food up): still NOT fixed, so all comparisons stay valid.
 
@@ -173,7 +212,9 @@ how often kin are dropped); the page list must stay short.
   from its home was not measured on real maps.
 - `why.py` replays from the seed; it does not read stored history.
 - The population graph on the page is not saved; it restarts after Load.
-- History makes saves about 20 times bigger (about 600 KB at 2,000 ticks).
+- Saves are about 1.1 MB at 2,000-3,000 ticks, mostly decision history.
+- Memory costs about 6-13% speed (around the 10% aimed for).
+- "Family" in panel and probes = parent, child, sibling while alive only.
 - One test (`test_controls.py`) sleeps 0.7 s and could rarely fail on a very
   busy Mac. Python 3.9.
 - Claude's sandbox blocks opening a port; the server check needed a run
@@ -191,7 +232,7 @@ See the world in your browser (stop with Ctrl+C):
 python3 server.py
 ```
 
-All automatic checks (should end with `Ran 121 tests` and `OK`, about 45 s):
+All automatic checks (should end with `Ran 132 tests` and `OK`, about 55 s):
 
 ```bash
 python3 -m unittest discover -s tests
@@ -222,6 +263,14 @@ python3 experiments/encounter_probe.py
 ```
 
 ```bash
+python3 experiments/memory_probe.py
+```
+
+```bash
+python3 experiments/sharing_opportunity.py
+```
+
+```bash
 python3 experiments/curiosity_probe.py
 ```
 
@@ -249,7 +298,8 @@ Add `--homes-off` to the two curiosity commands to regenerate the
 Milestone 2 files (`curiosity_probe.txt`, `curiosity_mixed_extra.txt`);
 without it they write the `_home` files. `stage_compare.py` prints both
 (its homes-on output is saved as `stage_compare_home.txt`). Times on this Mac:
-encounter probe about 3 min, curiosity probe about 4 min, mixed extra about
+memory probe about 3 min (`--old-drop-rule` for the rejected first cap
+rule), sharing count about 1.5 min, encounter probe about 3 min, curiosity probe about 4 min, mixed extra about
 4 min, stage compare about 4 min, trait drift about 2 min, starvation study
 about 25 s, baseline check about 1 min. `trait_drift.py` and
 `starvation_study.py` now run with homes on; their saved results are from
@@ -289,6 +339,22 @@ before homes.
 
 Newest first. Older entries mention section numbers of earlier versions of
 this file; see `git log -p STATUS.md` for those.
+
+### Session 2026-11-17 (part 6: Milestone 3 step 2, encounter memory)
+- **Your go** ("Yes, build memory").
+- **Frozen first** (`1e51430`): `experiments/baseline/milestone3_home.json`,
+  `tests/fixtures/save_v4_seed42_t300.json`.
+- **Built** (`bac6685`): `genesis/memory.py`, `memory` field, `memory_keep`
+  (10), save version 5. Page (`1f4a169`): "Knows N agents" list.
+- **Changed on evidence** (`aabe3df`): the cap first forgot whoever was met
+  longest ago; `experiments/memory_probe.py` showed it kept only half of
+  each agent's 5+-meeting contacts, so it now forgets the least-met.
+- **Speed** (`d132043`): faster meeting search tried; cost stays about
+  6-13% (the work is the updates, not the search). Reported, not hidden.
+- **Tests:** new `tests/test_memory.py` (11), 132 OK; Milestone 1 ALL SAME;
+  memory on/off reproduce the frozen homes world exactly.
+- **Evidence for step 3:** `experiments/sharing_opportunity.py` (section 4).
+- **Not done:** step 3 (waits for your go).
 
 ### Session 2026-11-17 (part 5: Milestone 3 step 1, homes, built and measured)
 - **Your go** ("Yes, build home") for the plan in the previous STATUS.

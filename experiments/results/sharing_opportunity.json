@@ -1,0 +1,98 @@
+{
+ "rows": [
+  {
+   "deaths_with_giver_near": {
+    "any": 138,
+    "familiar": 83,
+    "family": 20,
+    "friend": 30
+   },
+   "seed": "42",
+   "starved_deaths": 486,
+   "starving_ticks": 18127,
+   "with_giver": {
+    "any": 964,
+    "familiar": 543,
+    "family": 127,
+    "friend": 178
+   }
+  },
+  {
+   "deaths_with_giver_near": {
+    "any": 159,
+    "familiar": 97,
+    "family": 22,
+    "friend": 35
+   },
+   "seed": "1",
+   "starved_deaths": 453,
+   "starving_ticks": 17361,
+   "with_giver": {
+    "any": 1098,
+    "familiar": 653,
+    "family": 119,
+    "friend": 228
+   }
+  },
+  {
+   "deaths_with_giver_near": {
+    "any": 170,
+    "familiar": 94,
+    "family": 21,
+    "friend": 45
+   },
+   "seed": "2",
+   "starved_deaths": 446,
+   "starving_ticks": 16997,
+   "with_giver": {
+    "any": 1052,
+    "familiar": 545,
+    "family": 90,
+    "friend": 211
+   }
+  },
+  {
+   "deaths_with_giver_near": {
+    "any": 160,
+    "familiar": 88,
+    "family": 18,
+    "friend": 33
+   },
+   "seed": "3",
+   "starved_deaths": 462,
+   "starving_ticks": 16932,
+   "with_giver": {
+    "any": 1055,
+    "familiar": 567,
+    "family": 94,
+    "friend": 205
+   }
+  },
+  {
+   "deaths_with_giver_near": {
+    "any": 156,
+    "familiar": 89,
+    "family": 25,
+    "friend": 42
+   },
+   "seed": "4",
+   "starved_deaths": 481,
+   "starving_ticks": 17382,
+   "with_giver": {
+    "any": 1103,
+    "familiar": 635,
+    "family": 155,
+    "friend": 290
+   }
+  }
+ ],
+ "seeds": [
+  "42",
+  "1",
+  "2",
+  "3",
+  "4"
+ ],
+ "ticks": 3000,
+ "warmup": 500
+}

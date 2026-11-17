@@ -1,0 +1,18 @@
+Memory probe: default settings (homes on, history on), seeds 42,1,2,3,4, 3000 ticks.
+Cap rule: current (forget the least-met).
+Same world with memory_keep 10, 1000 and 0 (behaviour identical: True).
+                                                      mean      sd      min      max
+adults (alive at end, age >= 200)                     49.8     1.3     48.0     51.0
+agents remembered (cap 10)                            10.0     0.0      9.9     10.0
+agents met in life so far (no cap)                    30.9     1.6     28.7     32.4
+adults whose memory is full (%)                       98.4     2.2     95.9    100.0
+meetings with its most-met agent                      11.0     0.6     10.4     11.9
+remembered agents that are family (%)                 12.2     1.2     10.8     13.6
+adults remembering someone met 5+ times (%)           99.6     0.9     98.0    100.0
+agents met 5+ times, per adult (no cap)               7.43    0.34     6.94     7.80
+of those, still in the capped memory (%)              76.0     2.8     72.8     79.0
+living parent/siblings met, still remembered (%)      72.2    10.1     57.7     81.8
+ticks per second, memory on                            376      39      322      414
+ticks per second, memory off                           400      34      351      441
+save size at the end, KB, memory on                   1128      35     1077     1163
+save size at the end, KB, memory off                  1101      34     1052     1135

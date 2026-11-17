@@ -5,8 +5,9 @@ look for food, eat, have children and die. Nothing is installed and nothing
 is paid for: it only needs the Python that is already on your Mac.
 
 Milestone 1 (food, children, death), **Milestone 2** (a rest need and two
-personality traits, curiosity and industriousness) and the first step of
-**Milestone 3** (every agent has a home it stays near) are built. No AI model
+personality traits, curiosity and industriousness) and the first two steps
+of **Milestone 3** (every agent has a home it stays near, and remembers whom
+it has met) are built. No AI model
 (LLM): every decision comes from a few clear rules, and every decision says
 why. What the traits actually do, measured: `docs/MILESTONE2_REPORT.md`.
 
@@ -37,7 +38,7 @@ Want a different world? `python3 server.py --seed banana`
 | **Seed + New world** | Build a fresh world. Same seed = same world, always |
 | **Save** | Writes the world to `saves/<name>.json` |
 | **Load** | Brings a saved world back (it loads paused) |
-| **Click an agent** | See its energy, rest, traits, home (gold square on the map), age, what it needs, the options it weighed, *why* it chose, and its earlier decisions |
+| **Click an agent** | See its energy, rest, traits, home (gold square on the map), whom it knows best, age, what it needs, the options it weighed, *why* it chose, and its earlier decisions |
 | **Stats** | Alive, births, deaths by cause, resting now, average curiosity and industriousness, population graph |
 | **Feed** | Births and deaths, or every single decision |
 
@@ -47,7 +48,7 @@ Want a different world? `python3 server.py --seed banana`
 python3 -m unittest discover -s tests -v
 ```
 
-It should end with `Ran 121 tests` and `OK` (about 45 seconds).
+It should end with `Ran 132 tests` and `OK` (about 55 seconds).
 
 The tests prove the two promises this project is built on:
 
@@ -55,7 +56,7 @@ The tests prove the two promises this project is built on:
   decision for decision.
 - **Save → load = same state.** A loaded world is identical to the one that
   was saved, and it also *continues* identically. Saves from older versions
-  (1, 2, 3) still load and keep their old rules.
+  (1 to 4) still load and keep their old rules.
 - **Milestone 1 is frozen.** With `MILESTONE1_RULES` the new code repeats the
   old behaviour exactly (`tests/test_baseline.py`).
 
@@ -107,8 +108,10 @@ Milestone 2 settings (all whole numbers; see `genesis/config.py`):
 `trait_founder_min` (40), `trait_founder_max` (60), `trait_mutation` (5).
 `--set rest_below=0` switches resting off.
 
-Milestone 3 setting: `home_radius` (6). How far from home a wandering agent
+Milestone 3 settings: `home_radius` (6). How far from home a wandering agent
 may drift; `--set home_radius=0` switches homes off (Milestone 2 behaviour).
+`memory_keep` (10): how many agents each agent remembers meeting; `0` = no
+memory. Memory never changes behaviour.
 
 Notes: `food_cap` takes three numbers (water, grass, forest). If you give the
 same name twice, the last one wins. A wrong name or value stops with a plain
@@ -162,6 +165,11 @@ the first rule that fits:
    agent more than 6 tiles from its **home** (where it was born) steps back
    toward home instead.
 
+After everyone has acted, each agent notes whom it is standing next to (within
+1 tile): its **memory** of up to 10 agents, with how many separate times it
+met each one, when, and where. When the list is full it forgets the agent it
+met least. Nothing reads this memory yet; it is a record you can look at.
+
 Each agent has two **traits** (0 to 100, 50 = average), made at birth from
 its own seeded dice and inherited by children (parent's value +/- 5):
 
@@ -188,6 +196,7 @@ of 100"), the **options** it considered and whether each fitted, and the
 | `genesis/agents.py` | The decision rules (`decide`) and their "why" text |
 | `genesis/needs.py` | The rest need: when to rest, resting, tiring |
 | `genesis/traits.py` | Curiosity and industriousness: dice, inheritance, effects |
+| `genesis/memory.py` | Encounter memory: who met whom, when, where, how often |
 | `genesis/digest.py` | Behaviour-only codes used to prove Milestone 1 is unchanged |
 | `genesis/sim.py` | One tick of time (`step`) |
 | `genesis/save.py` | Save, load, fingerprint; repairs older saves |
@@ -201,9 +210,9 @@ of 100"), the **options** it considered and whether each fitted, and the
 | `server.py` | Runs the world and serves the page |
 | `web/` | The page. It only draws; no rules live there |
 | `tests/` | The automatic checks |
-| `experiments/` | Measurement scripts (they only read the world); results in `experiments/results/`. `regrow_sweep.py`, `starvation_study.py`, `stage_compare.py`, `curiosity_probe.py`, `trait_drift.py`, `encounter_probe.py`; `baseline/` holds the frozen Milestone 1 and Milestone 2 references |
+| `experiments/` | Measurement scripts (they only read the world); results in `experiments/results/`. `regrow_sweep.py`, `starvation_study.py`, `stage_compare.py`, `curiosity_probe.py`, `trait_drift.py`, `encounter_probe.py`, `memory_probe.py`; `baseline/` holds the frozen Milestone 1, Milestone 2 and homes references |
 | `VISION.md` | The long-term idea and roadmap (read first) |
-| `docs/MILESTONE3.md` | Milestone 3: homes (built), encounter memory (next), with results |
+| `docs/MILESTONE3.md` | Milestone 3: homes and encounter memory (built), with results |
 | `docs/MILESTONE2_REPORT.md` | What Milestone 2 does, measured |
 | `docs/MILESTONE2_V2.md` | The Milestone 2 design as built |
 | `docs/STARVATION.md` | Why about two thirds of deaths are starvation |

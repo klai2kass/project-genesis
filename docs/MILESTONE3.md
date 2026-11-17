@@ -7,8 +7,8 @@ Built one small step at a time, each measured before the next.
 | Step | What | Status |
 | --- | --- | --- |
 | 1 | **Home**: every agent remembers where it was born and wanders near it | **Built** (this file) |
-| 2 | **Encounter memory**: who did I meet, where, when, how often (record only) | Next, not started |
-| later | Anything that USES that memory (recognition, preferring kin, ...) | Only with evidence |
+| 2 | **Encounter memory**: who did I meet, where, when, how often (record only) | **Built** (below) |
+| 3 | First USE of that memory: share food with a starving agent you know | Proposed (`STATUS.md`), not started |
 
 ## Step 1: home (built 2026-11-17)
 
@@ -140,3 +140,111 @@ cousins. Agents behind a lake from their home wander normally at the lake
 shore (tested in a small world; how often it happens in real maps was not
 measured). Homes are fixed for life; an agent born in a poor spot stays
 tied to it.
+
+## Step 2: encounter memory (built 2026-11-17)
+
+### Why
+
+Homes made repeated contact common (21% of pairs meet 5+ times, 13% of
+meetings are family; step 1 results). A memory now has something to keep.
+It is a **record only**: nothing reads it yet, so behaviour cannot change.
+
+### The rule (whole numbers, no dice; `genesis/memory.py`)
+
+- A **meeting**: two living agents within 1 tile of each other (the 8 tiles
+  around, or the same tile) at the end of a tick. While they stay that close
+  it is one meeting; walking apart and coming back is a new one.
+- Each agent keeps `memory`: entries `[id, first_tick, last_tick, meetings,
+  x, y]` (x, y = where it stood when the latest meeting began).
+- At most `memory_keep` entries (default **10**; 0 = off). When full it
+  forgets the agent it met the **fewest** times (ties: met longest ago, then
+  lower id), never one it is meeting right now unless all of them are.
+- Updated once per tick in `sim.step`, after every agent has acted.
+- Save format **5**; older saves start with empty memories (logged).
+
+### Why "forget the least-met" (measured, not guessed)
+
+The first version forgot whoever was met longest ago. Measuring it against
+the same world with unlimited memory (memory never changes behaviour, so
+the two runs are identical except for what is remembered;
+`experiments/memory_probe.py`, 5 seeds x 3,000 ticks, adults = alive at the
+end and 200+ ticks old):
+
+| | forget met-longest-ago (first try) | **forget least-met (built)** |
+| --- | --- | --- |
+| agents met 5+ times that are still remembered | 49.8% | **76.0%** |
+| adults remembering someone met 5+ times | 80.3% | **99.6%** |
+| meetings with its most-met agent | 8.1 | **11.0** |
+| living parent/siblings met, still remembered | 68.6% | **72.2%** |
+| remembered agents that are family | 11.1% | 12.2% |
+
+The first rule also reset a friend's count to 1 whenever it was forgotten
+and met again, which is why its "most-met" numbers are lower. Re-run both:
+`python3 experiments/memory_probe.py` and `... --old-drop-rule`.
+
+### What an adult remembers (FACT, `memory_probe.txt`)
+
+An adult has met about 31 different agents so far and remembers 10 (98% of
+adults have a full memory). Its most-met agent: about 11 meetings. On
+average it has met 7.4 agents 5+ times, and keeps 76% of them. About one
+remembered agent in eight is family.
+
+### Cost
+
+Speed: 6% to 13% slower depending on how it is timed: 6% in
+`memory_probe.py` (5 seeds x 3,000 ticks: 376 against 400 ticks per
+second), 11-13% in a seed 42, 2,000-tick timing (best of 3 runs: 4.02 s
+against 3.60 s). A faster meeting search did not change it; the cost is
+updating about 80 meetings per tick. Around the 10% aimed for; acceptable
+at this size. Save size: about +2.5% (1,128 KB against 1,101 KB at tick
+3,000; the decision history is still most of a save).
+
+### Tests (`tests/test_memory.py`, 11)
+
+Memory on and off both reproduce the frozen homes world
+(`experiments/baseline/milestone3_home.json`, seeds 42/1/2) exactly; a v4
+save (`tests/fixtures/save_v4_seed42_t300.json`) migrates and continues
+exactly; a meeting is counted once while it lasts and again after a gap;
+same tile counts, 2 tiles apart does not; the cap keeps a friend over a
+stranger; ties drop the one met longest ago, then the lower id; memory off
+records nothing; strongest-first order; every count equals an independent
+all-pairs count over 300 ticks (no cap); memory survives save and load and
+the world continues identically.
+
+### The page
+
+Click an agent: "Knows 10 agents (remembers up to 10). Met most:" and the
+top 5 with meetings, last tick, place, "(parent)", "(child)" or "(sibling)"
+where the world still knows it, and "has died".
+
+### Does memory have anything to do? (evidence for step 3)
+
+`experiments/sharing_opportunity.py` (5 seeds x 3,000 ticks, after tick 500,
+2,328 starvation deaths): a "giver" is an agent that is not hungry and
+carries food, standing within 1 tile.
+
+| | starving agent-ticks with a giver near | starvation deaths with a giver near in their last 20 ticks |
+| --- | --- | --- |
+| giver is anyone | 6.1% | **33.7%** |
+| giver met it 2+ times before | 3.4% | **19.4%** |
+| giver met it 5+ times | 1.3% | 8.0% |
+| giver is family (parent, child, sibling) | 0.7% | 4.6% |
+
+(Standing next to someone is itself a meeting, so "the giver remembers it
+at all" is always true and is not a useful line; "2+ times" means at least
+one earlier, separate meeting.)
+
+Plain reading: one starvation death in three happens to an agent that, in
+its last 20 ticks, stood next to a well-fed agent with food in its pack. In
+one death in five, that agent had met it before. Family alone is much rarer
+(under 5%), so a rule based on "someone I know" reaches about four times as
+many cases as one based on family. This is the concrete reason behind the
+proposed step 3 in `STATUS.md`.
+
+### Limitations
+
+- "Family" on the page and in the probe is only parent, child and sibling
+  while the relative is alive (the dead's parents are not kept).
+- Memory is per agent; when an agent dies its memory goes with it.
+- Speed cost is around the 10% I aimed for (6-13% depending on timing).
+

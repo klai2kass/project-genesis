@@ -1,0 +1,16 @@
+Sharing opportunity: default settings (homes, memory on), seeds 42,1,2,3,4, 3000 ticks,
+counted after tick 500. 'Giver' = not hungry and carrying food, within 1 tile.
+
+Starving agent-ticks (energy <= 20, empty pack) with a giver near:
+  giver is anyone                                         6.1% +/-  0.4
+  giver is someone who met it 2+ times                    3.4% +/-  0.3
+  giver is someone who met it 5+ times                    1.3% +/-  0.2
+  giver is family                                         0.7% +/-  0.1
+
+Starvation deaths that had a giver near in their last 20 ticks:
+  giver is anyone                                        33.7% +/-  3.6
+  giver is someone who met it 2+ times                   19.4% +/-  1.8
+  giver is someone who met it 5+ times                    8.0% +/-  1.5
+  giver is family                                         4.6% +/-  0.5
+
+Starvation deaths counted: 2328 (per seed 486, 453, 446, 462, 481).

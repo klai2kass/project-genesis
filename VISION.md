@@ -37,7 +37,7 @@ serve this, question it. If this file and the code disagree about what
 
 ## Roadmap
 
-### Works today (Milestones 1, 2 and step 1 of 3, checked in STATUS.md)
+### Works today (Milestones 1, 2 and steps 1-2 of 3, checked in STATUS.md)
 
 - Seeded world with land, water and regrowing food.
 - About 50 founders, settling near 93 agents, that look for food (walking
@@ -48,6 +48,8 @@ serve this, question it. If this file and the code disagree about what
 - A **home** for every agent (where it was born). Wandering agents stay
   within 6 tiles of it, so families and neighbours keep meeting
   (`docs/MILESTONE3.md`).
+- An **encounter memory** for every agent: up to 10 agents it met, how many
+  times, when and where. It is a record only; nothing uses it yet.
 - Same seed gives the same result; Milestone 1 and Milestone 2 behaviour are
   frozen and reproducible (`tests/test_baseline.py`, `tests/test_home.py`).
 - "Why" record for every decision: need, options considered, reason; the
@@ -64,14 +66,16 @@ serve this, question it. If this file and the code disagree about what
 
 - A scoring decision system (rules in a fixed order are still enough).
 - A "company" need, sociability or any social behaviour.
-- Memory of other agents. **Agents remember only their home, their own last
-  decisions and the food they are walking to.**
+- Anything that USES the memory of others (recognition, preferring kin,
+  avoiding someone). **Agents remember whom they met, but it does not yet
+  change what they do.**
 
 ### Next (proposed in STATUS.md, not built)
 
-- **Milestone 3, step 2: encounter memory.** Each agent records who it met,
-  where, when and how often. At first it changes no behaviour; it is shown in
-  the agent panel and measured. Only then decide what may use it.
+- **Milestone 3, step 3: share food with someone you know.** A well-fed
+  agent carrying food gives one to a starving agent it has met before. The
+  first behaviour that uses memory; then measure who helps whom and whether
+  help comes back.
 
 ### Future ambition (nothing below exists)
 
