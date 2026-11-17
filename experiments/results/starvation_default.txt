@@ -1,0 +1,53 @@
+STARVATION STUDY  seeds=42,1,2,3,4  ticks=3000  overrides=none
+settings: regrow=6 food_energy=20 repro_cost=50 repro_cooldown=200 eat_below=80 vision=4
+
+== 1. Deaths overall (all seeds pooled) ==
+deaths 4369, starved 2959 (67.7%), old age 1410
+ledger check (energy start + eaten - child cost - ticks lived == 0 for starved): 0 mismatches out of 2959
+
+== 2. Starvation by age band ==
+age band                        starved  old age  agent-ticks starved/1000
+0-49 (still on birth reserve)         0        0       228928         0.00
+50-79 (young)                       775        0       120657         6.42
+80-199                             1215        0       373183         3.26
+200-399                             730        0       416051         1.75
+400+                                239     1410       227172         1.05
+starved at age 48-52 (a newborn that never found food): 430 (14.5% of starved)
+starved before adult age 80: 775 (26.2%)
+
+== 3. What the starved agent was doing in its last 10 decisions (mean count) ==
+eat 0.0  gather 0.1  reproduce 0.0  to_food 3.3  search 6.7  explore 0.0  rest 0.0
+(search = no reachable food in sight; to_food = walking to food it sees; explore = pack full)
+
+== 4. How long without food, and was food in view ==
+ticks since the agent last picked up food (or was born): mean 44, median 45, p90 66, max 143
+     0 to 20   ticks:   182 (6.2%)
+    21 to 50   ticks:  1978 (66.8%)
+    51 to 100  ticks:   780 (26.4%)
+   101 to more ticks:    19 (0.6%)
+never gathered any food in life: 408 (13.8%); never ate: 430 (14.5%)
+food in the visible box (approx, start of death tick): 40.5%; reachable by walking: 40.0%
+carried food in the pack when starving (should be 0; eats at energy<=80): 182
+had at least one child before starving: 33.8%
+
+== 5. Energy budget (measured, completed lives of agents born inside the run) ==
+starved  n=2909  lifespan 172  food eaten 7.1 (= 142 energy)  food gathered 7.2  children 0.39
+old age  n=1210  lifespan 543  food eaten 33.7 (= 674 energy)  food gathered 34.5  children 2.18
+plain arithmetic: living costs 1 energy/tick, so a full lifespan (avg 550 ticks) needs 550 energy = 27.5 food at 20 energy per food.
+a child costs the parent 50 energy (2.5 food) but the child STARTS with those 50 energy, so a birth moves energy, it does not destroy it.
+a newborn with 50 energy that finds no food starves at age 50.
+map food supply: 6 regrow tries per tick; real new food per tick 4.92 (82% of tries succeeded; the rest hit a full tile).
+so the map can feed at most 98 energy/tick = about 98 living agents; mean population was 91.1.
+
+== 6. What agents spend their decisions on (all agent-ticks) ==
+eat 5.4%  gather 5.5%  reproduce 0.3%  to_food 37.0%  search 45.8%  explore 5.9%  rest 0.0%
+
+== 7. Steady or waves? (per 100-tick window) ==
+seed    pop min   pop max starved CV  births CV corr(births, starved next window)
+42           77       106       0.22       0.08         0.02
+1            72       102       0.32       0.13         0.65
+2            79       100       0.24       0.17         0.46
+3            75       103       0.31       0.16         0.30
+4            79       100       0.17       0.14         0.38
+seed 42 per 100 ticks  [pop at end / births / starved / old age]:
+100:73/23/0/0 200:127/54/0/0 300:131/42/30/8 400:98/31/52/12 500:79/25/30/14 600:80/31/15/15 700:81/29/17/11 800:92/34/13/10 900:88/27/22/9 1000:92/33/20/9 1100:99/31/18/6 1200:88/29/26/14 1300:83/27/20/12 1400:87/30/15/11 1500:96/32/16/7 1600:87/29/25/13 1700:92/30/16/9 1800:94/32/23/7 1900:89/27/24/8 2000:99/34/15/9 2100:99/28/16/12 2200:85/28/29/13 2300:81/27/21/10 2400:91/34/16/8 2500:100/27/13/5 2600:91/25/23/11 2700:89/28/18/12 2800:87/29/22/9 2900:89/30/17/11 3000:95/32/16/10

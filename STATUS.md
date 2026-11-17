@@ -26,6 +26,18 @@ Newest first. A fresh session should read this section first.
     the reason for ~2/3 starvation was never tested. NOT done -> step 1.
   - `docs/MILESTONE2_DECISIONS.md`: does not exist. NOT done (the seven
     questions go into `docs/MILESTONE2_V2.md` in step 3 instead).
+- **Step 1 done (starvation study).** New `experiments/starvation_study.py`
+  (read-only; same end state as a normal run with `history_keep=0`, checked:
+  seed 42, 500 ticks, fingerprint `8b33125c5a5addf9` both ways) and
+  `docs/STARVATION.md` with all numbers (raw output in `experiments/results/`).
+  Plain findings: the food supply sets how MANY agents live (about 91 of a
+  98 ceiling); nothing limits births when the map is full, so the overflow
+  starves. Slowing births (`repro_cooldown=400`) drops starved share
+  67.7% -> 45.5% with about the same headcount. 26% of starvation deaths are
+  agents younger than 80; 14.5% are newborns that never found food (die at
+  age 50). 46% of all decisions are "search, nothing in sight". One small
+  flaw: 6.2% starve one tick after picking up food (gather and eat are two
+  separate ticks). Nothing in code changed; defaults untouched.
 
 ### Session 2026-11-17 (steps 0-9 plan)
 - **Step 0 verified by running:** git clean, 8 commits. 25 tests pass (6.3 s).
