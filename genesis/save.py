@@ -26,6 +26,11 @@ from .world import SAVE_VERSION
 #      settings for newborns. So an old world continues exactly as before
 #      (tested against the frozen baseline). To try the new rules on an old
 #      world: --set rest_below=30 --set trait_mutation=5.
+#   4  Milestone 3 step 1: every agent has a home [x, y] (where it was born).
+#      A version 3 (or older) save is migrated so it KEEPS ITS OLD RULES:
+#      home_radius=0 (homes are remembered but never used) and each living
+#      agent's home is set to where it stands now (its birthplace was never
+#      recorded). To try homes on an old world: --set home_radius=6.
 # Every change made while loading is written to world["migration_log"] (only
 # when something changed), so nothing happens silently.
 # To add a new version: bump SAVE_VERSION in world.py, write a function
@@ -46,7 +51,10 @@ AGENT_DEFAULTS = {
 # Settings that make the Milestone 2 rules behave exactly like Milestone 1.
 # Used when migrating a version 1/2 save, so old worlds keep their rules.
 MILESTONE1_RULES = {"rest_below": 0, "trait_founder_min": 50,
-                    "trait_founder_max": 50, "trait_mutation": 0}
+                    "trait_founder_max": 50, "trait_mutation": 0, "home_radius": 0}
+
+# Settings that make the new rules behave exactly like Milestone 2.
+MILESTONE2_RULES = {"home_radius": 0}
 
 # Defaults for the counters in world["stats"].
 STATS_DEFAULTS = {"births": 0, "deaths_starved": 0, "deaths_old_age": 0}
@@ -85,6 +93,10 @@ def _repair(world):
                 agent[key] = copy.deepcopy(value)
                 _note(world, "agent %s: %s missing: used %r"
                       % (agent.get("id", "?"), key, value))
+        if "home" not in agent:
+            agent["home"] = [agent["x"], agent["y"]]
+            _note(world, "agent %s: home missing: set to where it stands (%d, %d)"
+                  % (agent.get("id", "?"), agent["x"], agent["y"]))
 
     for key, empty in (("history", {}), ("history_dead", [])):
         if key not in world:
@@ -121,7 +133,25 @@ def _migrate_2_to_3(world):
     world["version"] = 3
 
 
-MIGRATIONS = {1: _migrate_1_to_2, 2: _migrate_2_to_3}
+def _migrate_3_to_4(world):
+    cfg = world["config"]
+    for key, value in MILESTONE2_RULES.items():
+        if key not in cfg:
+            cfg[key] = value
+            _note(world, "config.%s missing (save from before homes): set to %r "
+                         "so this world keeps its old rules" % (key, value))
+    changed = 0
+    for agent in world["agents"]:
+        if "home" not in agent:
+            agent["home"] = [agent["x"], agent["y"]]
+            changed += 1
+    if changed:
+        _note(world, "version 3 -> 4: %d agents given a home where they stand now "
+                     "(birthplaces were not recorded before version 4)" % changed)
+    world["version"] = 4
+
+
+MIGRATIONS = {1: _migrate_1_to_2, 2: _migrate_2_to_3, 3: _migrate_3_to_4}
 
 
 def world_from_json(text):

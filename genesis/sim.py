@@ -68,8 +68,9 @@ def step(world):
         if child is not None:
             newborns.append(child)
             world["stats"]["births"] += 1
-            log(child, "born", "child of #%d (generation %d)"
-                % (agent["id"], child["generation"]))
+            born_why = "child of #%d (generation %d)" % (agent["id"], child["generation"])
+            child["last_why"] = born_why   # same words as its history record
+            log(child, "born", born_why)
 
     # Newborns join at the end and take their first turn next tick.
     world["agents"] = survivors + newborns

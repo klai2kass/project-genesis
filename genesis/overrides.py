@@ -45,6 +45,7 @@ RULES = {
     "trait_founder_min": ("int", 0, 100),
     "trait_founder_max": ("int", 0, 100),
     "trait_mutation": ("int", 0, 100),
+    "home_radius": ("int", 0, 200),
 }
 
 # Only used while a world is being created; changing them on a loaded world

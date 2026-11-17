@@ -161,7 +161,9 @@ class HungerFirst(unittest.TestCase):
 
 class Curiosity(unittest.TestCase):
     def _turns(self, curiosity):
-        w = open_world(curiosity=curiosity, rest_below=0, width=60, height=60)
+        # home_radius=0: this tests Milestone 2 turning alone, without homes.
+        w = open_world(curiosity=curiosity, rest_below=0, width=60, height=60,
+                       home_radius=0)
         w["terrain"] = [GRASS] * (60 * 60)
         w["food"] = [0] * (60 * 60)
         changes, last = 0, w["agents"][0]["heading"]

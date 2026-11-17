@@ -47,9 +47,46 @@ def _sign(n):
     return (n > 0) - (n < 0)
 
 
-def _wander(world, agent, rng, note, why):
-    """Keep drifting the same way; sometimes (or when blocked) turn."""
+def _home_distance(x, y, home):
+    """(Chebyshev steps, then plain grid distance) from (x, y) to home."""
+    dx, dy = abs(x - home[0]), abs(y - home[1])
+    return max(dx, dy), dx + dy
+
+
+def _step_home(world, agent):
+    """If the agent is too far from home, the direction of the land step that
+    brings it closest (fixed order on ties, no dice). None if homes are off,
+    it is close enough, or no step gets it closer (for example a lake in the
+    way): then it wanders normally."""
+    radius = world["config"]["home_radius"]
+    home = agent["home"]
     x, y = agent["x"], agent["y"]
+    now = _home_distance(x, y, home)
+    if radius <= 0 or now[0] <= radius:
+        return None
+    best = None
+    for i, (dx, dy) in enumerate(DIRS):
+        if is_land(world, x + dx, y + dy):
+            d = _home_distance(x + dx, y + dy, home)
+            if d < now and (best is None or d < best[0]):
+                best = (d, i)
+    return None if best is None else best[1]
+
+
+def _wander(world, agent, rng, note, why):
+    """Keep drifting the same way; sometimes (or when blocked) turn.
+    Too far from home (Milestone 3): step back toward home instead."""
+    x, y = agent["x"], agent["y"]
+    toward = _step_home(world, agent)
+    if toward is not None:
+        dx, dy = DIRS[toward]
+        far = _home_distance(x, y, agent["home"])[0]
+        return {"action": "move", "dx": dx, "dy": dy, "heading": toward,
+                "note": note + ", but too far from home, so heading back",
+                "why": why + "; I am %d tiles from home (%d, %d) and stay within "
+                             "%d, so heading home"
+                       % (far, agent["home"][0], agent["home"][1],
+                          world["config"]["home_radius"])}
     heading = agent["heading"]
     dx, dy = DIRS[heading]
     # Curiosity sets the chance of a voluntary turn (15% at curiosity 50,

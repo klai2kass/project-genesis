@@ -86,7 +86,7 @@ class SaveLoadWithNewRules(unittest.TestCase):
         self.assertTrue(any(x["resting"] or x["tire_acc"] or x["drain_acc"]
                             for x in b["agents"]))
         b = world_from_json(world_to_json(b))
-        self.assertEqual(b["version"], 3)
+        self.assertEqual(b["version"], 4)
         self.assertNotIn("migration_log", b)
         da, db = EventDigest(), EventDigest()
         for _ in range(300):

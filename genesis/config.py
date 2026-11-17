@@ -64,6 +64,13 @@ DEFAULT_CONFIG = {
     "trait_founder_max": 60,
     "trait_mutation": 5,       # child = parent +/- up to this, per trait
 
+    # --- Home (Milestone 3; see docs/MILESTONE3.md) ---
+    # Every agent remembers the tile where it was born (founders: where they
+    # were placed). A WANDERING agent (no reachable food in sight, or pack
+    # full) that is more than home_radius tiles from home steps back toward
+    # it. 0 = off (old saves load with 0 and keep their old behaviour).
+    "home_radius": 6,
+
     # --- Memory of decisions (kept in saves) ---
     "history_keep": 20,        # recent decisions remembered per agent
     "dead_history_keep": 50,   # how many dead agents' decisions are kept
