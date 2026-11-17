@@ -1,0 +1,34 @@
+{
+ "note": "Milestone 2 rules (code defaults at commit b292617, before 'home'). Frozen 2026-11-17. Must be reproduced by later code with home_radius=0.",
+ "save_v3": {
+  "behaviour_digest": "824681938f993a90",
+  "event_digest": "bce73cfc246088cf",
+  "tick": 500
+ },
+ "short": {
+  "1": {
+   "alive": 93,
+   "behaviour_digest": "174a72a07b4bbb4b",
+   "births": 189,
+   "event_digest": "76c53d30f354e2a8",
+   "old_age": 25,
+   "starved": 121
+  },
+  "2": {
+   "alive": 87,
+   "behaviour_digest": "ad9458d7a1463b93",
+   "births": 189,
+   "event_digest": "3fd0d1d875116ede",
+   "old_age": 30,
+   "starved": 122
+  },
+  "42": {
+   "alive": 92,
+   "behaviour_digest": "824681938f993a90",
+   "births": 189,
+   "event_digest": "8261acafa5c97a12",
+   "old_age": 39,
+   "starved": 108
+  }
+ }
+}
