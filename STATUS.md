@@ -2,13 +2,13 @@
 
 Last checked: 2026-11-17, by running the commands in this file (not from memory).
 
-**Milestones 1 and 2 are done. Milestone 3 steps 1 (a home) and 2
-(encounter memory) are built, tested and measured** (`docs/MILESTONE3.md`).
-Every agent stays near its birthplace and remembers up to 10 agents it met,
-how often, when and where. Memory changes no behaviour yet. **Proposed next:
-step 3, the first use of memory: share food with a starving agent you know**
-(section 5); not started, it waits for your go. GitHub (`origin/main`) has
-everything up to `e3e07c3`; this session's commits are local only.
+**Milestones 1 and 2 are done. Milestone 3 steps 1 (a home), 2 (encounter
+memory) and 3 (sharing food with a starving agent you know) are built,
+tested and measured** (`docs/MILESTONE3.md`). Sharing rescues agents and
+lowers the starved share a little, but help only ever flows one way: no gift
+was returned. **Proposed next: step 4, look for groups in the memory
+network (a measurement, no rule change)**, section 5. GitHub (`origin/main`)
+has everything up to `af88e8a`; the sharing commits are local only.
 
 Plain words: a **tick** is one step of time. A **seed** is the number a world
 is built from (same seed = same world). A **fingerprint** is a short code that
@@ -21,12 +21,15 @@ is equal only when two worlds are exactly equal. **Headless** = no window.
 - [x] Rest need and traits (curiosity, industriousness), inherited +/-5.
 - [x] **Homes**: `home` per agent (birth tile), `home_radius` 6 (0 = off).
 - [x] **Encounter memory**: `memory` per agent, `memory_keep` 10 (0 = off);
-      shown in the agent panel. A record only.
+      shown in the agent panel.
+- [x] **Sharing**: action `give`, `share_min_meetings` 2 (0 = off); gifts
+      shown in the panel and in the stats ("Food shared").
 - [x] Every decision has a "why"; recent decisions are kept in saves.
-- [x] Saves version 5; versions 1 to 4 load and keep their old rules.
-- [x] Milestone 1, Milestone 2 and homes behaviour frozen and reproduced
-      exactly: `tests/test_baseline.py`, `tests/test_home.py`,
-      `tests/test_memory.py`, `experiments/baseline/make_baseline.py --check`.
+- [x] Saves version 6; versions 1 to 5 load and keep their old rules.
+- [x] Milestone 1, Milestone 2, homes and memory behaviour frozen and
+      reproduced exactly: `tests/test_baseline.py`, `tests/test_home.py`,
+      `tests/test_memory.py`, `tests/test_sharing.py`,
+      `experiments/baseline/make_baseline.py --check`.
 - [x] Browser page, including the clicked agent's home and whom it knows
       (checked this session at http://127.0.0.1:8766, see 3).
 - [x] Measurement scripts in `experiments/`, results in `experiments/results/`.
@@ -35,18 +38,19 @@ is equal only when two worlds are exactly equal. **Headless** = no window.
 
 ## 2. Tests (run this session)
 
-`python3 -m unittest discover -s tests` -> `Ran 132 tests`, `OK` (about 55 s
-on a quiet Mac). By file: baseline 5, controls 11, determinism 7, history 8,
-home 12, memory 11, movement 7, overrides 11, rest 12, rest_design 14,
-save_load 10, summary 5, trait_streams 5, traits 8, why_log 6.
+`python3 -m unittest discover -s tests` -> `Ran 141 tests`, `OK` (about a
+minute). By file: baseline 5, controls 11, determinism 7, history 8, home 12,
+memory 11, movement 7, overrides 11, rest 12, rest_design 14, save_load 10,
+sharing 9, summary 5, trait_streams 5, traits 8, why_log 6.
 Changed tests (on purpose): save-version checks now use `SAVE_VERSION`
 instead of a fixed number; the curiosity turning test in `test_rest.py`
-runs with `home_radius=0`.
+runs with `home_radius=0`; the memory tests switch sharing off to compare
+with the frozen memory world; `test_why_log.py` knows the action "give".
 `make_baseline.py --check` -> ALL SAME (Milestone 1 unchanged).
 Reference run: `python3 run_headless.py --seed 42 --ticks 500 --every 0` ->
 100 alive (homes on). Frozen references: `experiments/baseline/baseline.json`
 (Milestone 1), `milestone2.json` (before homes), `milestone3_home.json`
-(homes, before memory).
+(homes, before memory), `milestone3_memory.json` (memory, before sharing).
 
 ## 3. Browser check (this session)
 
@@ -64,12 +68,34 @@ so it ran outside the sandbox), page opened in the app's browser.
   (remembers up to 10). Met most:" and a list such as "#231 · met 3 times,
   last at tick 664 near (26, 27)", with "has died" where right. **No console
   errors.**
+- Sharing check (fresh tab, tick 821): stats show "Food shared 71" and
+  "Newest generation 7"; agent #111's list shows "met 15 times ... it gave
+  me 1 food" and "met 10 times ... I gave it 1 food". **No console errors.**
 Small things noticed (not fixed): the population graph starts empty after a
 load (not stored in saves); the rest bar shows the value after this tick's
 rest while the decision text shows the value at decision time. The test save
 `saves/claude_browsercheck.json` is still in `saves/` (ignored by git).
 
 ## 4. Measured results
+
+**Sharing** (`docs/MILESTONE3.md`; `experiments/sharing_probe.py`, 5 seeds x
+3,000 ticks):
+
+| | no sharing | sharing, met 2+ (default) |
+| --- | --- | --- |
+| starved % of deaths | 65.4 | 62.9 |
+| age at death | 304 | 319 |
+| births | 931 | 894 |
+| population after tick 500 | 93.1 | 93.6 |
+| gifts per run | 0 | 187 (170 different pairs) |
+| receivers alive 20 ticks later | | 98% |
+| gifts ever returned | | 0% |
+
+All Milestone 2 bands hold (starved and age close to an edge). Sharing
+rescues individuals and makes life a bit longer, with slightly fewer births;
+the population stays the same. **No exchange emerged:** of about 935 gifts
+none went back the other way; givers and receivers are mostly different
+agents. Fewer gifts than the "few hundred" I hoped for.
 
 **Encounter memory** (`docs/MILESTONE3.md`; `experiments/memory_probe.py`,
 5 seeds x 3,000 ticks): an adult has met about 31 agents and remembers 10;
@@ -105,79 +131,52 @@ disappears** (25 of 40, within luck), because homes keep every agent near
 its patch, which was the zigzaggers' edge. In normal runs no trait is
 selected beyond chance.
 
-## 5. Next step: Milestone 3, step 3, share food with someone you know (recommended)
+## 5. Next step: Milestone 3, step 4, look for groups (measurement only, recommended)
 
-**What:** the first behaviour that uses memory. A well-fed agent (energy
-above 80) carrying food, standing within 1 tile of a **starving** agent
-(energy 20 or less, empty pack) that it has **met at least twice before**,
-gives it 1 food. The receiver eats it next tick by its normal eat rule.
+**What:** a new read-only script, `experiments/community_probe.py`. No rule
+changes. Every 250 ticks it builds a "knows each other well" network from
+the agents' memories (an edge when two agents BOTH remember 5+ meetings with
+each other) and looks for groups in it:
+- how many groups of 3 or more, their sizes, and the share of agents in one;
+- how much of a group is family, and how far apart its members' homes are;
+- whether the same groups are still there 250 and 500 ticks later (overlap
+  of members), so a group is a lasting thing and not a passing crowd;
+- whether gifts happen mostly inside groups.
+Same seeds, homes on vs off as a control (without homes we expect no
+lasting groups).
 
-**Why (evidence, section 4):** 33.7% of starvation deaths had a fed giver
-with food right next to them in their last 20 ticks; 19.4% had one that
-knew them. That is a concrete situation the memory can act on, which
-nothing else in the world handles. It is also the smallest step toward the
-vision's relationships and exchange: who helps whom, and does help come
-back, can then be measured.
+**Why this and not a new rule (evidence):** the vision's next layer is
+groups and communities. Homes made neighbours meet again and again, memory
+records it, and sharing showed help moving along those ties. Before giving
+groups any rule or name, check that groups actually exist and last; the
+"home" step showed that measuring first picks the right next rule.
 
 **Alternatives considered:**
-- *Family-only sharing* (uses the existing `parent` field, no memory):
-  rejected as the first rule, it reaches only 4.6% of starvation deaths,
-  a quarter of "someone I know".
-- *Seeking company* (walk toward known agents): rejected, no measured payoff
-  (the Milestone 2 gate still applies).
-- *Do nothing social yet; give curiosity a job first* (decision 2): smaller,
-  but does not move toward relationships.
+- *Reciprocity rule* ("give first to those who gave to you"): rejected for
+  now. The data shows roles never swap (0 of 935 gifts returned; about 5% of
+  receivers ever give), so such a rule would almost never fire.
+- *More sharing* (lower the bar, bigger gifts): that is tuning numbers to
+  get more events, not a new behaviour.
+- *Curiosity as roaming distance* (decision 2): still open, small, but not
+  toward groups.
 
-**Prediction to test (not assumed):** `docs/STARVATION.md` showed that food
-supply, not food finding, sets how many agents live. So sharing will
-probably NOT lower the starved share much; it changes WHO starves (fewer
-young, maybe more givers). That is still the interesting part: whether
-gifts flow back (reciprocity) and whether giving families do better.
+**Files:** `experiments/community_probe.py` (new), results in
+`experiments/results/`, a section in `docs/MILESTONE3.md`, STATUS. Nothing
+in `genesis/` changes, so no save change and no behaviour change.
 
-**Rule (proposed):**
-- New action `give`, checked after eat and reproduce, before gather, rest
-  and move. Fits when: not hungry (energy above `eat_below`), food in the
-  pack, and some agent within 1 tile is starving with an empty pack and has
-  `share_min_meetings` (2) or more meetings in the giver's memory.
-- Several fit: the one met most often (ties: lower energy, then lower id).
-  No dice.
-- `share_min_meetings = 0` switches it off (old saves get 0 and keep their
-  behaviour).
-- Why text: "gave 1 food to #31 (we have met 6 times); it is starving
-  (energy 14) and I am not hungry (energy 88)". The receiver's history gets
-  a line too.
+**Done when:** the script runs from a clean checkout; the report says, with
+numbers and spread over seeds, whether lasting groups exist (for example
+"X% of adults belong to a group of 3+ that still has most of its members
+500 ticks later", against the homes-off control) and recommends the next
+rule only if the numbers support one.
 
-**Files:** `genesis/agents.py` (the give rule and its option line),
-`genesis/sim.py` (move 1 food, event for both), `genesis/config.py`,
-`overrides.py`, `save.py` (version 6: `share_min_meetings = 0` for old
-saves), `server.py`/`web/` (gifts given/received in the panel, "gifts" in
-the stats), README, `docs/MILESTONE3.md`. Optional small addition to memory
-entries: gifts given and received per known agent, so reciprocity can be
-read off directly.
-
-**Tests:** frozen reference of today's behaviour first; `share_min_meetings
-= 0` reproduces it exactly; a v5 save migrates and continues identically;
-gives only when not hungry, only to a starving agent within 1 tile met 2+
-times; never gives the last food when itself becomes hungry (energy rule
-first); picks the most-met; same seed = same world.
-
-**Measure and success:** gifts per 1,000 ticks; starved share, population,
-births and age at death inside the Milestone 2 bands; starvation deaths by
-age band before and after; reciprocity (share of gifts later returned by
-the receiver, against a shuffled control); whether pairs that exchanged
-gifts meet more often afterwards. Success = the bands hold AND gifts
-happen often enough to measure (at least a few hundred per run); the other
-numbers are reported, not targets.
-
-**Risks:** changes behaviour (all comparisons need the new frozen
-reference); givers may starve later (measure); with only 2 meetings needed,
-"knowing" is weak (try 5 as well).
+**Risks:** "group" depends on the thresholds (5 meetings, mutual); report
+2 and 5 as well. With memory capped at 10, big groups cannot be seen fully.
 
 ## 6. Next 5 tasks
 
-1. **Your go for step 3 (sharing with someone you know)**, then build it as
-   in section 5. Check: `python3 -m unittest discover -s tests`, then
-   `python3 experiments/sharing_opportunity.py` and `stage_compare.py`.
+1. **Your go for step 4 (look for groups)**, then build the script as in
+   section 5. Check: `python3 experiments/community_probe.py`.
 2. **Decide what curiosity should mean now** (decision 2). If "roaming
    distance": files `genesis/agents.py`, `genesis/traits.py`, tests; measure
    with `python3 experiments/curiosity_probe.py`.
@@ -190,8 +189,8 @@ reference); givers may starve later (measure); with only 2 meetings needed,
 
 ## 7. Decisions for you
 
-1. **Go for sharing with someone you know (section 5)?** It is the first
-   social rule, so it is your call. Default: wait for your yes.
+1. **Go for the group measurement (section 5)?** Default: wait for your yes.
+   (Sharing was built on your yes; `--set share_min_meetings=0` turns it off.)
 2. **Curiosity after homes.** It now matters little. Options: (a) leave it;
    (b) let it also set each agent's roaming distance around home (curious =
    wanders further), which matches the word; (c) remove its effect.
@@ -214,6 +213,7 @@ reference); givers may starve later (measure); with only 2 meetings needed,
 - The population graph on the page is not saved; it restarts after Load.
 - Saves are about 1.1 MB at 2,000-3,000 ticks, mostly decision history.
 - Memory costs about 6-13% speed (around the 10% aimed for).
+- Sharing: fewer gifts than hoped (187 per run); no gift ever returned.
 - "Family" in panel and probes = parent, child, sibling while alive only.
 - One test (`test_controls.py`) sleeps 0.7 s and could rarely fail on a very
   busy Mac. Python 3.9.
@@ -271,6 +271,16 @@ python3 experiments/sharing_opportunity.py
 ```
 
 ```bash
+python3 experiments/sharing_probe.py
+```
+
+The world without sharing:
+
+```bash
+python3 run_headless.py --seed 42 --ticks 2000 --every 0 --summary --set share_min_meetings=0
+```
+
+```bash
 python3 experiments/curiosity_probe.py
 ```
 
@@ -299,7 +309,7 @@ Milestone 2 files (`curiosity_probe.txt`, `curiosity_mixed_extra.txt`);
 without it they write the `_home` files. `stage_compare.py` prints both
 (its homes-on output is saved as `stage_compare_home.txt`). Times on this Mac:
 memory probe about 3 min (`--old-drop-rule` for the rejected first cap
-rule), sharing count about 1.5 min, encounter probe about 3 min, curiosity probe about 4 min, mixed extra about
+rule), sharing count about 1.5 min, sharing probe about 5 min, encounter probe about 3 min, curiosity probe about 4 min, mixed extra about
 4 min, stage compare about 4 min, trait drift about 2 min, starvation study
 about 25 s, baseline check about 1 min. `trait_drift.py` and
 `starvation_study.py` now run with homes on; their saved results are from
@@ -339,6 +349,21 @@ before homes.
 
 Newest first. Older entries mention section numbers of earlier versions of
 this file; see `git log -p STATUS.md` for those.
+
+### Session 2026-11-18 (part 7: Milestone 3 step 3, sharing)
+- **Your go** ("Yes, build sharing"), after pushing everything (GitHub at
+  `af88e8a`).
+- **Frozen first** (`0a1d3e9`): `experiments/baseline/milestone3_memory.json`,
+  `tests/fixtures/save_v5_seed42_t300.json`.
+- **Built** (`e8794c2`): action `give`, `share_min_meetings` (2), gift counts
+  in memory, `stats.gifts`, save version 6 (old saves: sharing off).
+  Page (`531f33b`): "Food shared", "Newest generation", gifts per known agent.
+- **Tests:** new `tests/test_sharing.py` (9); 141 OK; Milestone 1 ALL SAME;
+  `share_min_meetings=0` reproduces the frozen memory world exactly.
+- **Measured** (`experiments/sharing_probe.py`): section 4. Starved share
+  65.4 -> 62.9, age at death 304 -> 319, births 931 -> 894, population same;
+  no gift returned.
+- **Not done:** step 4 (waits for your go).
 
 ### Session 2026-11-17 (part 6: Milestone 3 step 2, encounter memory)
 - **Your go** ("Yes, build memory").

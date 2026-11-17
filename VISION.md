@@ -37,7 +37,7 @@ serve this, question it. If this file and the code disagree about what
 
 ## Roadmap
 
-### Works today (Milestones 1, 2 and steps 1-2 of 3, checked in STATUS.md)
+### Works today (Milestones 1, 2 and steps 1-3 of 3, checked in STATUS.md)
 
 - Seeded world with land, water and regrowing food.
 - About 50 founders, settling near 93 agents, that look for food (walking
@@ -49,7 +49,10 @@ serve this, question it. If this file and the code disagree about what
   within 6 tiles of it, so families and neighbours keep meeting
   (`docs/MILESTONE3.md`).
 - An **encounter memory** for every agent: up to 10 agents it met, how many
-  times, when and where. It is a record only; nothing uses it yet.
+  times, when and where.
+- **Sharing**: a well-fed agent carrying food gives 1 food to a starving
+  agent it has met at least twice. It rescues agents; help has so far only
+  flowed one way (no gift was ever returned).
 - Same seed gives the same result; Milestone 1 and Milestone 2 behaviour are
   frozen and reproducible (`tests/test_baseline.py`, `tests/test_home.py`).
 - "Why" record for every decision: need, options considered, reason; the
@@ -66,16 +69,14 @@ serve this, question it. If this file and the code disagree about what
 
 - A scoring decision system (rules in a fixed order are still enough).
 - A "company" need, sociability or any social behaviour.
-- Anything that USES the memory of others (recognition, preferring kin,
-  avoiding someone). **Agents remember whom they met, but it does not yet
-  change what they do.**
+- Any other use of memory (preferring kin, avoiding someone, returning
+  favours). Sharing is the only rule that reads memory.
 
 ### Next (proposed in STATUS.md, not built)
 
-- **Milestone 3, step 3: share food with someone you know.** A well-fed
-  agent carrying food gives one to a starving agent it has met before. The
-  first behaviour that uses memory; then measure who helps whom and whether
-  help comes back.
+- **Milestone 3, step 4: look for groups.** Measure whether lasting groups
+  of agents who know each other well exist (from their memories), before
+  giving groups any rule.
 
 ### Future ambition (nothing below exists)
 

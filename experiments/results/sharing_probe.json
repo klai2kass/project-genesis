@@ -1,0 +1,348 @@
+{
+ "seeds": [
+  "42",
+  "1",
+  "2",
+  "3",
+  "4"
+ ],
+ "settings": {
+  "no sharing (0)": [
+   {
+    "age_at_death": 299.13984461709214,
+    "births": 955,
+    "distinct_pairs": 0,
+    "extinct": false,
+    "gifts": 0,
+    "gifts_per_1000_ticks": 0.0,
+    "gifts_to_family_pct": null,
+    "givers_starved_100_pct": null,
+    "mean_pop": 93.9784,
+    "pairs_both_ways_pct": null,
+    "receivers_alive_20_pct": null,
+    "returned_pct": null,
+    "seed": "42",
+    "starved_band_pct": [
+     26.21035058430718,
+     39.73288814691152,
+     25.542570951585976,
+     8.514190317195325
+    ],
+    "starved_pct": 66.48168701442842
+   },
+   {
+    "age_at_death": 304.4261363636364,
+    "births": 932,
+    "distinct_pairs": 0,
+    "extinct": false,
+    "gifts": 0,
+    "gifts_per_1000_ticks": 0.0,
+    "gifts_to_family_pct": null,
+    "givers_starved_100_pct": null,
+    "mean_pop": 92.936,
+    "pairs_both_ways_pct": null,
+    "receivers_alive_20_pct": null,
+    "returned_pct": null,
+    "seed": "1",
+    "starved_band_pct": [
+     25.834797891036906,
+     40.070298769771526,
+     26.71353251318102,
+     7.381370826010545
+    ],
+    "starved_pct": 64.6590909090909
+   },
+   {
+    "age_at_death": 306.6257175660161,
+    "births": 919,
+    "distinct_pairs": 0,
+    "extinct": false,
+    "gifts": 0,
+    "gifts_per_1000_ticks": 0.0,
+    "gifts_to_family_pct": null,
+    "givers_starved_100_pct": null,
+    "mean_pop": 92.5984,
+    "pairs_both_ways_pct": null,
+    "receivers_alive_20_pct": null,
+    "returned_pct": null,
+    "seed": "2",
+    "starved_band_pct": [
+     24.377224199288257,
+     41.81494661921708,
+     25.26690391459075,
+     8.540925266903914
+    ],
+    "starved_pct": 64.52353616532722
+   },
+   {
+    "age_at_death": 305.08191126279866,
+    "births": 924,
+    "distinct_pairs": 0,
+    "extinct": false,
+    "gifts": 0,
+    "gifts_per_1000_ticks": 0.0,
+    "gifts_to_family_pct": null,
+    "givers_starved_100_pct": null,
+    "mean_pop": 92.4452,
+    "pairs_both_ways_pct": null,
+    "receivers_alive_20_pct": null,
+    "returned_pct": null,
+    "seed": "3",
+    "starved_band_pct": [
+     25.043478260869566,
+     43.30434782608695,
+     22.26086956521739,
+     9.391304347826088
+    ],
+    "starved_pct": 65.41524459613197
+   },
+   {
+    "age_at_death": 304.1608154020385,
+    "births": 925,
+    "distinct_pairs": 0,
+    "extinct": false,
+    "gifts": 0,
+    "gifts_per_1000_ticks": 0.0,
+    "gifts_to_family_pct": null,
+    "givers_starved_100_pct": null,
+    "mean_pop": 93.4188,
+    "pairs_both_ways_pct": null,
+    "receivers_alive_20_pct": null,
+    "returned_pct": null,
+    "seed": "4",
+    "starved_band_pct": [
+     26.243567753001717,
+     39.27958833619211,
+     26.07204116638079,
+     8.404802744425385
+    ],
+    "starved_pct": 66.02491506228766
+   }
+  ],
+  "share, met 2+ (default)": [
+   {
+    "age_at_death": 315.93224299065423,
+    "births": 899,
+    "distinct_pairs": 151,
+    "extinct": false,
+    "gifts": 168,
+    "gifts_per_1000_ticks": 56.0,
+    "gifts_to_family_pct": 10.714285714285714,
+    "givers_starved_100_pct": 3.658536585365854,
+    "mean_pop": 94.1812,
+    "pairs_both_ways_pct": 0.0,
+    "receivers_alive_20_pct": 97.02380952380952,
+    "returned_pct": 0.0,
+    "seed": "42",
+    "starved_band_pct": [
+     22.950819672131146,
+     41.712204007285976,
+     26.41165755919854,
+     8.925318761384336
+    ],
+    "starved_pct": 64.1355140186916
+   },
+   {
+    "age_at_death": 319.26635514018693,
+    "births": 898,
+    "distinct_pairs": 185,
+    "extinct": false,
+    "gifts": 200,
+    "gifts_per_1000_ticks": 66.66666666666667,
+    "gifts_to_family_pct": 19.0,
+    "givers_starved_100_pct": 2.0618556701030926,
+    "mean_pop": 94.2936,
+    "pairs_both_ways_pct": 0.0,
+    "receivers_alive_20_pct": 97.5,
+    "returned_pct": 0.0,
+    "seed": "1",
+    "starved_band_pct": [
+     26.070763500931097,
+     38.733705772811916,
+     26.81564245810056,
+     8.379888268156424
+    ],
+    "starved_pct": 62.73364485981308
+   },
+   {
+    "age_at_death": 319.53419811320754,
+    "births": 888,
+    "distinct_pairs": 171,
+    "extinct": false,
+    "gifts": 188,
+    "gifts_per_1000_ticks": 62.666666666666664,
+    "gifts_to_family_pct": 13.297872340425531,
+    "givers_starved_100_pct": 2.7777777777777777,
+    "mean_pop": 92.814,
+    "pairs_both_ways_pct": 0.0,
+    "receivers_alive_20_pct": 98.38709677419355,
+    "returned_pct": 0.0,
+    "seed": "2",
+    "starved_band_pct": [
+     23.66412213740458,
+     41.79389312977099,
+     25.954198473282442,
+     8.587786259541986
+    ],
+    "starved_pct": 61.79245283018868
+   },
+   {
+    "age_at_death": 317.8527679623086,
+    "births": 900,
+    "distinct_pairs": 159,
+    "extinct": false,
+    "gifts": 173,
+    "gifts_per_1000_ticks": 57.666666666666664,
+    "gifts_to_family_pct": 17.341040462427745,
+    "givers_starved_100_pct": 1.7647058823529411,
+    "mean_pop": 92.6444,
+    "pairs_both_ways_pct": 0.0,
+    "receivers_alive_20_pct": 100.0,
+    "returned_pct": 0.0,
+    "seed": "3",
+    "starved_band_pct": [
+     22.09737827715356,
+     41.947565543071164,
+     27.715355805243444,
+     8.239700374531836
+    ],
+    "starved_pct": 62.897526501766784
+   },
+   {
+    "age_at_death": 322.69030732860523,
+    "births": 883,
+    "distinct_pairs": 185,
+    "extinct": false,
+    "gifts": 204,
+    "gifts_per_1000_ticks": 68.0,
+    "gifts_to_family_pct": 21.07843137254902,
+    "givers_starved_100_pct": 2.487562189054726,
+    "mean_pop": 94.1016,
+    "pairs_both_ways_pct": 0.0,
+    "receivers_alive_20_pct": 98.52941176470588,
+    "returned_pct": 0.0,
+    "seed": "4",
+    "starved_band_pct": [
+     23.639774859287055,
+     38.83677298311444,
+     27.954971857410882,
+     9.568480300187618
+    ],
+    "starved_pct": 63.002364066193856
+   }
+  ],
+  "share, met 5+": [
+   {
+    "age_at_death": 310.31121281464533,
+    "births": 917,
+    "distinct_pairs": 80,
+    "extinct": false,
+    "gifts": 85,
+    "gifts_per_1000_ticks": 28.333333333333332,
+    "gifts_to_family_pct": 28.235294117647058,
+    "givers_starved_100_pct": 0.0,
+    "mean_pop": 93.09,
+    "pairs_both_ways_pct": 0.0,
+    "receivers_alive_20_pct": 96.47058823529412,
+    "returned_pct": 0.0,
+    "seed": "42",
+    "starved_band_pct": [
+     27.9491833030853,
+     38.11252268602541,
+     25.226860254083483,
+     8.711433756805807
+    ],
+    "starved_pct": 63.04347826086956
+   },
+   {
+    "age_at_death": 309.27885714285713,
+    "births": 921,
+    "distinct_pairs": 85,
+    "extinct": false,
+    "gifts": 96,
+    "gifts_per_1000_ticks": 32.0,
+    "gifts_to_family_pct": 23.958333333333332,
+    "givers_starved_100_pct": 2.150537634408602,
+    "mean_pop": 93.07,
+    "pairs_both_ways_pct": 0.0,
+    "receivers_alive_20_pct": 95.74468085106383,
+    "returned_pct": 0.0,
+    "seed": "1",
+    "starved_band_pct": [
+     25.824175824175825,
+     44.32234432234432,
+     22.52747252747253,
+     7.326007326007326
+    ],
+    "starved_pct": 62.4
+   },
+   {
+    "age_at_death": 311.59143518518516,
+    "births": 911,
+    "distinct_pairs": 72,
+    "extinct": false,
+    "gifts": 78,
+    "gifts_per_1000_ticks": 26.0,
+    "gifts_to_family_pct": 16.666666666666668,
+    "givers_starved_100_pct": 1.2987012987012987,
+    "mean_pop": 92.6244,
+    "pairs_both_ways_pct": 0.0,
+    "receivers_alive_20_pct": 96.15384615384616,
+    "returned_pct": 0.0,
+    "seed": "2",
+    "starved_band_pct": [
+     24.30939226519337,
+     43.0939226519337,
+     25.414364640883978,
+     7.18232044198895
+    ],
+    "starved_pct": 62.84722222222222
+   },
+   {
+    "age_at_death": 306.13287514318444,
+    "births": 914,
+    "distinct_pairs": 72,
+    "extinct": false,
+    "gifts": 80,
+    "gifts_per_1000_ticks": 26.666666666666668,
+    "gifts_to_family_pct": 23.75,
+    "givers_starved_100_pct": 2.7777777777777777,
+    "mean_pop": 91.628,
+    "pairs_both_ways_pct": 0.0,
+    "receivers_alive_20_pct": 97.5,
+    "returned_pct": 0.0,
+    "seed": "3",
+    "starved_band_pct": [
+     26.512455516014235,
+     40.569395017793596,
+     24.91103202846975,
+     8.00711743772242
+    ],
+    "starved_pct": 64.37571592210767
+   },
+   {
+    "age_at_death": 306.9497716894977,
+    "births": 917,
+    "distinct_pairs": 74,
+    "extinct": false,
+    "gifts": 78,
+    "gifts_per_1000_ticks": 26.0,
+    "gifts_to_family_pct": 23.076923076923077,
+    "givers_starved_100_pct": 0.0,
+    "mean_pop": 94.1248,
+    "pairs_both_ways_pct": 0.0,
+    "receivers_alive_20_pct": 97.43589743589743,
+    "returned_pct": 0.0,
+    "seed": "4",
+    "starved_band_pct": [
+     25.357142857142858,
+     39.464285714285715,
+     29.464285714285715,
+     5.714285714285714
+    ],
+    "starved_pct": 63.926940639269404
+   }
+  ]
+ },
+ "ticks": 3000
+}

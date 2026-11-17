@@ -5,9 +5,9 @@ look for food, eat, have children and die. Nothing is installed and nothing
 is paid for: it only needs the Python that is already on your Mac.
 
 Milestone 1 (food, children, death), **Milestone 2** (a rest need and two
-personality traits, curiosity and industriousness) and the first two steps
-of **Milestone 3** (every agent has a home it stays near, and remembers whom
-it has met) are built. No AI model
+personality traits, curiosity and industriousness) and three steps of
+**Milestone 3** (every agent has a home it stays near, remembers whom it has
+met, and shares food with a starving agent it knows) are built. No AI model
 (LLM): every decision comes from a few clear rules, and every decision says
 why. What the traits actually do, measured: `docs/MILESTONE2_REPORT.md`.
 
@@ -38,8 +38,8 @@ Want a different world? `python3 server.py --seed banana`
 | **Seed + New world** | Build a fresh world. Same seed = same world, always |
 | **Save** | Writes the world to `saves/<name>.json` |
 | **Load** | Brings a saved world back (it loads paused) |
-| **Click an agent** | See its energy, rest, traits, home (gold square on the map), whom it knows best, age, what it needs, the options it weighed, *why* it chose, and its earlier decisions |
-| **Stats** | Alive, births, deaths by cause, resting now, average curiosity and industriousness, population graph |
+| **Click an agent** | See its energy, rest, traits, home (gold square on the map), whom it knows best (and food given or received), age, what it needs, the options it weighed, *why* it chose, and its earlier decisions |
+| **Stats** | Alive, births, deaths by cause, resting now, average curiosity and industriousness, food shared, newest generation, population graph |
 | **Feed** | Births and deaths, or every single decision |
 
 ## Check that it works (tests)
@@ -48,7 +48,7 @@ Want a different world? `python3 server.py --seed banana`
 python3 -m unittest discover -s tests -v
 ```
 
-It should end with `Ran 132 tests` and `OK` (about 55 seconds).
+It should end with `Ran 141 tests` and `OK` (about a minute).
 
 The tests prove the two promises this project is built on:
 
@@ -56,7 +56,7 @@ The tests prove the two promises this project is built on:
   decision for decision.
 - **Save → load = same state.** A loaded world is identical to the one that
   was saved, and it also *continues* identically. Saves from older versions
-  (1 to 4) still load and keep their old rules.
+  (1 to 5) still load and keep their old rules.
 - **Milestone 1 is frozen.** With `MILESTONE1_RULES` the new code repeats the
   old behaviour exactly (`tests/test_baseline.py`).
 
@@ -111,7 +111,8 @@ Milestone 2 settings (all whole numbers; see `genesis/config.py`):
 Milestone 3 settings: `home_radius` (6). How far from home a wandering agent
 may drift; `--set home_radius=0` switches homes off (Milestone 2 behaviour).
 `memory_keep` (10): how many agents each agent remembers meeting; `0` = no
-memory. Memory never changes behaviour.
+memory. `share_min_meetings` (2): how many meetings it takes before an agent
+gives food to that agent when it is starving; `0` = no sharing.
 
 Notes: `food_cap` takes three numbers (water, grass, forest). If you give the
 same name twice, the last one wins. A wrong name or value stops with a plain
@@ -157,10 +158,12 @@ the first rule that fits:
 
 1. **Eat** if it carries food and has room for the energy.
 2. **Reproduce** if it is strong, grown up and rested.
-3. **Gather** if there is food on its tile and room in its pack.
-4. **Rest** if it is not hungry (energy above 80) and tired (rest below 30);
+3. **Give** 1 food if it is not hungry, carries food, and an agent it has met
+   at least twice stands next to it starving (energy 20 or less, empty pack).
+4. **Gather** if there is food on its tile and room in its pack.
+5. **Rest** if it is not hungry (energy above 80) and tired (rest below 30);
    it keeps resting until rest reaches 70. Resting costs half the energy.
-5. **Move** toward the nearest food it can *walk to* (around water), or
+6. **Move** toward the nearest food it can *walk to* (around water), or
    wander if there is none. Food it cannot reach is ignored. A wandering
    agent more than 6 tiles from its **home** (where it was born) steps back
    toward home instead.
@@ -168,7 +171,7 @@ the first rule that fits:
 After everyone has acted, each agent notes whom it is standing next to (within
 1 tile): its **memory** of up to 10 agents, with how many separate times it
 met each one, when, and where. When the list is full it forgets the agent it
-met least. Nothing reads this memory yet; it is a record you can look at.
+met least. Only the Give rule reads this memory.
 
 Each agent has two **traits** (0 to 100, 50 = average), made at birth from
 its own seeded dice and inherited by children (parent's value +/- 5):
@@ -210,9 +213,9 @@ of 100"), the **options** it considered and whether each fitted, and the
 | `server.py` | Runs the world and serves the page |
 | `web/` | The page. It only draws; no rules live there |
 | `tests/` | The automatic checks |
-| `experiments/` | Measurement scripts (they only read the world); results in `experiments/results/`. `regrow_sweep.py`, `starvation_study.py`, `stage_compare.py`, `curiosity_probe.py`, `trait_drift.py`, `encounter_probe.py`, `memory_probe.py`; `baseline/` holds the frozen Milestone 1, Milestone 2 and homes references |
+| `experiments/` | Measurement scripts (they only read the world); results in `experiments/results/`. `regrow_sweep.py`, `starvation_study.py`, `stage_compare.py`, `curiosity_probe.py`, `trait_drift.py`, `encounter_probe.py`, `memory_probe.py`, `sharing_opportunity.py`, `sharing_probe.py`; `baseline/` holds the frozen Milestone 1, Milestone 2 and homes references |
 | `VISION.md` | The long-term idea and roadmap (read first) |
-| `docs/MILESTONE3.md` | Milestone 3: homes and encounter memory (built), with results |
+| `docs/MILESTONE3.md` | Milestone 3: homes, encounter memory and sharing (built), with results |
 | `docs/MILESTONE2_REPORT.md` | What Milestone 2 does, measured |
 | `docs/MILESTONE2_V2.md` | The Milestone 2 design as built |
 | `docs/STARVATION.md` | Why about two thirds of deaths are starvation |
@@ -232,3 +235,4 @@ Open `genesis/config.py`, change one number, start a new world:
 - `--set tire_base=200`: everyone tires twice as fast and rests more.
 - `--set rest_below=0`: nobody rests (Milestone 1 behaviour for rest).
 - `--set home_radius=2`: agents cling to their birthplace; `0`: they roam freely.
+- `--set share_min_meetings=0`: nobody shares; `5`: only with agents met 5+ times.

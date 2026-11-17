@@ -8,7 +8,8 @@ Built one small step at a time, each measured before the next.
 | --- | --- | --- |
 | 1 | **Home**: every agent remembers where it was born and wanders near it | **Built** (this file) |
 | 2 | **Encounter memory**: who did I meet, where, when, how often (record only) | **Built** (below) |
-| 3 | First USE of that memory: share food with a starving agent you know | Proposed (`STATUS.md`), not started |
+| 3 | First USE of that memory: share food with a starving agent you know | **Built** (below) |
+| 4 | Look for groups in the memory network (measurement only) | Proposed (`STATUS.md`) |
 
 ## Step 1: home (built 2026-11-17)
 
@@ -247,4 +248,88 @@ proposed step 3 in `STATUS.md`.
   while the relative is alive (the dead's parents are not kept).
 - Memory is per agent; when an agent dies its memory goes with it.
 - Speed cost is around the 10% I aimed for (6-13% depending on timing).
+
+## Step 3: sharing food with someone you know (built 2026-11-18)
+
+### Why
+
+Evidence from step 2: one starvation death in three happened next to a
+well-fed agent carrying food, and in one in five that agent had met the
+starving one before. It is the first rule that READS memory.
+
+### The rule (whole numbers, no dice; `genesis/agents.py`, `who_to_help`)
+
+- New action **give**, checked after eat and reproduce, before gather, rest
+  and move.
+- Fits when the agent is not hungry (energy above 80), carries food, and an
+  agent within 1 tile is **starving** (energy 20 or less, empty pack) and has
+  `share_min_meetings` (default **2**) or more meetings in its memory.
+- Several fit: the one met most often, then the lowest energy, then the
+  lowest id. Never one that already died this tick.
+- 1 food moves from pack to pack; the receiver eats it with its own eat rule
+  (the same tick if it acts later, otherwise the next).
+- Memory entries now also count food given and received
+  (`[id, first, last, meetings, x, y, gave, got]`); `stats.gifts` counts all.
+- The why: "gave 1 food to #60 (we have met 4 times); it is starving (energy
+  20, empty pack) and I am not hungry (energy 93)".
+- Save format **6**: older saves load with `share_min_meetings = 0`, so they
+  keep their behaviour; old memory entries get gift counts 0.
+
+### Tests (`tests/test_sharing.py`, 9)
+
+`share_min_meetings = 0` reproduces the frozen memory world
+(`experiments/baseline/milestone3_memory.json`) exactly; a v5 save
+(`tests/fixtures/save_v5_seed42_t300.json`) migrates and continues exactly;
+sharing on changes behaviour and gifts happen; one gift moves exactly 1 food
+and both memories count it; gives only when not hungry, only to a starving
+agent within 1 tile met enough times (each condition tested on its edge);
+eat and reproduce come first; the choice order; never to an agent that died
+this tick; same seed = same world and save/load continues identically.
+
+### Results (FACT, `experiments/sharing_probe.py`, 5 seeds x 3,000 ticks)
+
+| | no sharing | **met 2+ (default)** | met 5+ | Milestone 2 band |
+| --- | --- | --- | --- | --- |
+| population after tick 500 | 93.1 | 93.6 | 92.9 | 80-98 |
+| births | 931 | 894 | 916 | 830-1,010 |
+| starved % of deaths | 65.4 | **62.9** | 63.3 | 62-73 |
+| age at death | 304 | **319** | 309 | 265-325 |
+| gifts per run (3,000 ticks) | 0 | 187 | 83 | |
+| different giver-receiver pairs | 0 | 170 | 77 | |
+| gifts to family | | 16% | 23% | |
+| receivers alive 20 ticks later | | 98% | 97% | |
+| givers starved within 100 ticks | | 2.6% | 1.2% | |
+| gifts ever returned (b gave back to a) | | **0%** | **0%** | |
+| starvation deaths aged 0-79 | 25.5% | 23.7% | 26.0% | |
+
+(sd over seeds: starved share 0.8 points, age at death 2-3 ticks, births
+4-16, so the changes in those three lines are larger than luck.)
+
+**Plain reading:**
+- Sharing works as a rescue: 98% of receivers are still alive 20 ticks
+  later, and givers almost never starve because of it.
+- The world gets a little kinder but not bigger: the starved share drops
+  by 2.5 points and agents live 15 ticks longer on average, while there are
+  about 4% fewer births and the population stays the same. GUESS: giving
+  away food keeps givers below the energy of 90 needed for a child a little
+  more often; food, not finding food, still sets how many can live
+  (`docs/STARVATION.md`).
+- **No exchange emerged.** In about 935 gifts over 5 runs, not one went back
+  the other way. Givers and receivers are mostly different agents (in seeds
+  42 and 1, only 6 of 132 and 7 of 154 receivers ever gave food to anyone
+  later).
+  Help flows one way, from agents doing well to agents in trouble. The rule
+  never looks at past gifts, so the only way help could come back is by the
+  same two agents swapping roles, and that practically never happens.
+- Fewer gifts than I hoped: 187 per run against "a few hundred" I set as a
+  target. Still enough to measure.
+- Both band lines sit near an edge (starved 62.9 against a floor of 62; age
+  319 against a ceiling of 325). All bands still hold.
+
+### Limitations
+
+- 5 seeds, one map, 3,000 ticks.
+- "Starving" is a fixed line (energy 20); no trait affects giving.
+- Gifts are counted in memory only while both still remember each other.
+- The family share uses parent/child/sibling only.
 
