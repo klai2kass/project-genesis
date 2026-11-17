@@ -178,6 +178,7 @@ class Game:
                     "births": world["stats"]["births"],
                     "starved": world["stats"]["deaths_starved"],
                     "old_age": world["stats"]["deaths_old_age"],
+                    "gifts": world["stats"].get("gifts", 0),
                     "avg_energy": round(energy_total / len(agents)) if agents else 0,
                     "food": sum(world["food"]),
                     "generation": max((a["generation"] for a in agents), default=0),

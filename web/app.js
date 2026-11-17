@@ -261,6 +261,8 @@ function renderKnown(known) {
     li.append(who, document.createTextNode(
       " · met " + k.meetings + " time" + (k.meetings === 1 ? "" : "s") +
       ", last at tick " + k.last + " near (" + k.x + ", " + k.y + ")" +
+      (k.gave ? " · I gave it " + k.gave + " food" : "") +
+      (k.got ? " · it gave me " + k.got + " food" : "") +
       (k.alive ? "" : " · has died")));
     list.append(li);
   }
@@ -354,6 +356,8 @@ function render() {
   $("s-energy").textContent = s.stats.avg_energy;
   $("s-food").textContent = s.stats.food.toLocaleString();
   $("s-resting").textContent = s.stats.resting;
+  $("s-gifts").textContent = (s.stats.gifts || 0).toLocaleString();
+  $("s-generation").textContent = s.stats.generation;
   $("s-curiosity").textContent = s.stats.avg_curiosity;
   $("s-industrious").textContent = s.stats.avg_industriousness;
 
