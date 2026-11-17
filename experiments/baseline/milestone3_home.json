@@ -1,0 +1,34 @@
+{
+ "note": "Milestone 3 step 1 rules (homes, code defaults at commit 2f7af5b, before encounter memory). Frozen 2026-11-17. Later code must reproduce it with memory on or off, since memory never changes behaviour.",
+ "save_v4": {
+  "behaviour_digest": "b8f49d5630f29f51",
+  "event_digest": "14baf0988e051a95",
+  "tick": 500
+ },
+ "short": {
+  "1": {
+   "alive": 90,
+   "behaviour_digest": "4afc8d8de75a3715",
+   "births": 184,
+   "event_digest": "a04643bb9d141e23",
+   "old_age": 28,
+   "starved": 116
+  },
+  "2": {
+   "alive": 92,
+   "behaviour_digest": "c52e21d9462a8010",
+   "births": 186,
+   "event_digest": "59efca3a450f5f5b",
+   "old_age": 28,
+   "starved": 116
+  },
+  "42": {
+   "alive": 100,
+   "behaviour_digest": "b8f49d5630f29f51",
+   "births": 194,
+   "event_digest": "53605f3aa0423df6",
+   "old_age": 31,
+   "starved": 113
+  }
+ }
+}
