@@ -1,0 +1,37 @@
+{
+ "note": "Milestone 3 step 3 rules (homes, memory, sharing; code defaults at commit 54f5869, before the family home). Frozen 2026-11-18. Must be reproduced by later code with home_inherit=0.",
+ "save_v6": {
+  "behaviour_digest": "26ae05245503f095",
+  "event_digest": "b02d03301c0b6755",
+  "tick": 500
+ },
+ "short": {
+  "1": {
+   "alive": 98,
+   "behaviour_digest": "e558289f9fbb0703",
+   "births": 179,
+   "event_digest": "97af6f6f429cb002",
+   "gifts": 53,
+   "old_age": 29,
+   "starved": 102
+  },
+  "2": {
+   "alive": 89,
+   "behaviour_digest": "df9ee3cb077656f0",
+   "births": 177,
+   "event_digest": "d84de6fade79c5ab",
+   "gifts": 43,
+   "old_age": 34,
+   "starved": 104
+  },
+  "42": {
+   "alive": 94,
+   "behaviour_digest": "26ae05245503f095",
+   "births": 174,
+   "event_digest": "6d92c49a600673c5",
+   "gifts": 51,
+   "old_age": 34,
+   "starved": 96
+  }
+ }
+}
