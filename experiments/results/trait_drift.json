@@ -1,0 +1,361 @@
+{
+ "seeds": [
+  "42",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9"
+ ],
+ "ticks": 3000,
+ "variants": {
+  "control (traits do nothing)": [
+   {
+    "end": {
+     "curiosity": 50.4,
+     "industriousness": 44.37894736842105
+    },
+    "max_generation": 16,
+    "pop": 95,
+    "seed": "42",
+    "spread_end": {
+     "curiosity": 13.02822846138742,
+     "industriousness": 11.434185997187667
+    },
+    "start": {
+     "curiosity": 49.14,
+     "industriousness": 49.8
+    }
+   },
+   {
+    "end": {
+     "curiosity": 48.34065934065934,
+     "industriousness": 53.824175824175825
+    },
+    "max_generation": 15,
+    "pop": 91,
+    "seed": "1",
+    "spread_end": {
+     "curiosity": 12.965058519822144,
+     "industriousness": 13.971394171304633
+    },
+    "start": {
+     "curiosity": 49.66,
+     "industriousness": 50.58
+    }
+   },
+   {
+    "end": {
+     "curiosity": 49.66265060240964,
+     "industriousness": 54.28915662650602
+    },
+    "max_generation": 16,
+    "pop": 83,
+    "seed": "2",
+    "spread_end": {
+     "curiosity": 8.328029472931622,
+     "industriousness": 10.425328425651493
+    },
+    "start": {
+     "curiosity": 51.56,
+     "industriousness": 50.58
+    }
+   },
+   {
+    "end": {
+     "curiosity": 56.54347826086956,
+     "industriousness": 45.47826086956522
+    },
+    "max_generation": 18,
+    "pop": 92,
+    "seed": "3",
+    "spread_end": {
+     "curiosity": 10.855186141313787,
+     "industriousness": 14.697292164729708
+    },
+    "start": {
+     "curiosity": 50.4,
+     "industriousness": 51.0
+    }
+   },
+   {
+    "end": {
+     "curiosity": 43.9010989010989,
+     "industriousness": 52.76923076923077
+    },
+    "max_generation": 17,
+    "pop": 91,
+    "seed": "4",
+    "spread_end": {
+     "curiosity": 14.308266223022965,
+     "industriousness": 8.452942686876844
+    },
+    "start": {
+     "curiosity": 49.02,
+     "industriousness": 50.26
+    }
+   },
+   {
+    "end": {
+     "curiosity": 49.40217391304348,
+     "industriousness": 51.43478260869565
+    },
+    "max_generation": 17,
+    "pop": 92,
+    "seed": "5",
+    "spread_end": {
+     "curiosity": 11.055256257829395,
+     "industriousness": 13.133349805995959
+    },
+    "start": {
+     "curiosity": 50.92,
+     "industriousness": 50.5
+    }
+   },
+   {
+    "end": {
+     "curiosity": 50.62068965517241,
+     "industriousness": 52.48275862068966
+    },
+    "max_generation": 16,
+    "pop": 87,
+    "seed": "6",
+    "spread_end": {
+     "curiosity": 10.02094516765317,
+     "industriousness": 12.433604880365403
+    },
+    "start": {
+     "curiosity": 49.84,
+     "industriousness": 51.2
+    }
+   },
+   {
+    "end": {
+     "curiosity": 46.02105263157895,
+     "industriousness": 49.48421052631579
+    },
+    "max_generation": 17,
+    "pop": 95,
+    "seed": "7",
+    "spread_end": {
+     "curiosity": 10.734086333651433,
+     "industriousness": 10.177232751686212
+    },
+    "start": {
+     "curiosity": 49.68,
+     "industriousness": 49.68
+    }
+   },
+   {
+    "end": {
+     "curiosity": 49.142857142857146,
+     "industriousness": 52.45238095238095
+    },
+    "max_generation": 15,
+    "pop": 84,
+    "seed": "8",
+    "spread_end": {
+     "curiosity": 10.725073933747671,
+     "industriousness": 9.21619273978035
+    },
+    "start": {
+     "curiosity": 48.6,
+     "industriousness": 50.04
+    }
+   },
+   {
+    "end": {
+     "curiosity": 45.876288659793815,
+     "industriousness": 53.0
+    },
+    "max_generation": 16,
+    "pop": 97,
+    "seed": "9",
+    "spread_end": {
+     "curiosity": 10.848780378940756,
+     "industriousness": 12.190921076810847
+    },
+    "start": {
+     "curiosity": 49.52,
+     "industriousness": 50.98
+    }
+   }
+  ],
+  "real (defaults)": [
+   {
+    "end": {
+     "curiosity": 49.252631578947366,
+     "industriousness": 54.88421052631579
+    },
+    "max_generation": 15,
+    "pop": 95,
+    "seed": "42",
+    "spread_end": {
+     "curiosity": 12.859539503134902,
+     "industriousness": 10.019836281774937
+    },
+    "start": {
+     "curiosity": 49.14,
+     "industriousness": 49.8
+    }
+   },
+   {
+    "end": {
+     "curiosity": 44.915789473684214,
+     "industriousness": 47.1578947368421
+    },
+    "max_generation": 19,
+    "pop": 95,
+    "seed": "1",
+    "spread_end": {
+     "curiosity": 13.47017223966364,
+     "industriousness": 8.44339142322336
+    },
+    "start": {
+     "curiosity": 49.66,
+     "industriousness": 50.58
+    }
+   },
+   {
+    "end": {
+     "curiosity": 52.88659793814433,
+     "industriousness": 52.43298969072165
+    },
+    "max_generation": 18,
+    "pop": 97,
+    "seed": "2",
+    "spread_end": {
+     "curiosity": 11.895486702522627,
+     "industriousness": 8.00116900800996
+    },
+    "start": {
+     "curiosity": 51.56,
+     "industriousness": 50.58
+    }
+   },
+   {
+    "end": {
+     "curiosity": 49.40659340659341,
+     "industriousness": 44.2967032967033
+    },
+    "max_generation": 16,
+    "pop": 91,
+    "seed": "3",
+    "spread_end": {
+     "curiosity": 10.903148070427683,
+     "industriousness": 13.746123933592388
+    },
+    "start": {
+     "curiosity": 50.4,
+     "industriousness": 51.0
+    }
+   },
+   {
+    "end": {
+     "curiosity": 55.53012048192771,
+     "industriousness": 55.2289156626506
+    },
+    "max_generation": 16,
+    "pop": 83,
+    "seed": "4",
+    "spread_end": {
+     "curiosity": 9.793454107666921,
+     "industriousness": 9.510077471977173
+    },
+    "start": {
+     "curiosity": 49.02,
+     "industriousness": 50.26
+    }
+   },
+   {
+    "end": {
+     "curiosity": 54.956989247311824,
+     "industriousness": 49.1505376344086
+    },
+    "max_generation": 16,
+    "pop": 93,
+    "seed": "5",
+    "spread_end": {
+     "curiosity": 14.065831381071817,
+     "industriousness": 10.819085323530404
+    },
+    "start": {
+     "curiosity": 50.92,
+     "industriousness": 50.5
+    }
+   },
+   {
+    "end": {
+     "curiosity": 49.739583333333336,
+     "industriousness": 49.854166666666664
+    },
+    "max_generation": 17,
+    "pop": 96,
+    "seed": "6",
+    "spread_end": {
+     "curiosity": 10.656810021126818,
+     "industriousness": 10.225559445439758
+    },
+    "start": {
+     "curiosity": 49.84,
+     "industriousness": 51.2
+    }
+   },
+   {
+    "end": {
+     "curiosity": 54.07058823529412,
+     "industriousness": 51.588235294117645
+    },
+    "max_generation": 14,
+    "pop": 85,
+    "seed": "7",
+    "spread_end": {
+     "curiosity": 9.644002385261029,
+     "industriousness": 12.614924977182019
+    },
+    "start": {
+     "curiosity": 49.68,
+     "industriousness": 49.68
+    }
+   },
+   {
+    "end": {
+     "curiosity": 46.0,
+     "industriousness": 44.18181818181818
+    },
+    "max_generation": 17,
+    "pop": 99,
+    "seed": "8",
+    "spread_end": {
+     "curiosity": 14.7764486377287,
+     "industriousness": 19.962269276663232
+    },
+    "start": {
+     "curiosity": 48.6,
+     "industriousness": 50.04
+    }
+   },
+   {
+    "end": {
+     "curiosity": 57.58762886597938,
+     "industriousness": 43.47422680412371
+    },
+    "max_generation": 16,
+    "pop": 97,
+    "seed": "9",
+    "spread_end": {
+     "curiosity": 9.007159325780329,
+     "industriousness": 11.715786146081916
+    },
+    "start": {
+     "curiosity": 49.52,
+     "industriousness": 50.98
+    }
+   }
+  ]
+ }
+}

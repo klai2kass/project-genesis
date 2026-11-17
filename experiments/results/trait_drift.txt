@@ -1,0 +1,12 @@
+Trait drift: seeds 42,1,2,3,4,5,6,7,8,9, 3000 ticks. Change = (mean trait of the living at the end)
+minus (mean trait of the founders). Cells: mean +/- sd over seeds [min .. max].
+
+== real (defaults) ==
+  curiosity        change  +1.6 +/-  4.1 [ -4.7 ..  +8.1]   spread within world at end 11.7
+  industriousness  change  -1.2 +/-  4.6 [ -7.5 ..  +5.1]   spread within world at end 11.5
+  deepest generation alive at the end: 16.4 (min 14, max 19)
+
+== control (traits do nothing) ==
+  curiosity        change  -0.8 +/-  3.2 [ -5.1 ..  +6.1]   spread within world at end 11.3
+  industriousness  change  +0.5 +/-  3.3 [ -5.5 ..  +3.7]   spread within world at end 11.6
+  deepest generation alive at the end: 16.3 (min 15, max 18)
