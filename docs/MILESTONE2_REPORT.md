@@ -231,6 +231,15 @@ might show it; not tested.
 - Straightness counts only wander stretches of 10 moves or more, which are
   a minority (the mean stretch is 5 moves).
 
+## Update after homes (Milestone 3 step 1)
+
+Homes were built after this report. With homes on, the curiosity advantage
+in mixed worlds mostly disappears (high beat low in 25 of 40 seeds instead of
+34 of 40). Details: `docs/MILESTONE3.md`, "Results". Everything above
+describes the Milestone 2 world (`home_radius = 0`), which the code still
+reproduces exactly; `python3 experiments/curiosity_probe.py --homes-off`
+regenerates these files.
+
 ## 6. Evidence for the next step
 
 See `STATUS.md`, "Next step". Short version, from

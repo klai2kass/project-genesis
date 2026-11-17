@@ -2,12 +2,12 @@
 
 Last checked: 2026-11-17, by running the commands in this file (not from memory).
 
-**Milestones 1 and 2 are built, tested, measured and documented.** GitHub
-(`origin/main`) has everything up to `e3e07c3` (the Milestone 2 build); this
-session's commits are local only, not pushed. Milestone 2 = a rest need plus two inherited traits (curiosity,
-industriousness). What they do, measured: `docs/MILESTONE2_REPORT.md`.
-**Proposed next step: Milestone 3, step 1, "a home"** (section 5). Not
-started; it waits for your go.
+**Milestones 1 and 2 are done. Milestone 3, step 1 ("a home") is built,
+tested and measured.** Every agent remembers where it was born and wanders
+within 6 tiles of it; families now meet twice as often and survival is
+unchanged (`docs/MILESTONE3.md`). **Proposed next: step 2, encounter memory**
+(section 5); not started, it waits for your go. GitHub (`origin/main`) has
+everything up to `e3e07c3`; this session's commits are local only.
 
 Plain words: a **tick** is one step of time. A **seed** is the number a world
 is built from (same seed = same world). A **fingerprint** is a short code that
@@ -18,147 +18,134 @@ is equal only when two worlds are exactly equal. **Headless** = no window.
 - [x] World, food, agents that search (around water), gather, eat, rest,
       reproduce and die. Same seed = same world.
 - [x] Rest need and traits (curiosity, industriousness), inherited +/-5.
+- [x] **Homes**: `home` per agent (birth tile), `home_radius` 6 (0 = off).
 - [x] Every decision has a "why"; recent decisions are kept in saves.
-- [x] Saves version 3; versions 1 and 2 load and keep their old rules.
-- [x] Milestone 1 behaviour frozen: `tests/test_baseline.py`,
+- [x] Saves version 4; versions 1, 2 and 3 load and keep their old rules.
+- [x] Milestone 1 and Milestone 2 behaviour frozen and reproduced exactly:
+      `tests/test_baseline.py`, `tests/test_home.py`,
       `experiments/baseline/make_baseline.py --check`.
-- [x] Browser page (checked this session at http://127.0.0.1:8766, see 3).
+- [x] Browser page, including the clicked agent's home (checked this
+      session at http://127.0.0.1:8766, see 3).
 - [x] Measurement scripts in `experiments/`, results in `experiments/results/`.
 - [ ] `why.py --load` reads the stored history (it still replays instead).
 - [ ] `--summary` does not report action mix or trait averages.
 
 ## 2. Tests (run this session)
 
-`python3 -m unittest discover -s tests` -> `Ran 109 tests in 38.7s`, `OK`.
-By file: baseline 5, controls 11, determinism 7, history 8, movement 7,
-overrides 11, rest 12, rest_design 14, save_load 10, summary 5,
-trait_streams 5, traits 8, why_log 6. No test was changed this session.
-Reference run: `python3 run_headless.py --seed 42 --ticks 500 --every 0`
--> 92 alive, fingerprint `63826e5a26ffdded` (same as after the Milestone 2
-build). Speed: seed 42, 2,000 ticks, history on, about 4.5 s (about 450
-ticks per second, measured while another experiment was running).
+`python3 -m unittest discover -s tests` -> `Ran 121 tests`, `OK` (about 47 s).
+By file: baseline 5, controls 11, determinism 7, history 8, home 12,
+movement 7, overrides 11, rest 12, rest_design 14, save_load 10, summary 5,
+trait_streams 5, traits 8, why_log 6.
+Changed tests (on purpose): `test_save_load.py` and `test_traits.py` expect
+save version 4; the curiosity turning test in `test_rest.py` runs with
+`home_radius=0` (it measures turning alone).
+`make_baseline.py --check` -> ALL SAME (Milestone 1 unchanged).
+Reference run: `python3 run_headless.py --seed 42 --ticks 500 --every 0` ->
+100 alive, fingerprint `36327594028337c8` (with homes; before homes it was
+92 alive, `63826e5a26ffdded`, and `--set home_radius=0` still gives the same
+behaviour as then, see `tests/test_home.py`).
 
 ## 3. Browser check (this session)
 
-Server started from the shell on port 8766 (`python3 server.py --no-browser
---port 8766`; Claude's sandbox blocks ports, so it ran outside the sandbox),
-page opened in the app's browser. Checked: map draws; Play/Pause, Step and
-20x work; stats show resting now and average traits; clicking agent #1
-shows energy, rest bar, "resting (until 70)", traits with their effect
-("turns 15% of wandering ticks", "loses 1.06 rest per move"), the options
-table and earlier decisions; Save (name `claude_browsercheck`) then Load
-returns to tick 392, paused, with the fading "Loaded ..." message; earlier
-decisions still show after loading. **No console errors.**
+Server started from the shell on port 8766 (Claude's sandbox blocks ports,
+so it ran outside the sandbox), page opened in the app's browser.
+- Milestone 2 check: map, Play/Pause, Step, 20x, stats (resting now, average
+  traits), agent panel (rest bar, traits, options, earlier decisions), Save
+  then Load (back to tick 392, paused, "Loaded ..." message). No errors.
+- Homes check (fresh tab): clicking agent #45 shows a gold square at its
+  home (55, 6), a dashed box for its 6-tile area, and the line "Home (55, 6),
+  where it was born · 6 tiles away · wanders within 6 tiles of it"; its
+  earlier decisions include "... I am 7 tiles from home (55, 6) and stay
+  within 6, so heading home". Legend has the new entry. **No console errors.**
 Small things noticed (not fixed): the population graph starts empty after a
-load (it is not stored in saves); the rest bar shows the value after this
-tick's rest (36) while the decision text shows the value at decision time
-(33). The test save `saves/claude_browsercheck.json` was left in `saves/`
-(ignored by git); delete it if you like.
+load (not stored in saves); the rest bar shows the value after this tick's
+rest while the decision text shows the value at decision time. The test save
+`saves/claude_browsercheck.json` is still in `saves/` (ignored by git).
 
-## 4. Measured results (details in `docs/MILESTONE2_REPORT.md`)
+## 4. Measured results
 
-Curiosity, 10 seeds x 3,000 ticks (`experiments/curiosity_probe.py`):
+**Homes** (`docs/MILESTONE3.md`; `experiments/encounter_probe.py`, 5 seeds x
+3,000 ticks; `stage_compare.py`):
 
-| | low (10) | neutral (50) | high (90) |
+| | homes off (Milestone 2) | homes, radius 6 (default) | radius 3 |
 | --- | --- | --- | --- |
-| direction changes while wandering | 16.4% | 22.5% | 28.6% |
-| straightness (1 = straight line) | 0.53 | 0.47 | 0.43 |
-| tiles per 100 ticks | 65.6 | 64.2 | 62.3 |
-| moves until food in sight again | 4.76 | 4.84 | 4.86 |
-| starved %, everyone the same | 66.9 +/- 1.0 | 66.1 +/- 0.8 | 65.9 +/- 1.0 |
-| population, everyone the same | 93.5 | 93.2 | 93.5 |
-| alive at end, mixed worlds (30 extra seeds) | 17.3 | 34.1 | 42.8 |
-
-Plain answer to "does curiosity matter?": it always changes how agents
-walk; it does not change the world when everyone has the same value; but
-when families with different curiosity compete, the curious (zigzagging)
-families win in 34 of 40 worlds. "Curious" here means "searches its patch
-thoroughly", not "explores far". In normal runs (founders 40-60) no trait is
-selected beyond chance in 3,000 ticks (`experiments/trait_drift.py`).
-
-## 5. Next step (evidence-based recommendation)
-
-**Milestone 3, step 1: a home.** Each agent remembers one place, the tile
-where it was born (founders: where they start). When it wanders (no food in
-sight, or pack full) and is more than `home_radius` tiles from home, it steps
-toward home instead of drifting on. Eating, gathering, resting, reproducing
-and walking to food it can see do not change. No new dice. Then **step 2:
-encounter memory** (who did I meet, where, when, how often), shown in the
-agent panel, at first changing no behaviour.
-
-**Why this first (FACT, `experiments/encounter_probe.py`, 5 seeds x 3,000
-ticks, counted after tick 500):**
-
-| | today's rules | prototype home, radius 6 | prototype home, radius 3 |
-| --- | --- | --- | --- |
+| meetings that are family | 6.0% | 13.0% | 20.0% |
+| pairs that meet 5+ times | 8.5% | 21.1% | 26.6% |
 | different agents met in a life | 38.3 | 25.0 | 19.4 |
-| pairs that meet 5+ times | 8.5% | 21.5% | 26.9% |
-| pairs that meet again after 100+ ticks apart | 7.3% | 13.5% | 11.7% |
-| meetings that are family (parent/child, siblings) | 6.0% | 13.1% | 20.1% |
-| home range radius (tiles) | 11.0 | 5.2 | 3.7 |
-| population after tick 500 | 93.0 | 93.4 | 93.3 |
-| starved % of deaths | 66.5 | 65.4 | 64.6 |
-| births | 946 | 938 | 939 |
+| population after tick 500 | 93.0 | 93.1 | 93.4 |
+| starved % of deaths | 66.5 | 65.4 | 66.1 |
+| births | 946 | 931 | 947 |
 
-(Meeting = within 1 tile. The prototype lives only inside the experiment
-script and is never saved.)
+Both success lines met (family share and 5+ meetings at least doubled), all
+Milestone 2 bands hold, speed unchanged.
 
-Plain reading: today an agent drifts over a circle about 11 tiles wide and
-meets mostly strangers. Recognising individuals would mostly record people
-it never sees again, so relationships would have almost nothing to grow on.
-A remembered home is the smallest change that keeps the same agents near
-each other: family meetings double (radius 6) or triple (radius 3), pairs
-that meet 5+ times rise 2.5 times, and survival does not change. It is individual memory of a
-place (VISION: "agents remember places and individuals"), not a social rule.
+**Curiosity** (`docs/MILESTONE2_REPORT.md`, `docs/MILESTONE3.md`): it always
+changes how agents walk. Without homes, high-curiosity families out-bred low
+ones in 34 of 40 mixed worlds. **With homes that advantage mostly
+disappears** (25 of 40, within luck), because homes keep every agent near
+its patch, which was the zigzaggers' edge. In normal runs no trait is
+selected beyond chance.
 
-**Alternative considered and rejected as the FIRST step: encounter memory
-now** (your expectation). It is cheap and changes no behaviour, but with
-today's movement it would fill with one-off strangers (only 7% of pairs meet
-again after 100 ticks; 6% of meetings are family). It stays the planned step
-2, built right after the home, when it has repeat meetings to record.
-**Also rejected: reworking curiosity first.** It works and is selected in
-competition (section 4); changing it now would not move toward the vision.
+## 5. Next step: Milestone 3, step 2, encounter memory (recommended)
 
-**Build plan for step 1 (one stage, one commit):**
-- Files: `genesis/world.py` (`home: [x, y]` on every agent;
-  `SAVE_VERSION = 4`), `genesis/save.py` (`_migrate_3_to_4`: home = current
-  position and `home_radius = 0`, so old saves keep their behaviour; add
-  `home_radius: 0` to `MILESTONE1_RULES`), `genesis/config.py`
-  (`home_radius`, 0 = off; proposed default 6), `genesis/overrides.py`,
-  `genesis/agents.py` (inside `_wander`: if beyond the radius, step to the
-  land neighbour that is closest to home, fixed tie order; why text "...,
-  heading home (8 tiles away, I stay within 6)"), `server.py` and `web/`
-  (mark the selected agent's home on the map), README.
-- Before building: record today's Milestone 2 event digests for seeds
-  42/1/2 as a second frozen reference.
-- Tests (new `tests/test_home.py` + additions): with `home_radius = 0` the
-  event digest equals today's Milestone 2 run exactly; Milestone 1 baseline
-  unchanged; a v3 save migrates and continues identically; home survives
-  save/load; an agent outside the radius steps toward home; home never
-  overrides eat, gather, rest or walking to visible food; children get
-  their birth tile; same seed = same world.
-- Measure: `experiments/encounter_probe.py` switched from the prototype to
-  the real setting, plus `stage_compare.py` and `curiosity_probe.py`.
-- Success: population, starved share, births and age at death stay inside
-  the Milestone 2 bands (pop 80-98, starved 62-73%, births 830-1,010, age
-  265-325, no run dies out) AND family share of meetings at least doubles
-  (6% -> 12%+) AND pairs meeting 5+ times at least double (8.5% -> 17%+).
-- Risks: an agent stuck behind a lake between it and home (the greedy step
-  can bounce; test a lake case, fall back to normal wandering when no step
-  gets closer); crowding near birthplaces could raise local starvation (the
-  prototype says no, measure again); the change in which families win
-  (curiosity) must be re-measured.
+**What:** each agent keeps a small list of the agents it has met: id, first
+tick, last tick, how many separate meetings, and where the last one was.
+**At first it changes no behaviour.** It is shown in the agent panel ("knows
+12 agents; met #31, its sister, 9 times") and measured.
+
+**Why now (evidence):** homes made repeated contact common (21% of pairs
+meet 5+ times, 13% of meetings are family; section 4), so a memory now has
+something to remember. Before homes it would have been mostly one-off
+strangers. Recording before using keeps the step small and testable: the
+world must behave exactly as it does now.
+
+**Alternative rejected for now: curiosity as roaming distance** (each
+agent's own radius = 6 plus or minus a little by curiosity). It would give
+curiosity a real job again, but it changes behaviour and does not move toward
+relationships. Listed as decision 2 below.
+
+**Rule (proposed):**
+- A **meeting** = two living agents within 1 tile of each other at the end
+  of a tick. A meeting that continues from the previous tick is the same
+  meeting (no new count); this needs no extra saved state: an entry with
+  `last == tick - 1` that is still adjacent just updates `last`.
+- Per agent `memory`: a list of `[id, first_tick, last_tick, count, x, y]`,
+  at most `memory_keep` entries (proposed 10). When full, the entry met
+  longest ago is dropped (ties: fewer meetings first, then lower id). No dice.
+- Done once per tick in `sim.step` after all agents acted, with a neighbour
+  grid (one pass over agents).
+
+**Files:** `genesis/memory.py` (new: find meetings, update and cap lists),
+`genesis/sim.py` (one call per tick), `genesis/world.py` (`memory: []`,
+save version 5), `genesis/save.py` (`_migrate_4_to_5`: empty memories),
+`genesis/config.py` and `overrides.py` (`memory_keep`, 0 = off),
+`server.py` and `web/` (panel list, family marked), README, `docs/MILESTONE3.md`.
+
+**Tests:** behaviour unchanged: the event digest and behaviour digest of
+seeds 42/1/2 with memory on equal those with `memory_keep=0` and equal a
+reference frozen from today's code before building; v4 save migrates and
+continues identically; meetings counted once per meeting, not per tick;
+cap and drop order; memory survives save and load; same seed = same world.
+
+**Measure and success:** memory counts agree with
+`experiments/encounter_probe.py` (same definition of a meeting); speed loss
+under 10% and save size growth under 20% (seed 42, 2,000 ticks); in an
+average adult's memory at least one agent met 5+ times.
+
+**Risks:** save size (10 entries x about 100 agents, small next to the
+decision history); a cap of 10 may forget family in crowded spots (measure
+how often kin are dropped); the page list must stay short.
 
 ## 6. Next 5 tasks
 
-1. **Your go for Milestone 3 step 1 (home)**, then build it as in section 5.
+1. **Your go for step 2 (encounter memory)**, then build it as in section 5.
    Check: `python3 -m unittest discover -s tests`, then
    `python3 experiments/encounter_probe.py`.
-2. **Step 2, encounter memory** (record only): per agent the last N agents
-   met (id, first and last tick, count, place), capped, saved, shown in the
-   panel. Files: `genesis/world.py`, `save.py`, `sim.py`, `server.py`, `web/`.
+2. **Decide what curiosity should mean now** (decision 2). If "roaming
+   distance": files `genesis/agents.py`, `genesis/traits.py`, tests; measure
+   with `python3 experiments/curiosity_probe.py`.
 3. **Test industriousness in mixed worlds** (copy the mixed mode of
-   `curiosity_probe.py`): is it selected in competition too? About 2 min.
+   `curiosity_probe.py`).
 4. **`why.py --load` reads stored history.** Files: `why.py`,
    `genesis/history.py`, `tests/test_history.py`.
 5. **Add action mix and trait averages to `--summary`.** Files:
@@ -166,12 +153,14 @@ competition (section 4); changing it now would not move toward the vision.
 
 ## 7. Decisions for you
 
-1. **Go for "home" (section 5)?** Default: wait for your yes.
-2. **`home_radius` default:** 6 (proposed; families meet twice as often) or
-   3 (stronger clustering, family share 20%). Default if you say go: 6.
-3. **Curiosity wording:** describe it on the page as "how often it turns
-   while searching (high = searches its patch thoroughly)". No code change.
-   Default: do it with the next page change.
+1. **Go for encounter memory (section 5)?** Default: wait for your yes.
+2. **Curiosity after homes.** It now matters little. Options: (a) leave it;
+   (b) let it also set each agent's roaming distance around home (curious =
+   wanders further), which matches the word; (c) remove its effect.
+   Default: (a) until you choose.
+3. **`home_radius` = 6** (chosen as proposed). 3 doubles family contact
+   again (20%) but agents meet fewer different agents (19 in a life) and
+   reunite less after long gaps. Change anytime with `--set home_radius=3`.
 4. History caps (20 decisions per agent, 50 dead agents): kept.
 5. The gather-then-eat flaw (6.2% of starvation deaths happen one tick after
    picking food up): still NOT fixed, so all comparisons stay valid.
@@ -180,6 +169,8 @@ competition (section 4); changing it now would not move toward the vision.
 
 - Results are for one map size (60 x 40), one food setting, 3,000 ticks.
 - Mixed-world curiosity results use extreme values (10/50/90), no mutation.
+- Homes never move. How often an agent is stuck on the far side of a lake
+  from its home was not measured on real maps.
 - `why.py` replays from the seed; it does not read stored history.
 - The population graph on the page is not saved; it restarts after Load.
 - History makes saves about 20 times bigger (about 600 KB at 2,000 ticks).
@@ -200,7 +191,7 @@ See the world in your browser (stop with Ctrl+C):
 python3 server.py
 ```
 
-All automatic checks (should end with `Ran 109 tests` and `OK`, about 40 s):
+All automatic checks (should end with `Ran 121 tests` and `OK`, about 45 s):
 
 ```bash
 python3 -m unittest discover -s tests
@@ -212,6 +203,12 @@ Run without the page, with a report:
 python3 run_headless.py --seed 42 --ticks 2000 --every 0 --summary
 ```
 
+The same world without homes (Milestone 2 behaviour):
+
+```bash
+python3 run_headless.py --seed 42 --ticks 2000 --every 0 --summary --set home_radius=0
+```
+
 Why did agent 12 do that?
 
 ```bash
@@ -219,6 +216,10 @@ python3 why.py --seed 42 --ticks 300 --agent 12
 ```
 
 Experiments (each only reads the world; results go to `experiments/results/`):
+
+```bash
+python3 experiments/encounter_probe.py
+```
 
 ```bash
 python3 experiments/curiosity_probe.py
@@ -229,15 +230,11 @@ python3 experiments/curiosity_probe.py --mixed-extra
 ```
 
 ```bash
-python3 experiments/trait_drift.py
-```
-
-```bash
-python3 experiments/encounter_probe.py
-```
-
-```bash
 python3 experiments/stage_compare.py
+```
+
+```bash
+python3 experiments/trait_drift.py
 ```
 
 ```bash
@@ -248,9 +245,15 @@ python3 experiments/starvation_study.py
 python3 experiments/baseline/make_baseline.py --check
 ```
 
-Times on this Mac: curiosity probe about 4 min, mixed extra about 4 min,
-trait drift about 2 min, encounter probe about 3 min, stage compare about
-3 min, starvation study about 25 s, baseline check about 1 min.
+Add `--homes-off` to the two curiosity commands to regenerate the
+Milestone 2 files (`curiosity_probe.txt`, `curiosity_mixed_extra.txt`);
+without it they write the `_home` files. `stage_compare.py` prints both
+(its homes-on output is saved as `stage_compare_home.txt`). Times on this Mac:
+encounter probe about 3 min, curiosity probe about 4 min, mixed extra about
+4 min, stage compare about 4 min, trait drift about 2 min, starvation study
+about 25 s, baseline check about 1 min. `trait_drift.py` and
+`starvation_study.py` now run with homes on; their saved results are from
+before homes.
 
 ## Design choices (one line each)
 
@@ -265,8 +268,13 @@ trait drift about 2 min, encounter probe about 3 min, stage compare about
 - **The server runs the world; the page only draws.**
 - **Experiments only read the world.** Prototypes live in `experiments/`,
   clearly marked, never in `genesis/` and never in saves.
-- **(This session) Mixed worlds as the selection test**, because forced
-  worlds cannot show competition between traits.
+- **Mixed worlds as the selection test**, because forced worlds cannot show
+  competition between traits.
+- **Freeze before changing.** Each step that changes behaviour first freezes
+  today's digests (`experiments/baseline/milestone2.json`), and "setting
+  off" must reproduce them exactly.
+- **Homes: greedy step, no path search.** The simpler choice; a lake in the
+  way just means normal wandering (tested).
 
 ## Known risks
 
@@ -281,6 +289,26 @@ trait drift about 2 min, encounter probe about 3 min, stage compare about
 
 Newest first. Older entries mention section numbers of earlier versions of
 this file; see `git log -p STATUS.md` for those.
+
+### Session 2026-11-17 (part 5: Milestone 3 step 1, homes, built and measured)
+- **Your go** ("Yes, build home") for the plan in the previous STATUS.
+- **Frozen first** (`a603e88`): `experiments/baseline/milestone2.json` and
+  `tests/fixtures/save_v3_seed42_t300.json`, made with the unchanged code.
+- **Built** (`8aec7e8`): `home` field, `home_radius` setting (default 6,
+  0 = off), rule in `_wander`, save version 4 with migration (old saves keep
+  their rules), `MILESTONE1_RULES` also sets `home_radius = 0`. Fixed in
+  passing: a newborn's `last_why` now equals its history record (a test
+  caught the mismatch once homes changed which agent was born last).
+- **Tests:** new `tests/test_home.py` (12); 3 tests updated for version 4 /
+  homes off. 121 tests OK; Milestone 1 check ALL SAME; `home_radius=0`
+  reproduces the frozen Milestone 2 digests and the v3 save exactly.
+- **Page** (`9a900dc`): home square, dashed area, panel line, legend,
+  plainer curiosity wording. Checked in the browser, no console errors.
+- **Measured:** section 4 and `docs/MILESTONE3.md`. Success lines met; side
+  effect: curiosity's competitive edge mostly gone with homes.
+  `curiosity_probe.py --mixed-extra --homes-off` reproduced the Milestone 2
+  file exactly.
+- **Not done:** encounter memory (next, section 5).
 
 ### Session 2026-11-17 (part 4: Milestone 2 finished and measured; next step chosen)
 - **Verified first:** git clean on `main` at `e3e07c3`; remote `origin`

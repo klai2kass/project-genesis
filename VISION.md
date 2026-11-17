@@ -37,7 +37,7 @@ serve this, question it. If this file and the code disagree about what
 
 ## Roadmap
 
-### Works today (Milestones 1 and 2, checked in STATUS.md)
+### Works today (Milestones 1, 2 and step 1 of 3, checked in STATUS.md)
 
 - Seeded world with land, water and regrowing food.
 - About 50 founders, settling near 93 agents, that look for food (walking
@@ -45,8 +45,11 @@ serve this, question it. If this file and the code disagree about what
 - A **rest need** (resting halves energy use, only when not hungry) and two
   inherited **personality traits**: industriousness (how fast an agent
   tires) and curiosity (how often a wandering agent turns).
-- Same seed gives the same result; Milestone 1 behaviour is frozen and
-  reproducible (`tests/test_baseline.py`).
+- A **home** for every agent (where it was born). Wandering agents stay
+  within 6 tiles of it, so families and neighbours keep meeting
+  (`docs/MILESTONE3.md`).
+- Same seed gives the same result; Milestone 1 and Milestone 2 behaviour are
+  frozen and reproducible (`tests/test_baseline.py`, `tests/test_home.py`).
 - "Why" record for every decision: need, options considered, reason; the
   last decisions of every agent are kept in saves.
 - Save and load, with older saves upgraded and keeping their old rules;
@@ -61,16 +64,14 @@ serve this, question it. If this file and the code disagree about what
 
 - A scoring decision system (rules in a fixed order are still enough).
 - A "company" need, sociability or any social behaviour.
-- Memory of places or of other agents. **Agents remember nothing except
-  their own last decisions and the food they are walking to.**
+- Memory of other agents. **Agents remember only their home, their own last
+  decisions and the food they are walking to.**
 
 ### Next (proposed in STATUS.md, not built)
 
-- **Milestone 3, step 1: a home.** Each agent remembers where it was born and,
-  when it has nothing better to do, drifts back toward it. A throwaway
-  prototype (`experiments/encounter_probe.py`) showed this doubles how often
-  family members meet and how often the same two agents meet repeatedly,
-  without changing survival. Step 2: memory of encounters (who, where, when).
+- **Milestone 3, step 2: encounter memory.** Each agent records who it met,
+  where, when and how often. At first it changes no behaviour; it is shown in
+  the agent panel and measured. Only then decide what may use it.
 
 ### Future ambition (nothing below exists)
 
