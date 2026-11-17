@@ -5,12 +5,14 @@ Examples:
     python3 run_headless.py --seed 42 --ticks 500 --save saves/day500.json
     python3 run_headless.py --load saves/day500.json --ticks 500
     python3 run_headless.py --seed 42 --ticks 200 --log decisions.jsonl
+    python3 run_headless.py --seed 42 --ticks 500 --set regrow_per_tick=6 --set vision=6
 """
 
 import argparse
 import json
 
 from genesis import create_world, fingerprint, load_world, save_world, step
+from genesis.overrides import add_set_option, make_world_from_args
 
 
 def main():
@@ -22,9 +24,10 @@ def main():
     parser.add_argument("--log", help="write every decision (with its why) to this file")
     parser.add_argument("--every", type=int, default=100,
                         help="print a status line every N ticks (0 = quiet)")
+    add_set_option(parser)
     args = parser.parse_args()
 
-    world = load_world(args.load) if args.load else create_world(args.seed)
+    world = make_world_from_args(args, parser, create_world, load_world)
     log_file = open(args.log, "w", encoding="utf-8") if args.log else None
 
     if args.every:

@@ -23,7 +23,12 @@ Newest first. A fresh session should read this section first.
   defaults, logs every fill in `world["migration_log"]`, keeps unknown keys,
   rejects newer versions and saves missing essentials with plain messages.
   5 new tests (30 total, all pass). The real `saves/quicksave.json` (v1) loads.
-- **In progress:** step 3 (`--set`).
+- **Step 3 done:** `--set name=value` in `run_headless.py` and `why.py`
+  (`genesis/overrides.py`: type + range rules per setting, plain errors listing
+  valid names, last repeat wins, config files untouched, README documented).
+  11 new tests (41 total, all pass).
+- Note: steps 1 and 2 share one commit (my slip); every later step has its own.
+- **In progress:** step 4 (water dithering).
 
 ## What this project is
 

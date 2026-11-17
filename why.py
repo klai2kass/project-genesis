@@ -5,6 +5,7 @@ Examples:
     python3 why.py --seed 42 --ticks 300 --agent 12   (agent 12's last 5 decisions)
     python3 why.py --seed 42 --ticks 300 --agent 12 --last 20
     python3 why.py --load saves/quicksave.json --ticks 50 --agent 12
+    python3 why.py --seed 42 --ticks 300 --agent 12 --set regrow_per_tick=6
 
 How it works: the world is replayed from the seed (or from a save) for the
 number of ticks you ask for. Because the same seed always gives the same
@@ -16,6 +17,7 @@ from collections import deque
 
 from genesis import (create_world, format_agent_history, format_agent_list,
                      load_world, step)
+from genesis.overrides import add_set_option, make_world_from_args
 
 
 def main():
@@ -28,9 +30,10 @@ def main():
                         help="the agent's number; leave out to list who is alive")
     parser.add_argument("--last", type=int, default=5,
                         help="how many decisions to show")
+    add_set_option(parser)
     args = parser.parse_args()
 
-    world = load_world(args.load) if args.load else create_world(args.seed)
+    world = make_world_from_args(args, parser, create_world, load_world)
     history = deque(maxlen=max(1, args.last))
     for _ in range(args.ticks):
         for event in step(world):

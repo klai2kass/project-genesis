@@ -72,6 +72,30 @@ python3 run_headless.py --seed 42 --ticks 200 --log decisions.jsonl
 
 The last one writes every decision and its "why" to a file, one per line.
 
+## Try settings without editing files (`--set`)
+
+Both `run_headless.py` and `why.py` accept `--set name=value`. Repeat it for
+several settings. It changes that one run only; no file is ever modified.
+A `--set` value beats the default (and, with `--load`, beats the save's value).
+
+```bash
+python3 run_headless.py --seed 42 --ticks 500 --set regrow_per_tick=6
+```
+
+```bash
+python3 run_headless.py --seed 42 --ticks 500 --set regrow_per_tick=6 --set vision=6 --set food_cap=0,3,10
+```
+
+```bash
+python3 why.py --seed 42 --ticks 300 --agent 12 --set regrow_per_tick=6
+```
+
+Notes: `food_cap` takes three numbers (water, grass, forest). If you give the
+same name twice, the last one wins. A wrong name or value stops with a plain
+message that lists the valid names. With `--load`, map-building settings
+(`width`, `height`, `water_share`, `forest_share`, `start_food_share`,
+`start_agents`, `start_energy`) are refused because the world already exists.
+
 ## Ask why one agent did something
 
 List who is alive after 300 ticks:
