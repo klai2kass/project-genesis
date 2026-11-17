@@ -33,22 +33,25 @@ reference experiments/baseline/milestone3_home.json).
 """
 
 
-def meeting_pairs(agents):
-    """Every pair (a, b) of agents within 1 tile, a["id"] < b["id"], in a fixed
-    order. A grid of 2 x 2 tile cells keeps it to one pass over the agents."""
-    cells = {}
+def meeting_pairs(agents, width):
+    """Every pair (a, b) of agents within 1 tile, a["id"] < b["id"]. The order
+    is fixed (agents in list order, then the 9 tiles around in a fixed order),
+    so results never depend on chance. One pass: who stands on which tile.
+    Tiles are numbered on a grid one tile wider on each side (row length
+    width + 2), so stepping off the left or right edge never wraps around."""
+    row = width + 2
+    around = [dy * row + dx for dy in (-1, 0, 1) for dx in (-1, 0, 1)]
+    tiles = {}
     for a in agents:
-        cells.setdefault((a["x"] // 2, a["y"] // 2), []).append(a)
+        tiles.setdefault((a["y"] + 1) * row + a["x"] + 1, []).append(a)
     pairs = []
+    get = tiles.get
     for a in agents:
-        cx, cy = a["x"] // 2, a["y"] // 2
-        for dx in (-1, 0, 1):
-            for dy in (-1, 0, 1):
-                for b in cells.get((cx + dx, cy + dy), ()):
-                    if (b["id"] > a["id"] and abs(a["x"] - b["x"]) <= 1
-                            and abs(a["y"] - b["y"]) <= 1):
-                        pairs.append((a, b))
-    pairs.sort(key=lambda p: (p[0]["id"], p[1]["id"]))
+        here, aid = (a["y"] + 1) * row + a["x"] + 1, a["id"]
+        for d in around:
+            for b in get(here + d, ()):
+                if b["id"] > aid:
+                    pairs.append((a, b))
     return pairs
 
 
@@ -85,7 +88,7 @@ def update_memories(world):
     tick = world["tick"]
     started = 0
     touched = set()
-    for a, b in meeting_pairs(world["agents"]):
+    for a, b in meeting_pairs(world["agents"], world["config"]["width"]):
         started += _remember(a, b["id"], tick)
         _remember(b, a["id"], tick)
         touched.add(a["id"])

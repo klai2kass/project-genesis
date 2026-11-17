@@ -16,6 +16,8 @@ default settings (history on), same seeds.
 
 Run:  python3 experiments/memory_probe.py           (5 seeds x 3000 ticks, ~3 min)
       python3 experiments/memory_probe.py --quick   (2 seeds x 1000 ticks)
+      python3 experiments/memory_probe.py --old-drop-rule   (the rejected first
+            cap rule, for comparison; files memory_probe_oldrule.*)
 Writes experiments/results/memory_probe.json; printout in memory_probe.txt.
 """
 import json
@@ -28,7 +30,23 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
 from genesis import create_world, step, world_to_json  # noqa: E402
+from genesis import memory as memory_mod  # noqa: E402
 from genesis.digest import behaviour_digest  # noqa: E402
+
+# --old-drop-rule: the FIRST cap rule, kept here only so its numbers can be
+# reproduced: forget whoever was met longest ago (ties: fewer meetings, then
+# lower id). The simulation itself uses the rule in genesis/memory.py.
+OLD_RULE = "--old-drop-rule" in sys.argv
+
+
+def _trim_oldest(agent, keep):
+    mem = agent["memory"]
+    while len(mem) > keep:
+        mem.remove(min(mem, key=lambda e: (e[2], e[3], e[0])))
+
+
+if OLD_RULE:
+    memory_mod._trim = _trim_oldest
 
 SEEDS = ["42", "1", "2", "3", "4"]
 TICKS = 3000
@@ -125,6 +143,8 @@ def main():
             ("save_kb_off", "save size at the end, KB, memory off", 0)]
     print("Memory probe: default settings (homes on, history on), seeds %s, %d ticks."
           % (",".join(SEEDS), TICKS))
+    print("Cap rule: %s." % ("OLD (forget the one met longest ago)" if OLD_RULE
+                             else "current (forget the least-met)"))
     print("Same world with memory_keep 10, 1000 and 0 (behaviour identical: %s)."
           % all(r["same_behaviour_on_off"] for r in rows))
     print("%-48s %9s %7s %8s %8s" % ("", "mean", "sd", "min", "max"))
@@ -134,7 +154,8 @@ def main():
         sd = math.sqrt(sum((x - m) ** 2 for x in v) / (len(v) - 1)) if len(v) > 1 else 0.0
         print("%-48s %9.*f %7.*f %8.*f %8.*f" % (label, d, m, d, sd, d, min(v), d, max(v)))
     if "--quick" not in sys.argv:
-        with open(os.path.join(ROOT, "experiments", "results", "memory_probe.json"), "w") as f:
+        name = "memory_probe_oldrule.json" if OLD_RULE else "memory_probe.json"
+        with open(os.path.join(ROOT, "experiments", "results", name), "w") as f:
             json.dump({"seeds": SEEDS, "ticks": TICKS, "rows": rows}, f, indent=1, sort_keys=True)
 
 
