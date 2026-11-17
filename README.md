@@ -135,7 +135,8 @@ the first rule that fits:
 1. **Eat** if it carries food and has room for the energy.
 2. **Reproduce** if it is strong, grown up and rested.
 3. **Gather** if there is food on its tile and room in its pack.
-4. **Move** toward the nearest food it can see, or wander if it sees none.
+4. **Move** toward the nearest food it can *walk to* (around water), or
+   wander if there is none. Food it cannot reach is ignored.
 
 It **dies** if its energy hits 0 (starved) or it reaches its lifespan (old age).
 
@@ -151,7 +152,10 @@ of 100"), the **options** it considered and whether each fitted, and the
 | `genesis/world.py` | Builds a new world from a seed |
 | `genesis/agents.py` | The decision rules (`decide`) and their "why" text |
 | `genesis/sim.py` | One tick of time (`step`) |
-| `genesis/save.py` | Save, load, fingerprint |
+| `genesis/save.py` | Save, load, fingerprint; repairs older saves |
+| `genesis/history.py` | Each agent's recent decisions, stored in the world and saves |
+| `genesis/overrides.py` | The checks behind `--set` |
+| `genesis/summary.py` | The report behind `--summary` |
 | `genesis/rng.py` | The dice. One number, so saves can store it |
 | `genesis/whylog.py` | Turns decision records into readable text |
 | `run_headless.py` | Run with no page |
@@ -159,6 +163,9 @@ of 100"), the **options** it considered and whether each fitted, and the
 | `server.py` | Runs the world and serves the page |
 | `web/` | The page. It only draws; no rules live there |
 | `tests/` | The automatic checks |
+| `experiments/` | `regrow_sweep.py`: compares `regrow_per_tick` values |
+| `VISION.md` | The long-term idea and roadmap (read first) |
+| `docs/MILESTONE2.md` | Proposal for needs and personality (not built) |
 | `STATUS.md` | What works right now, and what to do next |
 
 The `genesis/` folder never touches the page or the server. That is what

@@ -1,8 +1,10 @@
 # Project Genesis: status
 
-Last checked: 2026-11-17, by actually running the commands below (not from memory).
+Last checked: 2026-11-17, by running the commands in this file (not from memory).
 
-**Milestone 1 is complete.** Read "Next 5 tasks" to continue.
+**Milestone 1 is complete and Steps 0-9 of the second session are done.**
+Milestone 2 is only a written proposal (`docs/MILESTONE2.md`). Read the
+"Session log" first, then "Next 5 tasks" and "Decisions you need to make".
 
 ## Session log
 
@@ -84,201 +86,219 @@ Newest first. A fresh session should read this section first.
   change behaviour, test-checked). 6 values x 5 seeds (42,1,2,3,4) x 3,000
   ticks. Results are averages over the 5 seeds; table and recommendation are
   in the final section below.
-- **In progress:** step 9 (Milestone 2 proposal).
+- **Step 9 done:** `docs/MILESTONE2.md` (proposal only, nothing built).
+- **Final check:** 64 tests pass; `run_headless.py --seed 42 --ticks 500`
+  gives 55 alive, fingerprint `2e91ef5c79b33484`, identical on two runs.
+  Server port still blocked in this sandbox (see section 9).
+- **In progress:** nothing. Next: "Next 5 tasks".
 
-## What this project is
+## 1. What was completed
 
-A small artificial world that runs on this Mac, offline and for free.
-Simple creatures ("agents") live on a map: they look for food, eat, have
-children and die. The world is built from a **seed** (any number or word):
-the same seed always produces exactly the same world and the same story.
-You can watch it on a map in your browser and ask **why** an agent did
-something.
+All steps 0-9 of this session: verified state; `VISION.md`; backward-
+compatible saves; `--set`; water dithering fix; `--summary`; load pop-up in
+the browser; decisions stored in saves; regrowth experiment; Milestone 2
+proposal. Every step except the first two has its own commit (steps 1 and 2
+share one). Nothing was pushed (there is no remote).
 
-The long-term vision (agents with personalities, needs and memories) is
-**not** in this folder as a document. See "Decisions you need to make".
+Plain words: a **fingerprint** is a short code equal only when two worlds are
+exactly equal. A **tick** is one step of time. **Headless** means running
+with no window. A **migration** upgrades an old save file when loading.
 
-## What exists
+## 2. What changed (file by file)
 
-Everything is written in Python 3.9 (already on the Mac). The map page uses
-a little HTML, CSS and JavaScript, only to draw. Nothing was installed.
-
-| File or folder | What it is |
+| File | Change |
 | --- | --- |
-| `genesis/` | The simulation itself. Runs with no window ("headless") |
-| `genesis/config.py` | All the numbers: map size, food, energy, lifespan |
-| `genesis/world.py` | Builds a new world from a seed |
-| `genesis/agents.py` | How an agent decides: its need, its options, its reason |
-| `genesis/sim.py` | Moves time forward one step (a "tick") |
-| `genesis/save.py` | Save, load, and a "fingerprint" (a short code that is equal only if two worlds are exactly equal) |
-| `genesis/rng.py` | The dice. Their whole memory is one number, so a save can store it |
-| `genesis/whylog.py` | Turns decision records into readable text |
-| `genesis/__init__.py` | Lists what the folder offers to other files |
-| `run_headless.py` | Runs the world in the Terminal, no page |
-| `why.py` | Shows the last decisions of one agent |
-| `server.py` | Runs the world and shows it on a local web page |
-| `web/` | The page: `index.html`, `style.css`, `app.js` |
-| `tests/` | Automatic checks (25 of them, in 4 files) |
-| `saves/` | Your saved worlds. Not stored in git. Holds `quicksave.json`, a test save |
-| `README.md` | Longer guide: controls, how agents think, things to try |
-| `STATUS.md` | This file |
-| `.gitignore` | Tells git which files to leave out (saves, logs, caches) |
-| `.claude/` | Settings for the Claude app, not part of the project. Left out of git |
+| `VISION.md` (new) | Principles and roadmap, "works today" vs "future" |
+| `genesis/save.py` | Save format 2; repairs missing/old fields on every load; `migration_log`; keeps unknown keys; plain errors |
+| `genesis/overrides.py` (new) | Type and range checks for `--set` |
+| `genesis/agents.py` | `_walk_to_food`: real walking distance, ignores unreachable food, keeps its target |
+| `genesis/history.py` (new) | Per-agent decision history stored in the world |
+| `genesis/summary.py` (new) | Report behind `--summary` |
+| `genesis/sim.py` | Records history; die events carry `age` and `cause` |
+| `genesis/world.py` | Save version 2; agents get `target`; world gets `history`, `history_dead` |
+| `genesis/config.py` | New settings `history_keep` (20), `dead_history_keep` (50) |
+| `run_headless.py`, `why.py` | `--set` (both), `--summary` (headless) |
+| `server.py` | Trail now read from the world's history; load reply shows tick and seed |
+| `web/app.js`, `index.html`, `style.css` | Fading load/error pop-up |
+| `experiments/regrow_sweep.py` (new) | The regrowth comparison |
+| `docs/MILESTONE2.md` (new) | The proposal |
+| `tests/` | 4 new files; additions to `test_save_load.py`, `test_controls.py` |
+| `README.md` | `--set`, `--summary`, new files |
 
-## How to run it
+## 3. Tests actually run (this session, final run)
 
-See the world on a map (your browser opens by itself):
+`python3 -m unittest discover -s tests` printed `Ran 64 tests in 16.4s` and
+`OK`. By file: controls 11, determinism 7, history 8, movement 7, overrides
+11, save_load 9, summary 5, why_log 6. Not covered by automatic tests: the
+real web page in a browser (see Remaining limits), and starting the server.
+
+## 4. Current performance (seed 42, 2,000 ticks, this Mac, measured)
+
+| | Speed | Save size | Save / load time |
+| --- | --- | --- | --- |
+| History on (default 20 / 50) | about 850 ticks/s | 605 KB | 4 ms / 4 ms |
+| History off (`--set history_keep=0`) | about 990 ticks/s | 28 KB | under 1 ms |
+| Before this session (Milestone 1) | about 1,800 ticks/s (claimed earlier; the old code measured 1.1 s per 2,000 ticks) | about 30 KB | not measured |
+
+Timings are noisy (a few runs varied by about 10%). The slowdown comes from
+the new walking-distance search (step 4) and from history (step 7).
+
+## 5. Remaining bugs and limitations
+
+- The real server and page were NOT run in this sandbox (port blocked). The
+  load pop-up was checked only as an injected snippet (see step 6 above).
+- Food farther than the view (13 x 13 tiles) is still unseen. A long detour
+  around a very large lake is not planned; the agent re-searches each tick.
+- Several agents can still stand on one tile.
+- Starvation is still about two thirds of all deaths at every regrowth
+  setting tested (section 6).
+- History makes saves about 20 times bigger (605 KB); fine on disk, grows
+  with population (about 290 bytes per remembered decision).
+- `why.py` still replays from the seed; it does not read stored history.
+- Back-and-forth moves while heading to food fell from 9,828 to 5,384 over
+  5 seeds x 2,000 ticks, not to zero (food gets eaten by others, so targets change).
+- One test uses real time (0.7 s) and could rarely fail on a very busy Mac.
+- Python 3.9 only; no remote backup (run `git push` yourself once a remote exists).
+
+## 6. Regeneration experiment results
+
+`regrow_per_tick` changed with `--set`, code default left at 4. 5 seeds
+(42, 1, 2, 3, 4) x 3,000 ticks each, averages, via
+`python3 experiments/regrow_sweep.py` (about 1 minute, reproduced twice).
+
+| regrow | died out | agents at end | lowest pop | highest pop | starved % of deaths | avg age at death | avg food on map | pop at t300 / t1500 / t3000 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2 | 0/5 | 28.8 | 20.4 | 81.2 | 75.6 | 275 | 53 | 31 / 29 / 29 |
+| 3 | 0/5 | 45.0 | 34.2 | 92.8 | 71.9 | 287 | 33 | 51 / 47 / 45 |
+| **4 (default)** | 0/5 | 60.8 | 48.0 | 107.0 | 68.9 | 295 | 37 | 78 / 58 / 61 |
+| 6 | 0/5 | 93.8 | 50.0 | 142.2 | 67.7 | 295 | 46 | 134 / 92 / 94 |
+| 8 | 0/5 | 123.8 | 50.0 | 192.4 | 66.5 | 297 | 59 | 184 / 121 / 124 |
+| 12 | 0/5 | 173.4 | 50.0 | 287.4 | 67.6 | 288 | 111 | 211 / 178 / 173 |
+
+What the numbers say: population grows about in proportion to regrowth, and
+nobody died out at any value. The starved share barely moves (76% down to
+about 67%), so more food gives more agents, not a gentler world. Every run
+shows a boom then a drop (for example 78 at tick 300 down to 58 at tick 1500
+at the default), then a steady level. Only 5 seeds, one map size, one length.
+The reason the starved share stays put is a guess (agents multiply until food
+is short again); it was not tested.
+
+## 7. Recommended `regrow_per_tick`
+
+**Recommendation: 6** (your decision; the code still says 4).
+- It keeps the world as deadly as before (starved share 67.7% against 68.9%,
+  average age at death unchanged at 295), which matches "no peaceful world".
+- It gives a steady population of about 94 instead of 61 (lowest 50 instead of
+  48), so there are more agents near each other for later social features,
+  and it is less fragile (at 2 or 3 the population sits at 29 to 45).
+- It costs speed: roughly 50% more agents means roughly 50% more work per tick.
+- If you prefer fewer agents or faster runs, keep 4: it is also stable.
+- Values of 8 or more mainly add agents (123 to 173) without more scarcity.
+To try it: `python3 run_headless.py --seed 42 --ticks 2000 --every 0 --summary --set regrow_per_tick=6`
+
+## 8. Milestone 2 proposal
+
+Written in full in [docs/MILESTONE2.md](docs/MILESTONE2.md): numerical needs
+(hunger, rest, company), four personality traits, scored decisions with
+"why" records, no LLM, file changes, save changes, determinism, tests,
+performance risks, 8-step build order, 7 decisions for you. Not built.
+
+## 9. Copy-paste commands
+
+Run from the project folder:
 
 ```bash
 cd ~/Desktop/"Project Genesis"
 ```
 
+See the map in your browser (run this in your own Terminal; Claude's sandbox
+blocks the port). Stop with Ctrl+C:
+
 ```bash
 python3 server.py
 ```
 
-Stop it with **Ctrl+C** in the Terminal. If it says the port is in use, it
-is already running in another Terminal window. After any code change, stop
-it and start it again to see the change.
-
-Run the automatic checks (should end with `Ran 25 tests` and `OK`):
+All automatic checks (end should say `Ran 64 tests` and `OK`):
 
 ```bash
-python3 -m unittest discover -s tests -v
+python3 -m unittest discover -s tests
 ```
 
-Run in the Terminal with no page:
+Run with no page and a report:
 
 ```bash
-python3 run_headless.py --seed 42 --ticks 500
+python3 run_headless.py --seed 42 --ticks 2000 --every 0 --summary
 ```
 
-Ask why agent 12 did what it did:
+Experiment with settings (repeat `--set` as needed; nothing is saved to files):
+
+```bash
+python3 run_headless.py --seed 42 --ticks 2000 --every 0 --summary --set regrow_per_tick=6 --set vision=6
+```
+
+Why did agent 12 do that?
 
 ```bash
 python3 why.py --seed 42 --ticks 300 --agent 12
 ```
 
-## What works
+Compare regrowth values:
 
-Checked on 2026-11-17:
+```bash
+python3 experiments/regrow_sweep.py
+```
 
-- All 25 tests pass.
-- `run_headless.py --seed 42 --ticks 500` ends with 49 agents alive and
-  fingerprint `f8afe5e75d1209c4`, the same every time.
-- The map page: pause/play, one step, speeds 1× 2× 5× 20×, new world from a
-  seed, save, load. Click an agent to see its need, the options it weighed,
-  its reason, and its earlier decisions.
-- `why.py` prints the last decisions of any agent, alive or dead.
-- Saves store the seed, the tick count and the position of the dice, so a
-  loaded world continues exactly as the original would have.
-- Speed: about 1,800 ticks per second with no page (2,000 ticks in 1.1 s).
-  A save file is about 30 KB.
+## 10. Next 5 tasks
 
-## What is broken or missing
-
-Nothing is broken. Rough edges, none blocking:
-
-- The world is harsh: about two thirds of all deaths are starvation.
-- Water dithering fixed in step 4 (see Session log). Food farther than the 13x13 view is still unseen.
-- Several agents can stand on the same tile.
-- The page forgets an agent's earlier decisions when you load a save or
-  restart the server. `why.py` does not have this limit.
-- No automatic test clicks the real web page. It was checked by hand.
-
-## Milestone 1 checklist
-
-| Item | State |
-| --- | --- |
-| Small seeded world | done |
-| About 50 agents that eat, move, gather, reproduce, die | done |
-| Simple map view | done |
-| Pause and speed controls | done, tested in `tests/test_controls.py` |
-| Save / load | done |
-| Simulation runs with no UI | done |
-| Test: same seed gives same world and same result after N steps | done, `tests/test_determinism.py` |
-| Test: save then load gives identical state | done, `tests/test_save_load.py` |
-| "Why" log: need, options considered, reason | done, `tests/test_why_log.py` |
-| Command and view for one agent's last decisions | done: `why.py` and the page's Agent panel |
-
-## Design choices (one line each)
-
-- **Python for everything, plus a thin web page.** Node.js is not installed;
-  Python is, so nothing needs installing.
-- **The world is one plain dictionary.** That makes a save file just that
-  dictionary written as text (JSON).
-- **Our own small dice (`rng.py`).** Its memory is one number, and it gives
-  the same results on every Python version.
-- **Rules in a fixed order, first one that fits wins.** Simplest thing that
-  explains itself. Scoring by needs can replace it in a later milestone.
-- **Recent decisions ARE stored in the save** (last 20 per agent, last 50
-  dead agents). `why.py` still replays from the seed.
-- **The server runs the world; the page only draws.** So the rules exist in
-  one place and stay testable.
-
-## Next 5 tasks
-
-Each is small. After each one: run the tests, commit, update this file.
-Changing a rule changes every fingerprint. That is expected; the tests
-compare two runs with each other, not against a stored code.
-
-1. **Make old saves survive new settings.**
-   Files: `genesis/save.py`, `tests/test_save_load.py`.
-   When loading, fill any setting missing from the save's `config` with the
-   value from `DEFAULT_CONFIG`. Add a test that deletes one key from a save
-   and loads it.
-   Check: `python3 -m unittest discover -s tests -v`
-
-2. **Try settings without editing files.**
-   Files: `run_headless.py`, `why.py`.
-   Add `--set name=value` (repeatable) and pass it to `create_world(seed, config)`.
-   Check: `python3 run_headless.py --seed 42 --ticks 500 --set regrow_per_tick=6`
-   (should end with more agents alive than 49).
-
-3. **Stop agents dithering at water.**
-   Files: `genesis/agents.py` (`_choose_move`), new `tests/test_movement.py`.
-   When the straight step is blocked, try the two directions next to it
-   before wandering. Test with a tiny hand-made world with a strip of water.
-   Check: `python3 run_headless.py --seed 42 --ticks 2000` (today: 285
-   starved out of 427 births; it should not get worse).
-
-4. **A summary of how lives went.**
-   Files: `run_headless.py`, `genesis/whylog.py`, `tests/test_why_log.py`.
-   Add `--summary`: deaths by cause, average age at death, share of children
-   that died before adulthood.
-   Check: `python3 run_headless.py --seed 42 --ticks 2000 --summary`
-
-5. **Keep an agent's story on the page after loading a save.**
-   Files: `server.py` (`Game._use_world`), `tests/test_controls.py`.
-   Simplest way: after a load, show a note in the Agent panel that earlier
-   decisions are available through `why.py`. Do not store history in saves
-   without asking (see decisions).
-   Check: `python3 -m unittest discover -s tests -v`, then load a save on the page.
-
-## Known risks
-
-- **Python 3.9 only.** Do not use newer Python features (`match`, `int | str`).
-- **Replays only match if code and settings are unchanged.** `why.py` on an
-  old save shows today's rules, not the rules from when it was saved.
-- **One test uses real time** (`test_pause_stops_time_and_play_restarts_it`
-  waits 0.7 s). On a very busy Mac it could fail once; run it again.
-- **Claude's sandbox blocks two things**: writing to `.git` (commits need
-  approval) and opening a local port (so `server.py` must be started
-  outside the sandbox, or by you in the Terminal). Your own Terminal is not
-  affected.
-- **Big populations slow the page.** At 20× speed with over ~300 agents,
-  Python may not keep up. Not a problem at today's ~50-100.
-- **Only a local git history, no backup.** Run `git push` yourself when you
-  have a remote set up.
+1. **Check the real page by hand.** Files: none. Run `python3 server.py`,
+   press Save, then Load, and confirm the pop-up at the top fades. Click an
+   agent after loading and confirm earlier decisions are listed.
+   Check: you see both. Tell me if not.
+2. **Let `why.py --load` read stored history.** Files: `why.py`,
+   `genesis/history.py`, new test in `tests/test_history.py`. When the save has
+   history for the agent and `--ticks 0`, print it without replaying.
+   Check: `python3 -m unittest discover -s tests` and
+   `python3 run_headless.py --seed 42 --ticks 300 --save saves/t.json` then
+   `python3 why.py --load saves/t.json --ticks 0 --agent 3`.
+3. **Find what really changes the death rate.** Files: new
+   `experiments/mortality_sweep.py` (copy of the regrow sweep), STATUS.md.
+   Sweep `repro_cost`, `food_energy`, `repro_cooldown` (never the code defaults).
+   Check: `python3 experiments/mortality_sweep.py`.
+4. **Milestone 2, build step 1** (fields only, behaviour unchanged). Files:
+   `genesis/world.py`, `genesis/save.py`, `web/app.js`, tests. Needs your
+   answers first (below). Check: all tests pass, `saves/quicksave.json` loads.
+5. **Optional: shrink saves with a string table.** Files: `genesis/save.py`,
+   `tests/test_save_load.py`. Only if 600 KB saves bother you; estimated about
+   half the size. Check: same tests plus a size print.
 
 ## Decisions you need to make
 
-1. **Add the vision document.** Copy it into this folder as `VISION.md` so
-   later sessions can read it. It was never in the repo.
-2. **Is the harsh world what you want?** Most children starve. One number
-   changes it: `regrow_per_tick` in `genesis/config.py` (higher = gentler).
-3. **What is Milestone 2?** Suggestion: needs as numbers (hunger, rest,
-   company) and personality traits that change the rule order, still with
-   no LLM. Nothing for it has been started.
-4. **Should saves also keep each agent's recent decisions?** Today they do
-   not (smaller files, simpler). Say so if you want the history inside saves.
+Safe defaults were used for all of them.
+
+1. **`regrow_per_tick`: keep 4 or move to 6?** (Section 7.) Default: kept 4.
+2. **History caps.** 20 decisions per agent, 50 dead agents (605 KB saves).
+   Default: kept as is. Lower for smaller saves, higher for longer stories.
+3. **Milestone 2.** Read the 7 questions at the end of `docs/MILESTONE2.md`;
+   say "go with the defaults" or answer them. Nothing is started until then.
+4. **Is the harsh world right?** This session's data suggests food amount
+   alone does not change the share of starvation deaths. If you want that
+   share lower, task 3 looks for levers; this is your call.
+5. **Dither fix is slower** (about 1.1 s to 1.9 s per 2,000 ticks). Acceptable?
+   Default: yes.
+
+## Design choices (one line each)
+
+- **Python for everything, plus a thin web page.** Node.js is not installed.
+- **The world is one plain dictionary.** A save is that dictionary as JSON text.
+- **Our own dice (`rng.py`).** Its memory is one number, stored in the save.
+- **Rules in a fixed order, first one that fits wins.** Scoring is proposed for Milestone 2.
+- **Decisions ARE stored in saves** (capped), so the page survives load.
+- **Old saves are repaired on every load** with documented defaults, never silently.
+- **The server runs the world; the page only draws.**
+
+## Known risks
+
+- Claude's sandbox blocks writing to `.git` in some modes and opening a port;
+  commits worked in this session, the server did not start.
+- Replays (`why.py`) match only if code and settings are unchanged.
+- Big populations slow the page (over about 300 agents at 20x).

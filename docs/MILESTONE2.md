@@ -156,14 +156,14 @@ Old history records without scores stay valid.
 
 ## 9. Performance risks
 
-- Scoring 7 candidates per agent per tick, plus the reachability search that
-  already costs about 40% of runtime. Budget: no more than 2x slower
+- Scoring 7 candidates per agent per tick, on top of the reachability search
+  (which already slowed 2,000 ticks from about 1.1 s to 1.9 s, measured in step 4). Budget: no more than 2x slower
   (about 400 ticks/s with ~100 agents).
 - "Company" needs the nearby agents. A naive scan is agents x agents (10,000
   checks at 100 agents, 1,000,000 at 1,000). Plan: one pass per tick that
   buckets agents into a coarse grid, then each agent looks only at its own and
   neighbouring cells.
-- History records get larger (scores). Save size estimate: +30-50%. Lower
+- History records get larger (scores). Save size: not measured, expect noticeably larger (guess, to be measured in step 4 of the build order). Lower
   `history_keep` or add a string table if it matters.
 - The page sends the selected agent's trail every poll; scores add a little.
 
