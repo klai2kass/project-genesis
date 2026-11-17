@@ -54,9 +54,16 @@ async function send(command) {
     });
     const result = await reply.json();
     showMessage(result.ok ? result.message : result.error, !result.ok);
+    if (command.action === "load") {
+      showToast(result.ok ? result.message : "Could not load: " + result.error,
+                !result.ok);
+    }
     return result.ok;
   } catch (error) {
     showMessage("Could not reach the server. Is server.py still running?", true);
+    if (command.action === "load") {
+      showToast("Could not load: the server did not answer.", true);
+    }
     return false;
   }
 }
@@ -153,6 +160,22 @@ function setRunState(kind, text) {
   const label = $("run-state");
   label.className = "state " + kind;
   label.textContent = text;
+}
+
+// A short pop-up that fades away by itself (longer for errors). It never
+// takes clicks, so the controls underneath keep working.
+let toastTimers = [];
+function showToast(text, isError) {
+  const toast = $("toast");
+  toastTimers.forEach(clearTimeout);
+  toast.textContent = text;
+  toast.classList.toggle("error", Boolean(isError));
+  toast.hidden = false;
+  requestAnimationFrame(() => toast.classList.add("show"));
+  toastTimers = [
+    setTimeout(() => toast.classList.remove("show"), isError ? 6000 : 3500),
+    setTimeout(() => { toast.hidden = true; }, isError ? 6700 : 4200),
+  ];
 }
 
 function showMessage(text, isError) {

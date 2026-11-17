@@ -199,8 +199,8 @@ class Game:
                     raise ValueError("No save called %s." % command["name"])
                 self._use_world(load_world(path))
                 self.paused = True   # paused so you can look before it moves on
-                return "Loaded %s at tick %d (paused)" % (command["name"],
-                                                          self.world["tick"])
+                return "Loaded %s: tick %d, seed %s (paused)" % (
+                    command["name"], self.world["tick"], self.world["seed"])
         raise ValueError("Unknown action.")
 
     @staticmethod

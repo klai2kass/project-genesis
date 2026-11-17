@@ -101,10 +101,13 @@ def world_from_json(text):
         raise ValueError("This save is missing essential data: %s."
                          % ", ".join(missing))
     # Unknown extra keys are deliberately left in place, never discarded.
-    while world["version"] < SAVE_VERSION:
-        before = world["version"]
-        MIGRATIONS[before](world)
-    _repair(world)
+    try:
+        while world["version"] < SAVE_VERSION:
+            MIGRATIONS[world["version"]](world)
+        _repair(world)
+    except (KeyError, TypeError, AttributeError, IndexError):
+        raise ValueError("This save file is damaged: its contents do not "
+                         "have the shape Genesis expects.")
     return world
 
 

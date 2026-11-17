@@ -88,6 +88,27 @@ class Controls(unittest.TestCase):
         self.assertEqual(fingerprint(self.game.world), saved)
         self.assertTrue(self.game.paused, "a loaded world should start paused")
 
+    def test_load_message_says_tick_and_seed_for_the_page(self):
+        for _ in range(7):
+            self.game.control({"action": "step"})
+        self.game.control({"action": "save", "name": "msg"})
+        text = self.game.control({"action": "load", "name": "msg"})
+        self.assertIn("tick 7", text)
+        self.assertIn("seed 42", text)
+
+    def test_broken_saves_fail_with_a_plain_error_and_keep_the_world(self):
+        before = fingerprint(self.game.world)
+        bad = {"not json": "{oops", "empty": "{}",
+               "damaged": '{"version": 2, "seed": "1", "tick": 0, "rng": 1, '
+                          '"config": 5, "terrain": [], "food": [], "agents": []}'}
+        for name, text in bad.items():
+            with open(os.path.join(self.folder.name, name.replace(" ", "-")
+                                   + ".json"), "w") as f:
+                f.write(text)
+            with self.assertRaises(ValueError, msg=name):
+                self.game.control({"action": "load", "name": name.replace(" ", "-")})
+        self.assertEqual(fingerprint(self.game.world), before)
+
     def test_bad_save_names_are_refused(self):
         for name in ("../escape", "a/b", "", "x" * 41, None):
             with self.assertRaises(ValueError):

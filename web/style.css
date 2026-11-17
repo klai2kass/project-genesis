@@ -186,3 +186,18 @@ button.primary {
 .feed .born b { color: #9fd58a; }
 .feed .die b { color: var(--danger); }
 .feed b, .trail b { font-weight: 600; color: var(--text); }
+
+/* Short confirmation after loading a save. Floats above the page, never
+   blocks clicks (pointer-events: none) and fades away by itself. */
+.toast {
+  position: fixed; left: 50%; top: 14px; transform: translateX(-50%);
+  max-width: min(92vw, 520px); padding: 10px 16px; border-radius: 8px;
+  background: var(--panel, #1f2937); color: var(--text, #fff);
+  border: 1px solid var(--accent, #4ade80); font-size: 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .35);
+  pointer-events: none; opacity: 0; transition: opacity .6s ease;
+  z-index: 10;
+}
+.toast.show { opacity: 1; transition: opacity .15s ease; }
+.toast.error { border-color: var(--danger); color: var(--danger); }
+.toast[hidden] { display: none; }

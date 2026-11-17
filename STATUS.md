@@ -50,7 +50,20 @@ Newest first. A fresh session should read this section first.
   `cause`. Checked: its counts equal the world's own counters and
   start + births - deaths = end (seed 42, 2000 ticks: 50 + 414 - 410 = 54).
   5 new tests (53 total). README documented.
-- **In progress:** step 6 (browser load message).
+- **Step 6 done (browser load message).** Server's load reply now reads
+  "Loaded NAME: tick N, seed S (paused)". The page shows it as a pop-up
+  (`#toast` in `web/`) that fades after ~3.5 s, ignores clicks
+  (`pointer-events: none`) and turns red and stays ~6 s on failure. Damaged saves
+  now give a plain "save file is damaged" error instead of a crash.
+  2 new tests in `test_controls.py` (55 total, all pass).
+  **How it was checked, honestly:** the sandbox blocks the server port, so
+  the real page could not be loaded. In the built-in browser I opened the
+  page as a static snapshot, injected the new CSS and `showToast` function,
+  and saw: success text visible, opacity 1, `pointer-events: none`, then
+  hidden with opacity 0 after ~4.6 s; error variant red. NOT checked: the
+  full click on the real Load button. Please try once: run `python3 server.py`,
+  Save, then Load, and look at the top of the page.
+- **In progress:** step 7 (agent history in saves).
 
 ## What this project is
 
