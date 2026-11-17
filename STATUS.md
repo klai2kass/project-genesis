@@ -87,7 +87,8 @@ Newest first. A fresh session should read this section first.
   ticks. Results are averages over the 5 seeds; table and recommendation are
   in the final section below.
 - **Step 9 done:** `docs/MILESTONE2.md` (proposal only, nothing built).
-- **Final check:** 64 tests pass; `run_headless.py --seed 42 --ticks 500`
+- **Later: default `regrow_per_tick` changed 4 -> 6 at your request.**
+- **Final check (before that change):** 64 tests pass; `run_headless.py --seed 42 --ticks 500`
   gives 55 alive, fingerprint `2e91ef5c79b33484`, identical on two runs.
   Server port still blocked in this sandbox (see section 9).
 - **In progress:** nothing. Next: "Next 5 tasks".
@@ -162,7 +163,7 @@ the new walking-distance search (step 4) and from history (step 7).
 
 ## 6. Regeneration experiment results
 
-`regrow_per_tick` changed with `--set`, code default left at 4. 5 seeds
+`regrow_per_tick` changed with `--set`, code default was 4 when measured (changed to 6 afterwards, see section 7). 5 seeds
 (42, 1, 2, 3, 4) x 3,000 ticks each, averages, via
 `python3 experiments/regrow_sweep.py` (about 1 minute, reproduced twice).
 
@@ -185,7 +186,7 @@ is short again); it was not tested.
 
 ## 7. Recommended `regrow_per_tick`
 
-**Recommendation: 6** (your decision; the code still says 4).
+**Decision made: 6.** The code default is now 6 (was 4). After the change: 64 tests pass; seed 42, 500 ticks gives 79 alive, fingerprint `61e8b205b6228bc9`. Older fingerprints in this file are from default 4.
 - It keeps the world as deadly as before (starved share 67.7% against 68.9%,
   average age at death unchanged at 295), which matches "no peaceful world".
 - It gives a steady population of about 94 instead of 61 (lowest 50 instead of
@@ -275,7 +276,7 @@ python3 experiments/regrow_sweep.py
 
 Safe defaults were used for all of them.
 
-1. **`regrow_per_tick`: keep 4 or move to 6?** (Section 7.) Default: kept 4.
+1. ~~`regrow_per_tick`~~ Decided: switched to 6 (section 7).
 2. **History caps.** 20 decisions per agent, 50 dead agents (605 KB saves).
    Default: kept as is. Lower for smaller saves, higher for longer stories.
 3. **Milestone 2.** Read the 7 questions at the end of `docs/MILESTONE2.md`;

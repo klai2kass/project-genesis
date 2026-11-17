@@ -175,6 +175,6 @@ lets the tests run it with no UI.
 
 Open `genesis/config.py`, change one number, start a new world:
 
-- `regrow_per_tick`: more food growing means a bigger population.
+- `regrow_per_tick` (default 6): more food growing means a bigger population.
 - `vision`: how far agents see food.
 - `repro_cooldown`: lower it and watch a baby boom, then a famine.

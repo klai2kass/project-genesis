@@ -17,7 +17,7 @@ DEFAULT_CONFIG = {
     "food_cap": [0, 3, 8],
     "start_food_share": 0.08,  # share of tiles that start with food on them
     # Each tick this many random tiles try to grow 1 food.
-    "regrow_per_tick": 4,
+    "regrow_per_tick": 6,
     "food_energy": 20,     # energy gained by eating 1 food
 
     # --- Agents ---
