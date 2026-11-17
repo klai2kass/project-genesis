@@ -78,7 +78,13 @@ Newest first. A fresh session should read this section first.
   9 new tests (64 total, all pass), including history belongs to the right
   agent, dead agents kept, limits, old save, behaviour unchanged by history.
   Decision resolved: history IS now stored in saves (see Decisions).
-- **In progress:** step 8 (regrow experiments).
+- **Step 8 done (regrow experiments).** Default in code NOT changed (still 4).
+  Script: `experiments/regrow_sweep.py` (calls `run_headless.py --summary --set`;
+  history was switched off with `--set history_keep=0` for speed; this does not
+  change behaviour, test-checked). 6 values x 5 seeds (42,1,2,3,4) x 3,000
+  ticks. Results are averages over the 5 seeds; table and recommendation are
+  in the final section below.
+- **In progress:** step 9 (Milestone 2 proposal).
 
 ## What this project is
 
