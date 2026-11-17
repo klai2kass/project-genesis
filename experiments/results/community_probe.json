@@ -1,0 +1,348 @@
+{
+ "every": 250,
+ "first": 500,
+ "seeds": [
+  "42",
+  "1",
+  "2",
+  "3",
+  "4"
+ ],
+ "ticks": 3000,
+ "worlds": {
+  "homes off (control)": [
+   {
+    "K2": {
+     "biggest_group": 86.45454545454545,
+     "family_ties_pct": 9.493565513070456,
+     "gifts_counted": 70,
+     "gifts_inside_pct": 91.42857142857143,
+     "group_size": 73.61538461538461,
+     "groups_per_snapshot": 1.1818181818181819,
+     "home_spread": 17.892527425472647,
+     "in_group_pct": 91.94027083575254,
+     "kept_250_pct": 97.93699946192615,
+     "known_pairs_inside_pct": 99.87445072190835,
+     "outlived_founders_pct": 100.0,
+     "traced_1000_pct": 87.5,
+     "traced_ticks": 1531.25
+    },
+    "K5": {
+     "biggest_group": 10.363636363636363,
+     "family_ties_pct": 7.609689405742037,
+     "gifts_counted": 70,
+     "gifts_inside_pct": 5.714285714285714,
+     "group_size": 5.196969696969697,
+     "groups_per_snapshot": 6.0,
+     "home_spread": 13.822000280283863,
+     "in_group_pct": 32.59696852689631,
+     "kept_250_pct": 61.956521739130444,
+     "known_pairs_inside_pct": 24.60765850596359,
+     "outlived_founders_pct": null,
+     "traced_1000_pct": 0.0,
+     "traced_ticks": 94.5945945945946
+    },
+    "seed": "42"
+   },
+   {
+    "K2": {
+     "biggest_group": 79.18181818181819,
+     "family_ties_pct": 9.639631906339813,
+     "gifts_counted": 68,
+     "gifts_inside_pct": 79.41176470588235,
+     "group_size": 42.09090909090909,
+     "groups_per_snapshot": 2.0,
+     "home_spread": 11.946218714882228,
+     "in_group_pct": 89.7450748155367,
+     "kept_250_pct": 96.48973786499278,
+     "known_pairs_inside_pct": 99.63144963144963,
+     "outlived_founders_pct": 100.0,
+     "traced_1000_pct": 64.28571428571429,
+     "traced_ticks": 1196.4285714285713
+    },
+    "K5": {
+     "biggest_group": 9.636363636363637,
+     "family_ties_pct": 11.62795084466781,
+     "gifts_counted": 68,
+     "gifts_inside_pct": 10.294117647058824,
+     "group_size": 5.0285714285714285,
+     "groups_per_snapshot": 6.363636363636363,
+     "home_spread": 12.58208955987842,
+     "in_group_pct": 34.084832088615464,
+     "kept_250_pct": 54.453125,
+     "known_pairs_inside_pct": 24.57002457002457,
+     "outlived_founders_pct": 100.0,
+     "traced_1000_pct": 2.127659574468085,
+     "traced_ticks": 127.65957446808511
+    },
+    "seed": "1"
+   },
+   {
+    "K2": {
+     "biggest_group": 84.45454545454545,
+     "family_ties_pct": 8.053749998691911,
+     "gifts_counted": 59,
+     "gifts_inside_pct": 86.44067796610169,
+     "group_size": 84.45454545454545,
+     "groups_per_snapshot": 1.0,
+     "home_spread": 19.35890873886805,
+     "in_group_pct": 91.79670240973593,
+     "kept_250_pct": 98.65032679738562,
+     "known_pairs_inside_pct": 99.75429975429975,
+     "outlived_founders_pct": 100.0,
+     "traced_1000_pct": 100.0,
+     "traced_ticks": 1750.0
+    },
+    "K5": {
+     "biggest_group": 11.454545454545455,
+     "family_ties_pct": 8.23728100207423,
+     "gifts_counted": 59,
+     "gifts_inside_pct": 8.474576271186441,
+     "group_size": 5.790322580645161,
+     "groups_per_snapshot": 5.636363636363637,
+     "home_spread": 13.095092617061256,
+     "in_group_pct": 35.48013936318735,
+     "kept_250_pct": 53.5344827586207,
+     "known_pairs_inside_pct": 24.63144963144963,
+     "outlived_founders_pct": null,
+     "traced_1000_pct": 0.0,
+     "traced_ticks": 127.90697674418605
+    },
+    "seed": "2"
+   },
+   {
+    "K2": {
+     "biggest_group": 83.45454545454545,
+     "family_ties_pct": 8.15628773328357,
+     "gifts_counted": 69,
+     "gifts_inside_pct": 85.5072463768116,
+     "group_size": 76.75,
+     "groups_per_snapshot": 1.0909090909090908,
+     "home_spread": 17.367133026028977,
+     "in_group_pct": 91.13261770489113,
+     "kept_250_pct": 96.8322789320761,
+     "known_pairs_inside_pct": 99.81308411214954,
+     "outlived_founders_pct": 100.0,
+     "traced_1000_pct": 87.5,
+     "traced_ticks": 1531.25
+    },
+    "K5": {
+     "biggest_group": 12.0,
+     "family_ties_pct": 8.826686063382295,
+     "gifts_counted": 69,
+     "gifts_inside_pct": 2.898550724637681,
+     "group_size": 5.684210526315789,
+     "groups_per_snapshot": 5.181818181818182,
+     "home_spread": 13.463930046569418,
+     "in_group_pct": 31.996823798091498,
+     "kept_250_pct": 53.75,
+     "known_pairs_inside_pct": 22.990654205607477,
+     "outlived_founders_pct": null,
+     "traced_1000_pct": 0.0,
+     "traced_ticks": 109.375
+    },
+    "seed": "3"
+   },
+   {
+    "K2": {
+     "biggest_group": 84.45454545454545,
+     "family_ties_pct": 8.72397783164749,
+     "gifts_counted": 73,
+     "gifts_inside_pct": 84.93150684931507,
+     "group_size": 84.45454545454545,
+     "groups_per_snapshot": 1.0,
+     "home_spread": 19.736578293925472,
+     "in_group_pct": 92.33517054881715,
+     "kept_250_pct": 97.26624337005305,
+     "known_pairs_inside_pct": 99.62756052141528,
+     "outlived_founders_pct": 100.0,
+     "traced_1000_pct": 100.0,
+     "traced_ticks": 1750.0
+    },
+    "K5": {
+     "biggest_group": 9.909090909090908,
+     "family_ties_pct": 7.940566923283227,
+     "gifts_counted": 73,
+     "gifts_inside_pct": 4.109589041095891,
+     "group_size": 5.267857142857143,
+     "groups_per_snapshot": 5.090909090909091,
+     "home_spread": 13.621886205501093,
+     "in_group_pct": 29.41312114369059,
+     "kept_250_pct": 48.33333333333333,
+     "known_pairs_inside_pct": 21.353196772191186,
+     "outlived_founders_pct": null,
+     "traced_1000_pct": 0.0,
+     "traced_ticks": 89.74358974358974
+    },
+    "seed": "4"
+   }
+  ],
+  "homes on (default)": [
+   {
+    "K2": {
+     "biggest_group": 84.18181818181819,
+     "family_ties_pct": 16.924791867391146,
+     "gifts_counted": 71,
+     "gifts_inside_pct": 91.54929577464789,
+     "group_size": 62.93333333333333,
+     "groups_per_snapshot": 1.3636363636363635,
+     "home_spread": 14.78578959779456,
+     "in_group_pct": 93.28396515735871,
+     "kept_250_pct": 94.35139239060808,
+     "known_pairs_inside_pct": 99.71131639722864,
+     "outlived_founders_pct": 100.0,
+     "traced_1000_pct": 90.0,
+     "traced_ticks": 1525.0
+    },
+    "K5": {
+     "biggest_group": 15.818181818181818,
+     "family_ties_pct": 21.301190140392904,
+     "gifts_counted": 71,
+     "gifts_inside_pct": 32.394366197183096,
+     "group_size": 7.172839506172839,
+     "groups_per_snapshot": 7.363636363636363,
+     "home_spread": 5.29237970808915,
+     "in_group_pct": 57.4252260388067,
+     "kept_250_pct": 68.61816578483246,
+     "known_pairs_inside_pct": 49.942263279445726,
+     "outlived_founders_pct": 100.0,
+     "traced_1000_pct": 6.25,
+     "traced_ticks": 208.33333333333334
+    },
+    "seed": "42"
+   },
+   {
+    "K2": {
+     "biggest_group": 83.9090909090909,
+     "family_ties_pct": 14.566025275890132,
+     "gifts_counted": 82,
+     "gifts_inside_pct": 90.2439024390244,
+     "group_size": 46.333333333333336,
+     "groups_per_snapshot": 1.9090909090909092,
+     "home_spread": 11.899252498680324,
+     "in_group_pct": 93.91188946429423,
+     "kept_250_pct": 98.64171539961013,
+     "known_pairs_inside_pct": 99.83561643835617,
+     "outlived_founders_pct": 100.0,
+     "traced_1000_pct": 53.84615384615385,
+     "traced_ticks": 1019.2307692307693
+    },
+    "K5": {
+     "biggest_group": 18.454545454545453,
+     "family_ties_pct": 18.62115620386297,
+     "gifts_counted": 82,
+     "gifts_inside_pct": 26.829268292682926,
+     "group_size": 7.891891891891892,
+     "groups_per_snapshot": 6.7272727272727275,
+     "home_spread": 6.02011995653186,
+     "in_group_pct": 56.42631325535422,
+     "kept_250_pct": 65.95147907647907,
+     "known_pairs_inside_pct": 48.54794520547945,
+     "outlived_founders_pct": 100.0,
+     "traced_1000_pct": 6.818181818181818,
+     "traced_ticks": 261.3636363636364
+    },
+    "seed": "1"
+   },
+   {
+    "K2": {
+     "biggest_group": 79.27272727272727,
+     "family_ties_pct": 15.497330083330853,
+     "gifts_counted": 77,
+     "gifts_inside_pct": 81.81818181818181,
+     "group_size": 53.27777777777778,
+     "groups_per_snapshot": 1.6363636363636365,
+     "home_spread": 14.29008181656511,
+     "in_group_pct": 94.28419517887696,
+     "kept_250_pct": 97.9439944309991,
+     "known_pairs_inside_pct": 100.0,
+     "outlived_founders_pct": 100.0,
+     "traced_1000_pct": 100.0,
+     "traced_ticks": 1916.6666666666667
+    },
+    "K5": {
+     "biggest_group": 20.818181818181817,
+     "family_ties_pct": 15.951804875990355,
+     "gifts_counted": 77,
+     "gifts_inside_pct": 31.16883116883117,
+     "group_size": 7.974025974025974,
+     "groups_per_snapshot": 7.0,
+     "home_spread": 5.784484460308731,
+     "in_group_pct": 60.285682077575146,
+     "kept_250_pct": 68.73352750190985,
+     "known_pairs_inside_pct": 51.66112956810631,
+     "outlived_founders_pct": 100.0,
+     "traced_1000_pct": 6.0,
+     "traced_ticks": 195.0
+    },
+    "seed": "2"
+   },
+   {
+    "K2": {
+     "biggest_group": 83.81818181818181,
+     "family_ties_pct": 14.341774853298908,
+     "gifts_counted": 69,
+     "gifts_inside_pct": 85.5072463768116,
+     "group_size": 56.35294117647059,
+     "groups_per_snapshot": 1.5454545454545454,
+     "home_spread": 13.284573130118645,
+     "in_group_pct": 94.59896503880118,
+     "kept_250_pct": 90.9206922110148,
+     "known_pairs_inside_pct": 100.0,
+     "outlived_founders_pct": 100.0,
+     "traced_1000_pct": 76.92307692307692,
+     "traced_ticks": 1500.0
+    },
+    "K5": {
+     "biggest_group": 17.727272727272727,
+     "family_ties_pct": 17.575479218523682,
+     "gifts_counted": 69,
+     "gifts_inside_pct": 23.18840579710145,
+     "group_size": 7.376623376623376,
+     "groups_per_snapshot": 7.0,
+     "home_spread": 5.5436807850719,
+     "in_group_pct": 55.95552152256337,
+     "kept_250_pct": 68.68253968253968,
+     "known_pairs_inside_pct": 48.50462207721588,
+     "outlived_founders_pct": 100.0,
+     "traced_1000_pct": 4.166666666666667,
+     "traced_ticks": 161.45833333333334
+    },
+    "seed": "3"
+   },
+   {
+    "K2": {
+     "biggest_group": 84.0,
+     "family_ties_pct": 16.426607331019547,
+     "gifts_counted": 82,
+     "gifts_inside_pct": 91.46341463414635,
+     "group_size": 69.85714285714286,
+     "groups_per_snapshot": 1.2727272727272727,
+     "home_spread": 15.994070457825675,
+     "in_group_pct": 93.66886473113095,
+     "kept_250_pct": 93.88177509964535,
+     "known_pairs_inside_pct": 99.83633387888707,
+     "outlived_founders_pct": 100.0,
+     "traced_1000_pct": 100.0,
+     "traced_ticks": 1750.0
+    },
+    "K5": {
+     "biggest_group": 18.818181818181817,
+     "family_ties_pct": 19.463290894305782,
+     "gifts_counted": 82,
+     "gifts_inside_pct": 41.46341463414634,
+     "group_size": 8.181818181818182,
+     "groups_per_snapshot": 7.0,
+     "home_spread": 5.6825652500292065,
+     "in_group_pct": 60.34794405890037,
+     "kept_250_pct": 73.22466648997262,
+     "known_pairs_inside_pct": 54.282596835788326,
+     "outlived_founders_pct": 100.0,
+     "traced_1000_pct": 8.333333333333334,
+     "traced_ticks": 296.875
+    },
+    "seed": "4"
+   }
+  ]
+ }
+}

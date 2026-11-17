@@ -213,9 +213,9 @@ of 100"), the **options** it considered and whether each fitted, and the
 | `server.py` | Runs the world and serves the page |
 | `web/` | The page. It only draws; no rules live there |
 | `tests/` | The automatic checks |
-| `experiments/` | Measurement scripts (they only read the world); results in `experiments/results/`. `regrow_sweep.py`, `starvation_study.py`, `stage_compare.py`, `curiosity_probe.py`, `trait_drift.py`, `encounter_probe.py`, `memory_probe.py`, `sharing_opportunity.py`, `sharing_probe.py`; `baseline/` holds the frozen Milestone 1, Milestone 2 and homes references |
+| `experiments/` | Measurement scripts (they only read the world); results in `experiments/results/`. `regrow_sweep.py`, `starvation_study.py`, `stage_compare.py`, `curiosity_probe.py`, `trait_drift.py`, `encounter_probe.py`, `memory_probe.py`, `sharing_opportunity.py`, `sharing_probe.py`, `community_probe.py`, `home_drift.py`; `baseline/` holds the frozen Milestone 1, Milestone 2 and homes references |
 | `VISION.md` | The long-term idea and roadmap (read first) |
-| `docs/MILESTONE3.md` | Milestone 3: homes, encounter memory and sharing (built), with results |
+| `docs/MILESTONE3.md` | Milestone 3: homes, encounter memory and sharing (built), groups (measured), with results |
 | `docs/MILESTONE2_REPORT.md` | What Milestone 2 does, measured |
 | `docs/MILESTONE2_V2.md` | The Milestone 2 design as built |
 | `docs/STARVATION.md` | Why about two thirds of deaths are starvation |

@@ -1,0 +1,35 @@
+Community probe: seeds 42,1,2,3,4, 3000 ticks, snapshot every 250 ticks from tick 500.
+Tie = both living agents remember K+ meetings with each other. Group = 3+
+agents connected by ties. Cells: mean over snapshots, then mean +/- sd over seeds.
+
+== K = 5 ==
+                                                homes on (default)     homes off (control)
+groups (3+ agents) per snapshot                        7.0 +/- 0.2             5.7 +/- 0.5
+living agents in a group %                            58.1 +/- 2.1            32.7 +/- 2.3
+group size, mean                                       7.7 +/- 0.4             5.4 +/- 0.3
+biggest group, mean                                   18.3 +/- 1.8            10.7 +/- 1.0
+ties inside groups that are family %                  18.6 +/- 2.0             8.8 +/- 1.6
+home spread in a group (tiles)                         5.7 +/- 0.3            13.3 +/- 0.5
+kept together 250 ticks later %                       69.0 +/- 2.6            54.4 +/- 4.9
+group can be traced, ticks (mean)                   224.6 +/- 54.1          109.9 +/- 17.9
+groups traced 1,000+ ticks %                           6.3 +/- 1.5             0.4 +/- 1.0
+  of those, all first members dead %                 100.0 +/- 0.0           100.0 +/- 0.0
+gifts inside a group %                                31.0 +/- 6.9             6.3 +/- 3.1
+  vs met-2+ pairs inside a group %                    50.6 +/- 2.4            23.6 +/- 1.5
+gifts counted                                         76.2 +/- 6.1            67.8 +/- 5.3
+
+== K = 2 ==
+                                                homes on (default)     homes off (control)
+groups (3+ agents) per snapshot                        1.5 +/- 0.2             1.3 +/- 0.4
+living agents in a group %                            93.9 +/- 0.5            91.4 +/- 1.0
+group size, mean                                      57.8 +/- 9.0           72.3 +/- 17.5
+biggest group, mean                                   83.0 +/- 2.1            83.6 +/- 2.7
+ties inside groups that are family %                  15.6 +/- 1.1             8.8 +/- 0.7
+home spread in a group (tiles)                        14.1 +/- 1.5            17.3 +/- 3.1
+kept together 250 ticks later %                       95.1 +/- 3.2            97.4 +/- 0.9
+group can be traced, ticks (mean)                 1542.2 +/- 338.7        1551.8 +/- 226.8
+groups traced 1,000+ ticks %                         84.2 +/- 19.4           87.9 +/- 14.6
+  of those, all first members dead %                 100.0 +/- 0.0           100.0 +/- 0.0
+gifts inside a group %                                88.1 +/- 4.3            85.5 +/- 4.3
+  vs met-2+ pairs inside a group %                    99.9 +/- 0.1            99.7 +/- 0.1
+gifts counted                                         76.2 +/- 6.1            67.8 +/- 5.3

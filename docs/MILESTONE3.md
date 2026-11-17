@@ -9,7 +9,8 @@ Built one small step at a time, each measured before the next.
 | 1 | **Home**: every agent remembers where it was born and wanders near it | **Built** (this file) |
 | 2 | **Encounter memory**: who did I meet, where, when, how often (record only) | **Built** (below) |
 | 3 | First USE of that memory: share food with a starving agent you know | **Built** (below) |
-| 4 | Look for groups in the memory network (measurement only) | Proposed (`STATUS.md`) |
+| 4 | Look for groups in the memory network (measurement only) | **Done** (below) |
+| 5 | Family home: a child takes its parent's home | Proposed (`STATUS.md`) |
 
 ## Step 1: home (built 2026-11-17)
 
@@ -332,4 +333,71 @@ this tick; same seed = same world and save/load continues identically.
 - "Starving" is a fixed line (energy 20); no trait affects giving.
 - Gifts are counted in memory only while both still remember each other.
 - The family share uses parent/child/sibling only.
+
+## Step 4: are there groups? (measured 2026-11-18, no rule changed)
+
+### How
+
+`experiments/community_probe.py` (read-only), 5 seeds x 3,000 ticks, default
+world (homes, memory, sharing on) against the same world with homes off.
+Every 250 ticks from tick 500 it builds a network from the agents' own
+memories: a **tie** when two living agents BOTH remember K or more meetings
+with each other, and a **group** = 3 or more agents connected by ties.
+
+### Results (FACT, `experiments/results/community_probe.txt`)
+
+With K = 5 (know each other well):
+
+| | homes on (default) | homes off (control) |
+| --- | --- | --- |
+| living agents in a group | **58%** | 33% |
+| groups per snapshot | 7.0 | 5.7 |
+| group size, mean (biggest) | 7.7 (18) | 5.4 (11) |
+| ties inside groups that are family | **19%** | 9% |
+| how spread out members' homes are | **5.7 tiles** | 13.3 tiles |
+| members still together 250 ticks later | 69% | 54% |
+| how long a group can be traced | 225 ticks | 110 ticks |
+| groups traced 1,000+ ticks (about 3 lifetimes) | **6.3%** | 0.4% |
+| of those, every first member has died | 100% | |
+| gifts made inside a group | 31% | 6% |
+| pairs met 2+ times that lie inside a group | 51% | 24% |
+
+(sd over seeds 0.2 to 2.6 on most lines; traced ticks 54 and 18.)
+
+With K = 2 (met twice) almost everyone (94%) is one big connected network,
+with or without homes: weak ties connect the whole world, so K = 2 says
+nothing about groups.
+
+### Plain reading
+
+- **Groups exist.** More than half of all agents belong to a group of agents
+  who know each other well. They are local (homes within about 6 tiles),
+  about one tie in five is family, and they are twice as common with homes
+  as without.
+- **Most groups are short-lived.** A group can be followed for about 225
+  ticks on average, less than one lifetime (about 310 ticks).
+- **A few groups outlive everyone who started them** (6.3%, against 0.4%
+  without homes): new members join while the first ones die. These are the
+  first signs of something like a village. Rare, but clearly not chance.
+- **Sharing does not stay inside groups.** Only 31% of gifts are between
+  group members, although 51% of the pairs that could give are inside a
+  group. Help goes more to agents at the edge of groups. GUESS: group
+  members are the settled, well-fed agents; the starving ones are mostly
+  newcomers and outsiders. Not measured.
+
+### Why groups dissolve (`experiments/home_drift.py`)
+
+A child's home is the tile where it was born, next to wherever the parent
+happened to stand. So a family's home moves about 5.3 tiles every generation
+(5.2 to 5.6 over 5 seeds) and after 10+ generations it is 14 to 19 tiles from
+the founder's home. A group tied to one place cannot last when its families'
+homes keep drifting apart. This is the evidence behind the proposed step 5.
+
+### Limitations
+
+- "Group" depends on the definition (mutual ties, K = 5, connected); other
+  definitions (for example cliques) were not tried.
+- With memory capped at 10, an agent cannot have more than 10 ties.
+- The trace rule (follow the later group holding at least half of the
+  surviving members) is one reasonable choice, not the only one.
 

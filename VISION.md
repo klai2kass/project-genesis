@@ -74,9 +74,11 @@ serve this, question it. If this file and the code disagree about what
 
 ### Next (proposed in STATUS.md, not built)
 
-- **Milestone 3, step 4: look for groups.** Measure whether lasting groups
-  of agents who know each other well exist (from their memories), before
-  giving groups any rule.
+- **Milestone 3, step 5: the family home.** A child takes its parent's home,
+  so a family stays in one place across generations. Measured first: groups
+  of agents who know each other well already exist (58% of agents are in
+  one), but family homes drift about 5 tiles per generation and most groups
+  last less than a lifetime.
 
 ### Future ambition (nothing below exists)
 
