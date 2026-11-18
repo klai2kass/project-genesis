@@ -10,7 +10,8 @@ Built one small step at a time, each measured before the next.
 | 2 | **Encounter memory**: who did I meet, where, when, how often (record only) | **Built** (below) |
 | 3 | First USE of that memory: share food with a starving agent you know | **Built** (below) |
 | 4 | Look for groups in the memory network (measurement only) | **Done** (below) |
-| 5 | Family home: a child takes its parent's home | Proposed (`STATUS.md`) |
+| 5 | Family home: a child takes its parent's home | **Built, OFF by default**: it did not make groups last longer |
+| 6 | Why do groups end? (measurement only) | Proposed (`STATUS.md`) |
 
 ## Step 1: home (built 2026-11-17)
 
@@ -400,4 +401,68 @@ homes keep drifting apart. This is the evidence behind the proposed step 5.
 - With memory capped at 10, an agent cannot have more than 10 ties.
 - The trace rule (follow the later group holding at least half of the
   surviving members) is one reasonable choice, not the only one.
+
+## Step 5: the family home (built 2026-11-18, then switched off by default)
+
+### The rule
+
+Setting `home_inherit`: 1 = a newborn's home is a copy of its parent's
+home, so every descendant keeps its founder's home; 0 = the home is the
+tile where it was born (the step 1 rule). No dice. Save format **7**: older
+saves load with 0. Code: `genesis/sim.py` (reproduce), `genesis/config.py`.
+
+### What it was meant to do
+
+Step 4 found that a family's home drifts about 5 tiles per generation, and
+guessed that this pulls groups apart. Success line, set before building:
+groups traced 1,000+ ticks clearly above 6.3%, and the Milestone 2 bands
+hold.
+
+### Results (FACT, `experiments/community_probe.py` and `home_drift.py`,
+5 seeds x 3,000 ticks)
+
+| | family home (`home_inherit=1`) | birth-tile home (`0`) | homes off |
+| --- | --- | --- | --- |
+| a family's home after 10+ generations, from the founder's | **0 tiles** | 14-19 tiles | |
+| agents in a group (K = 5) | 57.5% | 58.1% | 32.7% |
+| groups per snapshot (size) | 7.9 (6.7) | 7.0 (7.7) | 5.7 (5.4) |
+| family ties inside groups | **24.0%** | 18.6% | 8.8% |
+| members' homes spread | **3.3 tiles** | 5.7 tiles | 13.3 tiles |
+| members still together 250 ticks later | 72.7% | 69.0% | 54.4% |
+| how long a group can be traced | 248 +/- 76 ticks | 225 +/- 54 | 110 +/- 18 |
+| **groups traced 1,000+ ticks** | **6.1% +/- 4.8** | **6.3% +/- 1.5** | 0.4% |
+| starved % of deaths | 65.0 | 62.9 | 63.5 |
+| age at death | 311 | 319 | 311 |
+| population / births | 93.1 / 905 | 93.6 / 894 | 93.0 / 913 |
+| gifts of food per run | 226 | 187 | 167 |
+
+The birth-tile column is the same world as step 4 and gives exactly the
+same numbers (a reproducibility check).
+
+### Plain reading
+
+- It does what it says: family homes no longer move.
+- Groups become tighter and more family-like (homes 3.3 tiles apart, a
+  quarter of ties are family), and more food is shared (226 gifts).
+- **But groups do not last longer.** Groups traced 1,000+ ticks: 6.1%
+  against 6.3%, well inside the luck range. The step 4 guess (drift is what
+  ends groups) was wrong, or at least not the main reason.
+- Life gets a little harder: starved share 65.0% against 62.9%, age at
+  death 311 against 319 (families crowd one spot). Bands still hold.
+
+### Decision
+
+The success line was not met, so the family home stays in the code as a
+setting but is **off by default** (`home_inherit = 0`): the normal world is
+the step 3 world, unchanged. Try it with `--set home_inherit=1`. Owner can
+switch the default (STATUS, decisions).
+
+### Tests (`tests/test_home.py`, +4: 16 in that file)
+
+`home_inherit = 0` reproduces the frozen sharing world
+(`experiments/baseline/milestone3_share.json`) exactly; a v6 save
+(`tests/fixtures/save_v6_seed42_t300.json`) migrates and continues
+exactly; with 1, behaviour changes, every child's home equals its parent's
+and every agent's home equals its founder's (600 ticks, generation 2+
+checked); with 0, children's homes are their birth tiles.
 

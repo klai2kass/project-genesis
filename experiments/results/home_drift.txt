@@ -1,7 +1,16 @@
-Home drift: default settings, seeds 42,1,2,3,4, 3000 ticks.
+Home drift: home_inherit=0 (birth-tile home), seeds 42,1,2,3,4, 3000 ticks.
 seed      child home to parent home   generation 10+: home to founder's home
 42                    5.4 tiles (n= 899)                         17.1 tiles (n= 61)
 1                     5.2 tiles (n= 898)                         14.4 tiles (n= 64)
 2                     5.4 tiles (n= 888)                         15.1 tiles (n= 84)
 3                     5.6 tiles (n= 900)                         19.1 tiles (n= 77)
 4                     5.3 tiles (n= 883)                         17.1 tiles (n= 61)
+
+Home drift: home_inherit=1 (family home), seeds 42,1,2,3,4, 3000 ticks.
+seed      child home to parent home   generation 10+: home to founder's home
+42                    0.0 tiles (n= 926)                          0.0 tiles (n= 74)
+1                     0.0 tiles (n= 922)                          0.0 tiles (n= 64)
+2                     0.0 tiles (n= 884)                          0.0 tiles (n= 45)
+3                     0.0 tiles (n= 887)                          0.0 tiles (n= 68)
+4                     0.0 tiles (n= 905)                          0.0 tiles (n= 59)
+

@@ -30,10 +30,13 @@ For gifts (sharing): of the gifts in the 250 ticks after a snapshot, the
 share between two members of the same group, next to the share of all
 "met 2+ times" pairs that lie inside a group (what chance alone would give).
 
-Two worlds per seed: the default world (homes on) and the same with
-home_radius=0 (homes off) as the control.
+Three worlds per seed: the family home (home_inherit=1: a child takes its
+parent's home), the default world (home_inherit=0: home = birth tile, the
+step 1-4 rule) and homes off (home_radius=0) as the control. Also reported per world:
+population after tick 500, births, starved share and age at death, to check
+the Milestone 2 bands.
 
-Run:  python3 experiments/community_probe.py          (2 worlds x 5 seeds x 3000 ticks, ~4 min)
+Run:  python3 experiments/community_probe.py          (3 worlds x 5 seeds x 3000 ticks, ~6 min)
       python3 experiments/community_probe.py --quick  (2 seeds x 1500 ticks)
 Writes experiments/results/community_probe.json; printout in community_probe.txt.
 """
@@ -53,7 +56,9 @@ if "--quick" in sys.argv:
     SEEDS, TICKS = ["42", "1"], 1500
 FIRST, EVERY = 500, 250
 THRESHOLDS = [5, 2]
-WORLDS = [("homes on (default)", {}), ("homes off (control)", {"home_radius": 0})]
+WORLDS = [("family home", {"home_inherit": 1}),
+          ("birth-tile home (default)", {"home_inherit": 0}),
+          ("homes off (control)", {"home_radius": 0, "home_inherit": 0})]
 
 
 def ties(agents, k):
@@ -119,13 +124,17 @@ def run(seed, extra):
     parent = {a["id"]: a["parent"] for a in w["agents"]}
     snaps = []                  # per snapshot: tick, alive ids, homes, groups per K, ties
     gifts = []                  # (tick, giver, receiver)
+    pops, ages = [], []
     for _ in range(TICKS):
         for e in step(w):
+            if e["action"] == "die":
+                ages.append(e["age"])
             if e["action"] == "born":
                 parent[e["agent"]] = next(c["parent"] for c in w["agents"] if c["id"] == e["agent"])
             elif e["action"] == "give":
                 gifts.append((e["tick"], e["agent"], e["to"]))
         t = w["tick"]
+        pops.append(len(w["agents"]))
         if t >= FIRST and (t - FIRST) % EVERY == 0:
             snap = {"tick": t, "alive": {a["id"] for a in w["agents"]},
                     "home": {a["id"]: a["home"] for a in w["agents"]}, "k": {}}
@@ -138,7 +147,14 @@ def run(seed, extra):
         return (parent.get(a) == b or parent.get(b) == a
                 or (parent.get(a) is not None and parent.get(a) == parent.get(b)))
 
-    out = {"seed": seed}
+    st = w["stats"]
+    out = {"seed": seed,
+           "world": {"mean_pop": sum(pops[FIRST:]) / float(len(pops[FIRST:])),
+                     "births": st["births"],
+                     "starved_pct": 100.0 * st["deaths_starved"]
+                     / (st["deaths_starved"] + st["deaths_old_age"]),
+                     "age_at_death": sum(ages) / float(len(ages)),
+                     "gifts": st["gifts"], "extinct": int(not w["agents"])}}
     for k in THRESHOLDS:
         n_groups, in_group, sizes, biggest, fam, spread = [], [], [], [], [], []
         kept250, traced, long_, long_gone = [], [], 0, 0
@@ -229,13 +245,21 @@ def main():
           % (",".join(SEEDS), TICKS, EVERY, FIRST))
     print("Tie = both living agents remember K+ meetings with each other. Group = 3+")
     print("agents connected by ties. Cells: mean over snapshots, then mean +/- sd over seeds.")
+    print()
+    print("== The world (Milestone 2 bands: pop 80-98, starved 62-73, births 830-1010, age 265-325) ==")
+    print("%-42s" % "" + "".join("%28s" % n for n, _ in WORLDS))
+    for key, label in [("mean_pop", "population after tick 500"), ("births", "births"),
+                       ("starved_pct", "starved % of deaths"), ("age_at_death", "age at death"),
+                       ("gifts", "gifts of food"), ("extinct", "died out (0/1)")]:
+        print("%-42s" % label + "".join(
+            "%28s" % stats([r["world"][key] for r in out["worlds"][n]]) for n, _ in WORLDS))
     for k in THRESHOLDS:
         print()
         print("== K = %d ==" % k)
-        print("%-42s" % "" + "".join("%24s" % n for n, _ in WORLDS))
+        print("%-42s" % "" + "".join("%28s" % n for n, _ in WORLDS))
         for key, label in ROWS:
             print("%-42s" % label + "".join(
-                "%24s" % stats([r["K%d" % k][key] for r in out["worlds"][n]]) for n, _ in WORLDS))
+                "%28s" % stats([r["K%d" % k][key] for r in out["worlds"][n]]) for n, _ in WORLDS))
     if "--quick" not in sys.argv:
         with open(os.path.join(ROOT, "experiments", "results", "community_probe.json"), "w") as f:
             json.dump(out, f, indent=1, sort_keys=True,

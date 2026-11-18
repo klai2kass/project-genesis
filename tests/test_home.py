@@ -105,7 +105,7 @@ class FamilyHomeOffIsTheSharingWorld(unittest.TestCase):
             self.assertEqual(now, ref, "seed " + seed)
 
     def test_family_home_changes_behaviour(self):
-        w = create_world("42")
+        w = create_world("42", {"home_inherit": 1})
         ed = EventDigest()
         for _ in range(500):
             ed.add(step(w))
@@ -127,7 +127,7 @@ class FamilyHomeOffIsTheSharingWorld(unittest.TestCase):
 class WhereHomeIs(unittest.TestCase):
     def test_birth_tile_home_when_home_inherit_is_0(self):
         # The step 1 rule, still available with home_inherit=0.
-        w = create_world("42", {"home_inherit": 0})
+        w = create_world("42")          # the default since the step 5 measurement
         start = {a["id"]: [a["x"], a["y"]] for a in w["agents"]}
         self.assertTrue(all(a["home"] == start[a["id"]] for a in w["agents"]))
         born = {}
@@ -140,10 +140,10 @@ class WhereHomeIs(unittest.TestCase):
             self.assertEqual(a["home"], born.get(a["id"], start.get(a["id"])))
 
     def test_family_home_children_and_grandchildren_keep_the_founders_home(self):
-        # Step 5 (default): a child's home is its parent's home, so every
-        # descendant has the home of the founder its family started from.
-        w = create_world("42")
-        self.assertEqual(w["config"]["home_inherit"], 1)
+        # Step 5 (home_inherit=1, off by default): a child's home is its
+        # parent's home, so every descendant has its founder's home.
+        self.assertEqual(create_world("42")["config"]["home_inherit"], 0)
+        w = create_world("42", {"home_inherit": 1})
         home = {a["id"]: list(a["home"]) for a in w["agents"]}
         founder = {a["id"]: a["id"] for a in w["agents"]}
         deep = 0

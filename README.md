@@ -48,7 +48,7 @@ Want a different world? `python3 server.py --seed banana`
 python3 -m unittest discover -s tests -v
 ```
 
-It should end with `Ran 141 tests` and `OK` (about a minute).
+It should end with `Ran 145 tests` and `OK` (about 1.5 minutes).
 
 The tests prove the two promises this project is built on:
 
@@ -56,7 +56,7 @@ The tests prove the two promises this project is built on:
   decision for decision.
 - **Save → load = same state.** A loaded world is identical to the one that
   was saved, and it also *continues* identically. Saves from older versions
-  (1 to 5) still load and keep their old rules.
+  (1 to 6) still load and keep their old rules.
 - **Milestone 1 is frozen.** With `MILESTONE1_RULES` the new code repeats the
   old behaviour exactly (`tests/test_baseline.py`).
 
@@ -110,6 +110,8 @@ Milestone 2 settings (all whole numbers; see `genesis/config.py`):
 
 Milestone 3 settings: `home_radius` (6). How far from home a wandering agent
 may drift; `--set home_radius=0` switches homes off (Milestone 2 behaviour).
+`home_inherit` (0): `1` gives a child its parent's home instead of the
+tile where it was born (the "family home"; measured, off by default).
 `memory_keep` (10): how many agents each agent remembers meeting; `0` = no
 memory. `share_min_meetings` (2): how many meetings it takes before an agent
 gives food to that agent when it is starving; `0` = no sharing.
@@ -215,7 +217,7 @@ of 100"), the **options** it considered and whether each fitted, and the
 | `tests/` | The automatic checks |
 | `experiments/` | Measurement scripts (they only read the world); results in `experiments/results/`. `regrow_sweep.py`, `starvation_study.py`, `stage_compare.py`, `curiosity_probe.py`, `trait_drift.py`, `encounter_probe.py`, `memory_probe.py`, `sharing_opportunity.py`, `sharing_probe.py`, `community_probe.py`, `home_drift.py`; `baseline/` holds the frozen Milestone 1, Milestone 2 and homes references |
 | `VISION.md` | The long-term idea and roadmap (read first) |
-| `docs/MILESTONE3.md` | Milestone 3: homes, encounter memory and sharing (built), groups (measured), with results |
+| `docs/MILESTONE3.md` | Milestone 3: homes, encounter memory, sharing (built), groups (measured), family home (built, off), with results |
 | `docs/MILESTONE2_REPORT.md` | What Milestone 2 does, measured |
 | `docs/MILESTONE2_V2.md` | The Milestone 2 design as built |
 | `docs/STARVATION.md` | Why about two thirds of deaths are starvation |
@@ -236,3 +238,5 @@ Open `genesis/config.py`, change one number, start a new world:
 - `--set rest_below=0`: nobody rests (Milestone 1 behaviour for rest).
 - `--set home_radius=2`: agents cling to their birthplace; `0`: they roam freely.
 - `--set share_min_meetings=0`: nobody shares; `5`: only with agents met 5+ times.
+- `--set home_inherit=1`: families keep one home forever (tighter, more
+  family-like groups; a little more starvation).

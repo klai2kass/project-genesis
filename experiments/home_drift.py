@@ -1,15 +1,16 @@
 """How far does a family's home move from one generation to the next?
 
-A child's home is the tile where it was born, next to wherever its parent
-stood at that moment (up to about 6-7 tiles from the parent's own home). So
-a family's home can drift a little every generation. Read-only; default
-settings; history off.
+With home_inherit=0 a child's home is the tile where it was born, next to
+wherever its parent stood (up to about 6-7 tiles from the parent's own
+home), so a family's home drifts a little every generation. With the family
+home (home_inherit=1, measured in step 5, off by default) it should not move.
+Both are run. Read-only; history off.
 
 Reports per seed: mean distance (steps) from a child's home to its parent's
 home, and for agents of generation 10 or more alive at the end, the
 straight-line distance from their home to their founder's home.
 
-Run:  python3 experiments/home_drift.py      (5 seeds x 3000 ticks, ~30 s)
+Run:  python3 experiments/home_drift.py      (2 settings x 5 seeds x 3000 ticks, ~1 min)
 Printout saved as experiments/results/home_drift.txt.
 """
 import math
@@ -26,10 +27,17 @@ TICKS = 3000
 
 
 def main():
-    print("Home drift: default settings, seeds %s, %d ticks." % (",".join(SEEDS), TICKS))
+    for inherit in (0, 1):
+        report(inherit)
+        print()
+
+
+def report(inherit):
+    print("Home drift: home_inherit=%d (%s), seeds %s, %d ticks."
+          % (inherit, "family home" if inherit else "birth-tile home", ",".join(SEEDS), TICKS))
     print("%-6s %28s %40s" % ("seed", "child home to parent home", "generation 10+: home to founder's home"))
     for seed in SEEDS:
-        w = create_world(seed, {"history_keep": 0})
+        w = create_world(seed, {"history_keep": 0, "home_inherit": inherit})
         home = {a["id"]: a["home"] for a in w["agents"]}
         root = {a["id"]: a["id"] for a in w["agents"]}
         gen = {a["id"]: 0 for a in w["agents"]}

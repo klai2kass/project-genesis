@@ -53,6 +53,9 @@ serve this, question it. If this file and the code disagree about what
 - **Sharing**: a well-fed agent carrying food gives 1 food to a starving
   agent it has met at least twice. It rescues agents; help has so far only
   flowed one way (no gift was ever returned).
+- Groups (measured, `docs/MILESTONE3.md`): over half of all agents belong to
+  a local group of agents who know each other well; a few groups outlive
+  all their founders. Optional family home (`home_inherit=1`).
 - Same seed gives the same result; Milestone 1 and Milestone 2 behaviour are
   frozen and reproducible (`tests/test_baseline.py`, `tests/test_home.py`).
 - "Why" record for every decision: need, options considered, reason; the
@@ -74,11 +77,11 @@ serve this, question it. If this file and the code disagree about what
 
 ### Next (proposed in STATUS.md, not built)
 
-- **Milestone 3, step 5: the family home.** A child takes its parent's home,
-  so a family stays in one place across generations. Measured first: groups
-  of agents who know each other well already exist (58% of agents are in
-  one), but family homes drift about 5 tiles per generation and most groups
-  last less than a lifetime.
+- **Milestone 3, step 6: why do groups end?** Groups of agents who know each
+  other well exist (58% of agents are in one), but most last less than a
+  lifetime, and keeping families on one home (step 5, built, off by default)
+  did not change that. Measure whether groups end because their members die
+  or because they split, before choosing the next rule.
 
 ### Future ambition (nothing below exists)
 

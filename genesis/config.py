@@ -72,8 +72,10 @@ DEFAULT_CONFIG = {
     "home_radius": 6,
     # Family home (Milestone 3 step 5): 1 = a child's home is its parent's
     # home; 0 = the tile where it was born (the step 1 rule). Founders keep
-    # their start tile either way.
-    "home_inherit": 1,
+    # their start tile either way. Default 0: measured, the family home did
+    # not make groups last longer (docs/MILESTONE3.md, step 5), so it is
+    # available but off. Try it with --set home_inherit=1.
+    "home_inherit": 0,
     # Encounter memory (Milestone 3 step 2; genesis/memory.py): how many
     # agents each agent remembers meeting. 0 = no memory. Never changes
     # behaviour; it is a record.

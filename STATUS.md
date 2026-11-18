@@ -2,14 +2,14 @@
 
 Last checked: 2026-11-17, by running the commands in this file (not from memory).
 
-**Milestones 1 and 2 are done. Milestone 3 steps 1 (a home), 2 (encounter
-memory) and 3 (sharing) are built, and step 4 (are there groups?) is
-measured** (`docs/MILESTONE3.md`). 58% of agents belong to a group of agents
-who know each other well; most groups last less than a lifetime, a few
-outlive all their founders. Family homes drift about 5 tiles per
-generation, which pulls groups apart. **Proposed next: step 5, a child takes
-its parent's home** (section 5). GitHub (`origin/main`) has everything up
-to `af88e8a`; later commits are local only.
+**Milestones 1 and 2 are done. Milestone 3: steps 1 (home), 2 (memory) and
+3 (sharing) are built and on; step 4 (groups) is measured; step 5 (family
+home) is built but OFF by default, because it did not reach its goal**
+(`docs/MILESTONE3.md`). It kept families on one spot and made groups
+tighter, but groups did not last longer (6.1% against 6.3% lasting 1,000+
+ticks). **Proposed next: step 6, find out why groups end (measurement
+only)**, section 5. GitHub (`origin/main`) has everything up to `af88e8a`;
+later commits are local only.
 
 Plain words: a **tick** is one step of time. A **seed** is the number a world
 is built from (same seed = same world). A **fingerprint** is a short code that
@@ -25,8 +25,10 @@ is equal only when two worlds are exactly equal. **Headless** = no window.
       shown in the agent panel.
 - [x] **Sharing**: action `give`, `share_min_meetings` 2 (0 = off); gifts
       shown in the panel and in the stats ("Food shared").
+- [x] **Family home** (optional): `home_inherit` 0 by default, 1 = a child
+      takes its parent's home. The panel says where a home comes from.
 - [x] Every decision has a "why"; recent decisions are kept in saves.
-- [x] Saves version 6; versions 1 to 5 load and keep their old rules.
+- [x] Saves version 7; versions 1 to 6 load and keep their old rules.
 - [x] Milestone 1, Milestone 2, homes and memory behaviour frozen and
       reproduced exactly: `tests/test_baseline.py`, `tests/test_home.py`,
       `tests/test_memory.py`, `tests/test_sharing.py`,
@@ -39,8 +41,8 @@ is equal only when two worlds are exactly equal. **Headless** = no window.
 
 ## 2. Tests (run this session)
 
-`python3 -m unittest discover -s tests` -> `Ran 141 tests`, `OK` (about a
-minute). By file: baseline 5, controls 11, determinism 7, history 8, home 12,
+`python3 -m unittest discover -s tests` -> `Ran 145 tests`, `OK` (about 1.5
+minutes). By file: baseline 5, controls 11, determinism 7, history 8, home 16,
 memory 11, movement 7, overrides 11, rest 12, rest_design 14, save_load 10,
 sharing 9, summary 5, trait_streams 5, traits 8, why_log 6.
 Changed tests (on purpose): save-version checks now use `SAVE_VERSION`
@@ -51,7 +53,9 @@ with the frozen memory world; `test_why_log.py` knows the action "give".
 Reference run: `python3 run_headless.py --seed 42 --ticks 500 --every 0` ->
 100 alive (homes on). Frozen references: `experiments/baseline/baseline.json`
 (Milestone 1), `milestone2.json` (before homes), `milestone3_home.json`
-(homes, before memory), `milestone3_memory.json` (memory, before sharing).
+(homes, before memory), `milestone3_memory.json` (memory, before sharing),
+`milestone3_share.json` (sharing, before the family home; today's default
+world reproduces it exactly).
 
 ## 3. Browser check (this session)
 
@@ -78,6 +82,14 @@ rest while the decision text shows the value at decision time. The test save
 `saves/claude_browsercheck.json` is still in `saves/` (ignored by git).
 
 ## 4. Measured results
+
+**Family home** (`experiments/community_probe.py`, `home_drift.py`, 5 seeds
+x 3,000 ticks): family homes stop drifting (0 tiles against 14-19 after 10
+generations); groups get tighter (homes 3.3 against 5.7 tiles apart) and
+more family-like (24% against 19% family ties); 226 gifts against 187; but
+groups lasting 1,000+ ticks stay at 6.1% +/- 4.8 against 6.3% +/- 1.5, and
+the starved share rises to 65.0% from 62.9% (bands hold). Goal not met, so
+off by default.
 
 **Groups** (`experiments/community_probe.py`, 5 seeds x 3,000 ticks; tie =
 both remember 5+ meetings; group = 3+ agents connected by ties):
@@ -149,56 +161,47 @@ disappears** (25 of 40, within luck), because homes keep every agent near
 its patch, which was the zigzaggers' edge. In normal runs no trait is
 selected beyond chance.
 
-## 5. Next step: Milestone 3, step 5, the family home (recommended)
+## 5. Next step: Milestone 3, step 6, why do groups end? (measurement only, recommended)
 
-**What:** a child's home becomes its parent's home (the same tile), instead
-of the tile where it happened to be born. Founders keep their start tile.
-One new setting, `home_inherit` (1 = on; 0 = today's rule). No other change.
+**What:** extend `experiments/community_probe.py` so that every traced group
+records HOW its trace ended: (a) its members died (fewer than 2 left),
+(b) it split (survivors spread over several later groups, none holding
+half), or (c) it dissolved (survivors no longer in any group: ties fell
+below 5 meetings, or were forgotten from a full memory). Also: how many
+meetings a newcomer needs before it joins a group, and how often a tie is
+lost because memory was full. Default world and family home, same seeds.
+No rule change.
 
-**Why (evidence, section 4):** homes created groups (58% of agents in one,
-against 33% without homes), but most groups fall apart within a lifetime
-and only 6.3% last 1,000+ ticks. A family's home drifts about 5 tiles every
-generation, so after 10 generations the family lives 15+ tiles from where
-it started. Keeping the home in the family is the smallest change that
-could let a group outlive its members, which is what a community is.
+**Why (evidence):** two guesses about lasting groups have been tested and
+neither moved "groups lasting 1,000+ ticks" off about 6%: homes created
+groups but not lasting ones, and the family home (step 5) removed home drift
+without effect. Choosing a third rule without knowing why groups end would
+be guessing again.
 
-**Alternatives considered:**
-- *Name or record groups* (a group id per agent): rejected for now; most
-  groups do not last, so the name would mostly label passing crowds.
-- *A reciprocity rule*: still rejected (no gift was ever returned).
-- *Stop adding rules and tidy up* (why.py reading history, `--summary`
-  additions, the curiosity decision): reasonable, small; listed in the
-  tasks. The family home is chosen because the evidence points straight
-  at it.
+**What the answer would point to (not decided):**
+- mostly (a) die-out: newcomers join too slowly. Candidate: a newborn starts
+  knowing its parent's closest acquaintances (passing knowledge to children,
+  toward the vision's "habits passed on").
+- mostly (b) splits: groups grow until they break. Candidate: nothing, or a
+  group-size measure as the next study.
+- mostly (c) lost ties: the memory cap of 10 is the limit. Candidate: test a
+  larger `memory_keep` (a setting, no new rule).
 
-**Prediction to test:** more and longer-lasting groups and more family
-ties inside them; but families also pile up on one spot. That could raise
-local starvation, so the Milestone 2 bands must still hold.
+**Alternatives considered:** another rule straight away (rejected for the
+reason above); tidy-up tasks (why.py history, `--summary` additions, the
+curiosity decision), still listed below and fine to do first if you prefer.
 
-**Files:** `genesis/sim.py` (or `world.py`: child's home), `genesis/config.py`,
-`overrides.py`, `save.py` (version 7: `home_inherit = 0` for old saves),
-tests (`tests/test_home.py` additions), README, `docs/MILESTONE3.md`. A
-frozen reference of today's behaviour first.
+**Files:** `experiments/community_probe.py`, results, `docs/MILESTONE3.md`,
+STATUS. Nothing in `genesis/`.
 
-**Tests:** `home_inherit = 0` reproduces today's world exactly; a v6 save
-migrates and continues exactly; a child's home equals its parent's home;
-grandchildren keep the founder's home; same seed = same world.
-
-**Measure and success:** `community_probe.py` with `home_inherit` 0 and 1:
-success = groups traced 1,000+ ticks clearly above 6.3% (more than the
-seed-to-seed spread) AND the Milestone 2 bands hold (pop 80-98, starved
-62-73%, births 830-1,010, age 265-325, none died out). Also report
-`home_drift.py` (should drop to about 0) and `sharing_probe.py`.
-
-**Risks:** crowding at old family homes; whole families stuck in a poor
-spot (that is selection, but may cut diversity); groups could become one
-lineage each (watch the family share).
+**Done when:** the report gives the share of group endings of each kind,
+with spread over seeds, for both home settings, and names the next rule
+only if one kind clearly dominates.
 
 ## 6. Next 5 tasks
 
-1. **Your go for step 5 (the family home)**, then build it as in section 5.
-   Check: `python3 -m unittest discover -s tests`, then
-   `python3 experiments/community_probe.py`.
+1. **Your go for step 6 (why do groups end?)**, then extend the script as in
+   section 5. Check: `python3 experiments/community_probe.py`.
 2. **Decide what curiosity should mean now** (decision 2). If "roaming
    distance": files `genesis/agents.py`, `genesis/traits.py`, tests; measure
    with `python3 experiments/curiosity_probe.py`.
@@ -211,18 +214,20 @@ lineage each (watch the family share).
 
 ## 7. Decisions for you
 
-1. **Go for the family home (section 5)?** It changes behaviour, so it is
-   your call. Default: wait for your yes.
-2. **Curiosity after homes.** It now matters little. Options: (a) leave it;
+1. **Go for step 6 (section 5)?** Default: wait for your yes.
+2. **Family home default.** I switched it OFF after it missed its goal
+   (groups did not last longer; a bit more starvation). If you like the
+   tighter family groups anyway, set the default to 1 in `genesis/config.py`.
+3. **Curiosity after homes.** It now matters little. Options: (a) leave it;
    (b) let it also set each agent's roaming distance around home (curious =
    wanders further), which matches the word; (c) remove its effect.
    Default: (a) until you choose.
-3. **`home_radius` = 6** (chosen as proposed). 3 doubles family contact
+4. **`home_radius` = 6** (chosen as proposed). 3 doubles family contact
    again (20%) but agents meet fewer different agents (19 in a life) and
    reunite less after long gaps. Change anytime with `--set home_radius=3`.
-4. History caps (20 decisions per agent, 50 dead agents) and
+5. History caps (20 decisions per agent, 50 dead agents) and
    `memory_keep` 10: kept.
-5. The gather-then-eat flaw (6.2% of starvation deaths happen one tick after
+6. The gather-then-eat flaw (6.2% of starvation deaths happen one tick after
    picking food up): still NOT fixed, so all comparisons stay valid.
 
 ## 8. Remaining limitations
@@ -237,6 +242,7 @@ lineage each (watch the family share).
 - Memory costs about 6-13% speed (around the 10% aimed for).
 - Sharing: fewer gifts than hoped (187 per run); no gift ever returned.
 - Groups are measured with one definition (mutual 5+ ties, connected).
+- The family home is built but off; with it on, starvation rises a little.
 - "Family" in panel and probes = parent, child, sibling while alive only.
 - One test (`test_controls.py`) sleeps 0.7 s and could rarely fail on a very
   busy Mac. Python 3.9.
@@ -341,7 +347,7 @@ without it they write the `_home` files. `stage_compare.py` prints both
 (its homes-on output is saved as `stage_compare_home.txt`). Times on this Mac:
 memory probe about 3 min (`--old-drop-rule` for the rejected first cap
 rule), sharing count about 1.5 min, sharing probe about 5 min, community
-probe about 4 min, home drift about 30 s, encounter probe about 3 min, curiosity probe about 4 min, mixed extra about
+probe about 6 min, home drift about 1 min, encounter probe about 3 min, curiosity probe about 4 min, mixed extra about
 4 min, stage compare about 4 min, trait drift about 2 min, starvation study
 about 25 s, baseline check about 1 min. `trait_drift.py` and
 `starvation_study.py` now run with homes on; their saved results are from
@@ -381,6 +387,22 @@ before homes.
 
 Newest first. Older entries mention section numbers of earlier versions of
 this file; see `git log -p STATUS.md` for those.
+
+### Session 2026-11-18 (part 9: Milestone 3 step 5, the family home)
+- **Your go** ("Yes, family home").
+- **Frozen first** (`8d8381b`): `experiments/baseline/milestone3_share.json`,
+  `tests/fixtures/save_v6_seed42_t300.json`.
+- **Built** (`6c90028`): `home_inherit`, save version 7 (old saves: 0).
+  Page (`0057584`): "its family's home, from #58".
+- **A scare that was not a bug:** the full test suite ran for many minutes
+  once; each file alone ran in normal time. Cause: several test suites and
+  experiments running at the same time on this Mac. Final suite alone: 145
+  OK in about 1.5 minutes.
+- **Measured:** section 4 and `docs/MILESTONE3.md`. Goal NOT met (groups
+  lasting 1,000+ ticks 6.1% vs 6.3%). **Decision (mine, reversible):**
+  default switched to `home_inherit = 0`, so today's default world is the
+  step 3 world, exactly (tested). Listed under decisions.
+- **Not done:** step 6 (waits for your go).
 
 ### Session 2026-11-18 (part 8: Milestone 3 step 4, are there groups?)
 - **Your go** ("Yes, measure groups"). Measurement only; nothing in
