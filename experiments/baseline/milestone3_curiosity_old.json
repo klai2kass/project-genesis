@@ -1,0 +1,9 @@
+{
+ "note": "Milestone 3 step 8 code defaults (commit 155c71b), before the curiosity fix. Frozen 2026-11-18. A v8 save must continue exactly like this with curiosity_straight=0. Today's default world itself is frozen in milestone3_family.json.",
+ "save_v8": {
+  "behaviour_digest": "26ae05245503f095",
+  "event_digest": "b02d03301c0b6755",
+  "memory_digest": "65e0a602434029d7",
+  "tick": 500
+ }
+}
