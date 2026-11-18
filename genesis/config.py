@@ -77,9 +77,14 @@ DEFAULT_CONFIG = {
     # available but off. Try it with --set home_inherit=1.
     "home_inherit": 0,
     # Encounter memory (Milestone 3 step 2; genesis/memory.py): how many
-    # agents each agent remembers meeting. 0 = no memory. Never changes
-    # behaviour; it is a record.
+    # agents each agent remembers meeting. 0 = no memory. Sharing reads it.
     "memory_keep": 10,
+    # Fading memory (Milestone 3 step 7): forget an agent not met for more
+    # than this many ticks. 0 = never fade (old saves load with 0 and
+    # memory_keep 10, and keep their behaviour). Default 0: measured, no fade
+    # time gave groups that both last and stay local (docs/MILESTONE3.md,
+    # step 7). Try it with --set memory_fade=150 --set memory_keep=20.
+    "memory_fade": 0,
     # Sharing (Milestone 3 step 3; genesis/agents.py who_to_help): a
     # not-hungry agent carrying food gives 1 food to a starving agent within
     # 1 tile that it has met at least this many times. 0 = no sharing (old

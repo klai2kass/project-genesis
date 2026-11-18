@@ -48,6 +48,7 @@ RULES = {
     "home_radius": ("int", 0, 200),
     "home_inherit": ("int", 0, 1),
     "memory_keep": ("int", 0, 1000),
+    "memory_fade": ("int", 0, 100000),
     "share_min_meetings": ("int", 0, 1000),
 }
 

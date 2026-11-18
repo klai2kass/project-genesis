@@ -253,7 +253,9 @@ function renderKnown(known) {
   }
   $("a-known").textContent = known.count === 0 ? "Has not met anyone yet." :
     "Knows " + known.count + " agent" + (known.count === 1 ? "" : "s") +
-    " (remembers up to " + known.keep + "). Met most:";
+    " (remembers up to " + known.keep +
+    (known.fade > 0 ? ", forgets anyone not met for " + known.fade + " ticks" : "") +
+    "). Met most:";
   for (const k of known.top) {
     const li = document.createElement("li");
     const who = document.createElement("strong");

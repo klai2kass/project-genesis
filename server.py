@@ -63,7 +63,8 @@ def _known(agent, agents, cfg):
         out.append({"id": other_id, "first": first, "last": last, "meetings": meetings,
                     "x": x, "y": y, "alive": other is not None, "family": family,
                     "gave": gave, "got": got})
-    return {"count": len(agent["memory"]), "keep": cfg["memory_keep"], "top": out}
+    return {"count": len(agent["memory"]), "keep": cfg["memory_keep"],
+            "fade": cfg["memory_fade"], "top": out}
 
 class Game:
     """One running world plus the things the UI needs around it."""

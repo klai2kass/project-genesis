@@ -27,11 +27,18 @@ face gets a place by pushing out an old passing acquaintance.
 Chosen by measurement (experiments/memory_probe.py, docs/MILESTONE3.md): the
 first rule, "forget whoever was met longest ago", kept only about half of the
 agents met 5+ times and reset a friend's count to 1 after forgetting it.
+
+Fading (Milestone 3 step 7, config memory_fade; 0 = off): an agent also
+forgets anyone it has not been within 1 tile of for MORE than memory_fade
+ticks (tick - last_tick > memory_fade). Checked every tick for every living
+agent, before the list is trimmed. Step 6 showed why: a full list of 10
+forgot about 210 close friends per 1,000 ticks, and a big list that never
+forgets links everyone who once met into a few huge regions.
 Whole numbers, fixed order, no dice.
 
-Memory is a RECORD only: nothing in decide() reads it, so the world behaves
-exactly as without it (tests/test_memory.py checks this against the frozen
-reference experiments/baseline/milestone3_home.json).
+Memory was a RECORD only in step 2. Since step 3 sharing reads it
+(agents.who_to_help gives food only to agents met share_min_meetings times),
+so what is remembered, and when it fades, changes who gets food.
 """
 
 
@@ -81,13 +88,22 @@ def _trim(agent, keep):
         mem.remove(min(pool, key=lambda e: (e[3], e[2], e[0])))
 
 
+def _fade(agent, oldest):
+    """Forget every entry last met before tick `oldest`."""
+    mem = agent["memory"]
+    if mem and min(e[2] for e in mem) < oldest:
+        agent["memory"] = [e for e in mem if e[2] >= oldest]
+
+
 def update_memories(world):
     """Called once per tick by sim.step, after every agent has acted.
     Returns the number of NEW meetings that started this tick."""
-    keep = world["config"]["memory_keep"]
+    cfg = world["config"]
+    keep = cfg["memory_keep"]
     if keep <= 0:
         return 0
     tick = world["tick"]
+    fade = cfg["memory_fade"]
     started = 0
     touched = set()
     for a, b in meeting_pairs(world["agents"], world["config"]["width"]):
@@ -96,6 +112,8 @@ def update_memories(world):
         touched.add(a["id"])
         touched.add(b["id"])
     for agent in world["agents"]:
+        if fade > 0:
+            _fade(agent, tick - fade)
         if agent["id"] in touched and len(agent["memory"]) > keep:
             _trim(agent, keep)
     return started
