@@ -78,11 +78,10 @@ serve this, question it. If this file and the code disagree about what
 
 ### Next (proposed in STATUS.md, not built)
 
-- **Milestone 3, step 8: look inside the big groups** (measurement only).
-  Steps 6 and 7 showed that every memory setting tried so far that makes
-  groups last also makes them merge into a few huge regions (fading memory
-  is built but off by default). Next: check with a stricter group
-  definition whether those regions hold tight local cores that last.
+- **Milestone 3, step 9: rest at home.** Step 8 found small, very local
+  circles of friends, but every one breaks up within about 35 to 90 ticks:
+  agents meet only by chance. Next: a tired agent walks home before
+  resting, so neighbours and family meet again and again in one place.
 
 ### Future ambition (nothing below exists)
 

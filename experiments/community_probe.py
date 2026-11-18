@@ -47,6 +47,25 @@ step 6 world), memory 20 that never fades, and room for 20 with fading after
 75, 150, 300 and 600 ticks (75 added after a quick run showed 300 and 600
 change little: agents live about 310 ticks). All other settings are the code defaults; memory
 settings are given explicitly so the result does not depend on them.
+Step 8 (`--cores`): are there tight local groups INSIDE the big chained
+groups? Same tie (mutual 5+), but stricter ways to form groups that a single
+tie between two neighbourhoods cannot join:
+  K5 core3     keep only agents with 3+ ties to others that are kept
+               (repeat until stable; the "3-core"). A single tie between two
+               dense neighbourhoods SURVIVES this, so it can still chain;
+               reported for comparison.
+  K5 shared1/2/3  keep a tie only if the two agents also have 1 / 2 / 3+
+               friends IN COMMON among kept ties (repeat until stable; in
+               graph terms the 3-, 4- and 5-truss). A lone bridge between
+               neighbourhoods has no common friend, so it is cut.
+  K10          the old chained group with a stricter tie (10+ meetings).
+Groups are then connected sets of 3+ as before, traced the same way. Also:
+how many shared2 groups lie inside each big (20+) chained K5 group.
+Worlds: memory 10 (default), memory 20 + fade 150, memory 20 no fading,
+and the family home (home_inherit=1, a shared home area for a family) with
+memory 10 and with memory 20 + fade 150: added after a quick run found
+almost no tight groups, to see whether sharing a home area makes them.
+
 Also counted: living 5+-meeting friends forgotten by FADING (the row above
 it counts only those dropped from a full list). Files community_fading.txt / .json.
 
@@ -55,6 +74,10 @@ Run:  python3 experiments/community_probe.py          (3 worlds x 5 seeds x 3000
             files community_endings.txt / .json)
       python3 experiments/community_probe.py --fading    (step 7; ~15 min;
             files community_fading.txt / .json)
+      python3 experiments/community_probe.py --cores     (step 8; ~20 min;
+            files community_cores.txt / .json)
+      add --every 50 to snapshot every 50 ticks (files get "_every50")
+      add --reprint to print a saved result again without running
       python3 experiments/community_probe.py --quick  (2 seeds x 1500 ticks)
 Writes experiments/results/community_probe.json; printout in community_probe.txt.
 """
@@ -74,6 +97,12 @@ TICKS = 3000
 if "--quick" in sys.argv:
     SEEDS, TICKS = ["42", "1"], 1500
 FIRST, EVERY = 500, 250
+# --every N: snapshot every N ticks instead of 250 (step 8: a group whose
+# members all change within 250 ticks, about one lifetime, cannot be followed
+# at 250; at 50 it can). "Traced 1,000+ ticks" stays 1,000 ticks.
+if "--every" in sys.argv:
+    EVERY = int(sys.argv[sys.argv.index("--every") + 1])
+LONG = 1000 // EVERY            # snapshots in 1,000 ticks
 THRESHOLDS = [5, 2]
 WORLDS = [("family home", {"home_inherit": 1}),
           ("birth-tile home (default)", {"home_inherit": 0}),
@@ -99,6 +128,16 @@ if FADING:
               ("memory 20, fade 150", {"memory_keep": 20, "memory_fade": 150}),
               ("memory 20, fade 300", {"memory_keep": 20, "memory_fade": 300}),
               ("memory 20, fade 600", {"memory_keep": 20, "memory_fade": 600})]
+CORES = "--cores" in sys.argv
+if CORES:
+    THRESHOLDS = [5, "K5 core3", "K5 shared1", "K5 shared2", "K5 shared3", 10]
+    WORLDS = [("memory 10 (default)", {"memory_keep": 10, "memory_fade": 0}),
+              ("memory 20, fade 150", {"memory_keep": 20, "memory_fade": 150}),
+              ("memory 20, no fading", {"memory_keep": 20, "memory_fade": 0}),
+              ("family home, memory 10", {"home_inherit": 1, "memory_keep": 10,
+                                          "memory_fade": 0}),
+              ("family home, mem 20, fade 150", {"home_inherit": 1, "memory_keep": 20,
+                                                 "memory_fade": 150})]
 JOIN_EVERY = 50          # how often (ticks) group membership is checked for joining
 
 # Count strong entries (5+ meetings) forgotten because a memory was full.
@@ -147,6 +186,51 @@ def ties(agents, k):
     strong = {a["id"]: {e[0] for e in a["memory"] if e[3] >= k and e[0] in alive}
               for a in agents}
     return {(a, b) for a, bs in strong.items() for b in bs if a < b and a in strong.get(b, ())}
+
+
+def _neighbours(edges):
+    nbr = {}
+    for a, b in edges:
+        nbr.setdefault(a, set()).add(b)
+        nbr.setdefault(b, set()).add(a)
+    return nbr
+
+
+def core(edges, c):
+    """Ties among agents that keep c+ ties to other kept agents."""
+    edges = set(edges)
+    while True:
+        nbr = _neighbours(edges)
+        weak = {n for n, ns in nbr.items() if len(ns) < c}
+        if not weak:
+            return edges
+        edges = {(a, b) for a, b in edges if a not in weak and b not in weak}
+
+
+def shared(edges, m):
+    """Ties whose two agents have m+ common friends among kept ties."""
+    edges = set(edges)
+    while True:
+        nbr = _neighbours(edges)
+        keep = {(a, b) for a, b in edges if len(nbr[a] & nbr[b]) >= m}
+        if keep == edges:
+            return edges
+        edges = keep
+
+
+def view_ties(agents, view):
+    """Ties for a group view: an int k (chained, k+ meetings) or a name."""
+    if isinstance(view, int):
+        return ties(agents, view)
+    base = ties(agents, 5)
+    rule = view.split()[1]
+    if rule.startswith("core"):
+        return core(base, int(rule[4:]))
+    return shared(base, int(rule[6:]))
+
+
+def view_name(view):
+    return "K%d" % view if isinstance(view, int) else view
 
 
 def groups_of(edges):
@@ -242,7 +326,7 @@ def run(seed, extra):
             snap = {"tick": t, "alive": {a["id"] for a in w["agents"]},
                     "home": {a["id"]: a["home"] for a in w["agents"]}, "k": {}}
             for k in THRESHOLDS + [2]:
-                e2 = ties(w["agents"], k)
+                e2 = view_ties(w["agents"], k)
                 snap["k"][k] = {"ties": e2, "groups": groups_of(e2)}
             snaps.append(snap)
 
@@ -294,12 +378,12 @@ def run(seed, extra):
                     v = kept(g, later["k"][k]["groups"], later["alive"])
                     if v is not None:
                         kept250.append(v)
-            if i + 4 < len(snaps):          # 1,000+ ticks of room left
+            if i + LONG < len(snaps):       # 1,000+ ticks of room left
                 for g in gs:
                     n, gone, how = trace(snaps, i, g, k)
                     endings[how] += 1
                     traced.append(n * EVERY)
-                    if n >= 4:
+                    if n >= LONG:
                         long_ += 1
                         long_gone += gone
             # gifts in the next 250 ticks: inside a group?
@@ -313,7 +397,7 @@ def run(seed, extra):
 
         def mean(v):
             return sum(v) / float(len(v)) if v else None
-        out["K%d" % k] = {"groups_per_snapshot": mean(n_groups), "in_group_pct": mean(in_group),
+        out[view_name(k)] = {"groups_per_snapshot": mean(n_groups), "in_group_pct": mean(in_group),
                   "group_size": mean(sizes), "biggest_group": mean(biggest),
                   "family_ties_pct": mean(fam), "home_spread": mean(spread),
                   "kept_250_pct": 100.0 * mean(kept250) if kept250 else None,
@@ -327,6 +411,21 @@ def run(seed, extra):
                   "ended_split_pct": 100.0 * endings["split"] / max(1, sum(endings.values())),
                   "ended_dissolved_pct": 100.0 * endings["dissolved"] / max(1, sum(endings.values())),
                   "still_going_pct": 100.0 * endings["end"] / max(1, sum(endings.values()))}
+    if CORES:
+        # Inside each big chained K5 group (20+ agents): how many shared2
+        # groups, and what share of its members are in one.
+        n_inside, covered = [], []
+        for s in snaps:
+            small = s["k"]["K5 shared2"]["groups"]
+            for g in s["k"][5]["groups"]:
+                if len(g) >= 20:
+                    inner = [h for h in small if h <= g]
+                    n_inside.append(len(inner))
+                    covered.append(100.0 * len(set().union(*inner) if inner else set()) / len(g))
+        out["inside_big"] = {
+            "big_groups_counted": len(n_inside),
+            "shared2_groups_inside": sum(n_inside) / float(max(1, len(n_inside))),
+            "members_in_a_shared2_group_pct": sum(covered) / float(max(1, len(covered)))}
     return out
 
 
@@ -362,29 +461,46 @@ JOIN_ROWS = [("adults_ever_in_group_pct", "adults that ever joined a group %"),
              ("strong_faded_per_1000_ticks", "living 5+-meeting friends faded / 1000 ticks")]
 
 
+def result_file():
+    name = ("community_cores" if CORES else "community_fading" if FADING else
+            "community_endings" if ENDINGS else "community_probe")
+    if EVERY != 250:
+        name += "_every%d" % EVERY
+    return os.path.join(ROOT, "experiments", "results", name + ".json")
+
+
 def main():
-    out = {"seeds": SEEDS, "ticks": TICKS, "first": FIRST, "every": EVERY, "worlds": {}}
-    for name, extra in WORLDS:
-        out["worlds"][name] = [run(s, extra) for s in SEEDS]
-        sys.stderr.write("%s done\n" % name)
+    if "--reprint" in sys.argv:          # print again from the saved .json, no new run
+        with open(result_file()) as f:
+            out = json.load(f)
+    else:
+        out = {"seeds": SEEDS, "ticks": TICKS, "first": FIRST, "every": EVERY, "worlds": {}}
+        for name, extra in WORLDS:
+            out["worlds"][name] = [run(s, extra) for s in SEEDS]
+            sys.stderr.write("%s done\n" % name)
     print("Community probe: seeds %s, %d ticks, snapshot every %d ticks from tick %d."
           % (",".join(SEEDS), TICKS, EVERY, FIRST))
     print("Tie = both living agents remember K+ meetings with each other. Group = 3+")
     print("agents connected by ties. Cells: mean over snapshots, then mean +/- sd over seeds.")
     print()
     print("== The world (Milestone 2 bands: pop 80-98, starved 62-73, births 830-1010, age 265-325) ==")
-    print("%-42s" % "" + "".join("%28s" % n for n, _ in WORLDS))
+    print("%-42s" % "" + "".join("%31s" % n for n, _ in WORLDS))
     for key, label in [("mean_pop", "population after tick 500"), ("births", "births"),
                        ("starved_pct", "starved % of deaths"), ("age_at_death", "age at death"),
                        ("gifts", "gifts of food"), ("extinct", "died out (0/1)")]:
         print("%-42s" % label + "".join(
-            "%28s" % stats([r["world"][key] for r in out["worlds"][n]]) for n, _ in WORLDS))
+            "%31s" % stats([r["world"][key] for r in out["worlds"][n]]) for n, _ in WORLDS))
     for k in THRESHOLDS:
         print()
-        print("== K = %d ==" % k)
-        print("%-42s" % "" + "".join("%28s" % n for n, _ in WORLDS))
+        print("== %s ==" % (("K = %d" % k) if isinstance(k, int) else k))
+        print("%-42s" % "" + "".join("%31s" % n for n, _ in WORLDS))
         rows = ROWS
-        if ENDINGS:
+        if CORES:
+            show = ("groups_per_snapshot", "in_group_pct", "group_size", "biggest_group",
+                    "home_spread", "family_ties_pct", "traced_ticks", "traced_1000_pct",
+                    "outlived_founders_pct")
+            rows = [r for r in ROWS if r[0] in show] + ENDING_ROWS
+        elif ENDINGS:
             show = ("in_group_pct", "group_size", "traced_ticks", "traced_1000_pct")
             if FADING:
                 show += ("groups_per_snapshot", "biggest_group", "home_spread", "family_ties_pct",
@@ -392,22 +508,32 @@ def main():
             rows = [r for r in ROWS if r[0] in show] + ENDING_ROWS
         for key, label in rows:
             print("%-42s" % label + "".join(
-                "%28s" % stats([r["K%d" % k][key] for r in out["worlds"][n]]) for n, _ in WORLDS))
+                "%31s" % stats([r[view_name(k)][key] for r in out["worlds"][n]]) for n, _ in WORLDS))
+    if CORES:
+        print()
+        print("== Inside the big chained groups (K5, 20+ agents) ==")
+        print("%-42s" % "" + "".join("%31s" % n for n, _ in WORLDS))
+        for key, lab in [("big_groups_counted", "big groups counted (all snapshots)"),
+                         ("shared2_groups_inside", "shared2 groups inside one"),
+                         ("members_in_a_shared2_group_pct", "  its members in a shared2 group %")]:
+            print("%-42s" % lab + "".join(
+                "%31s" % stats([r["inside_big"][key] for r in out["worlds"][n]]) for n, _ in WORLDS))
+        print()
+        print("core3 = 3+ ties each; sharedM = each tie has M+ friends in common (see top of")
+        print("the script). Endings count groups starting 1,000+ ticks before the end.")
     if ENDINGS:
         print()
         print("== Joining and forgetting ==")
-        print("%-42s" % "" + "".join("%28s" % n for n, _ in WORLDS))
+        print("%-42s" % "" + "".join("%31s" % n for n, _ in WORLDS))
         for key, label in JOIN_ROWS:
             print("%-42s" % label + "".join(
-                "%28s" % stats([r["joining"][key] for r in out["worlds"][n]]) for n, _ in WORLDS))
+                "%31s" % stats([r["joining"][key] for r in out["worlds"][n]]) for n, _ in WORLDS))
         print()
         print("Endings count every group that starts at least 1,000 ticks before the end.")
         print("Joining: agents born in the run that lived 200+ ticks; group membership checked")
         print("every %d ticks, so ages are rounded to that." % JOIN_EVERY)
-    if "--quick" not in sys.argv:
-        name = ("community_fading.json" if FADING else
-                "community_endings.json" if ENDINGS else "community_probe.json")
-        with open(os.path.join(ROOT, "experiments", "results", name), "w") as f:
+    if "--quick" not in sys.argv and "--reprint" not in sys.argv:
+        with open(result_file(), "w") as f:
             json.dump(out, f, indent=1, sort_keys=True,
                       default=lambda o: sorted(o) if isinstance(o, (set, frozenset)) else str(o))
 

@@ -1,0 +1,117 @@
+Community probe: seeds 42,1,2,3,4, 3000 ticks, snapshot every 50 ticks from tick 500.
+Tie = both living agents remember K+ meetings with each other. Group = 3+
+agents connected by ties. Cells: mean over snapshots, then mean +/- sd over seeds.
+
+== The world (Milestone 2 bands: pop 80-98, starved 62-73, births 830-1010, age 265-325) ==
+                                                      memory 10 (default)            memory 20, fade 150           memory 20, no fading         family home, memory 10  family home, mem 20, fade 150
+population after tick 500                                    93.6 +/- 0.8                   93.3 +/- 0.5                   93.3 +/- 0.5                   93.1 +/- 0.9                   93.5 +/- 0.9
+births                                                      893.6 +/- 7.6                 896.6 +/- 10.2                  887.8 +/- 5.2                 904.8 +/- 19.3                 900.6 +/- 16.5
+starved % of deaths                                          62.9 +/- 0.8                   63.8 +/- 1.0                   62.5 +/- 1.5                   65.0 +/- 1.4                   63.8 +/- 1.6
+age at death                                                319.1 +/- 2.5                  316.3 +/- 2.8                  321.4 +/- 1.9                  311.4 +/- 3.2                  316.1 +/- 4.2
+gifts of food                                              186.6 +/- 15.9                  221.0 +/- 5.5                  217.4 +/- 3.2                 226.2 +/- 34.0                  262.4 +/- 9.3
+died out (0/1)                                                0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0
+
+== K = 5 ==
+                                                      memory 10 (default)            memory 20, fade 150           memory 20, no fading         family home, memory 10  family home, mem 20, fade 150
+groups (3+ agents) per snapshot                               7.2 +/- 0.4                    4.3 +/- 0.3                    3.5 +/- 0.3                    8.1 +/- 0.6                    5.8 +/- 0.7
+living agents in a group %                                   58.1 +/- 2.0                   70.9 +/- 1.2                   71.0 +/- 1.2                   57.5 +/- 2.0                   72.8 +/- 0.9
+group size, mean                                              7.5 +/- 0.6                   15.5 +/- 1.1                   19.2 +/- 1.3                    6.7 +/- 0.5                   12.0 +/- 1.7
+biggest group, mean                                          18.4 +/- 2.0                   39.7 +/- 2.5                   47.1 +/- 1.7                   14.5 +/- 1.5                   28.6 +/- 5.7
+ties inside groups that are family %                         18.9 +/- 1.4                   16.1 +/- 0.9                   16.3 +/- 1.6                   23.8 +/- 0.5                   20.9 +/- 0.7
+home spread in a group (tiles)                                5.6 +/- 0.2                    7.7 +/- 0.4                    8.5 +/- 0.5                    3.3 +/- 0.4                    4.9 +/- 0.8
+group can be traced, ticks (mean)                         315.3 +/- 106.5                 373.3 +/- 82.7                650.8 +/- 288.0                 391.0 +/- 68.4                628.5 +/- 305.2
+groups traced 1,000+ ticks %                                  6.6 +/- 7.5                    2.0 +/- 3.4                  24.9 +/- 21.3                   11.2 +/- 6.6                  24.8 +/- 22.7
+  of those, all first members dead %                        100.0 +/- 0.0                  100.0 +/- 0.0                  100.0 +/- 0.0                  100.0 +/- 0.0                  100.0 +/- 0.0
+ended: members died %                                         4.9 +/- 2.4                    1.0 +/- 0.7                    5.1 +/- 9.9                    6.0 +/- 6.3                    1.2 +/- 0.9
+ended: split into other groups %                            61.8 +/- 14.1                   88.7 +/- 8.5                  78.6 +/- 35.8                   32.7 +/- 6.8                  71.4 +/- 23.3
+ended: dissolved (ties broke) %                             33.1 +/- 12.4                   10.3 +/- 8.3                    4.4 +/- 2.9                   55.0 +/- 9.5                   13.1 +/- 9.3
+still going at the end of the run %                           0.3 +/- 0.6                    0.0 +/- 0.0                  11.9 +/- 26.6                    6.3 +/- 6.7                  14.3 +/- 18.3
+
+== K5 core3 ==
+                                                      memory 10 (default)            memory 20, fade 150           memory 20, no fading         family home, memory 10  family home, mem 20, fade 150
+groups (3+ agents) per snapshot                               0.6 +/- 0.2                    2.3 +/- 0.2                    2.2 +/- 0.1                    0.7 +/- 0.2                    3.5 +/- 0.4
+living agents in a group %                                    3.3 +/- 0.8                   19.8 +/- 2.2                   24.0 +/- 1.8                    3.5 +/- 1.2                   28.6 +/- 2.3
+group size, mean                                              4.9 +/- 0.3                    8.0 +/- 0.7                   10.1 +/- 0.8                    4.7 +/- 0.0                    7.7 +/- 0.5
+biggest group, mean                                           2.6 +/- 0.5                   11.3 +/- 1.7                   15.7 +/- 1.5                    2.6 +/- 0.7                   12.5 +/- 1.4
+ties inside groups that are family %                         20.1 +/- 1.5                   14.6 +/- 1.6                   15.1 +/- 1.3                   25.4 +/- 6.3                   18.3 +/- 0.9
+home spread in a group (tiles)                                3.6 +/- 0.4                    5.3 +/- 0.2                    6.4 +/- 0.5                    1.1 +/- 0.4                    3.1 +/- 0.5
+group can be traced, ticks (mean)                           47.9 +/- 24.6                  73.8 +/- 19.9                 104.6 +/- 29.4                  34.9 +/- 15.4                 124.7 +/- 40.1
+groups traced 1,000+ ticks %                                  0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0
+  of those, all first members dead %                                    -                              -                              -                              -                              -
+ended: members died %                                         3.1 +/- 4.7                    0.3 +/- 0.8                    0.8 +/- 0.8                    6.6 +/- 9.4                    0.8 +/- 1.4
+ended: split into other groups %                              0.0 +/- 0.0                    7.4 +/- 7.1                  18.3 +/- 16.8                    0.0 +/- 0.0                   11.1 +/- 4.2
+ended: dissolved (ties broke) %                              96.9 +/- 4.7                   92.3 +/- 6.7                  80.9 +/- 17.4                   93.4 +/- 9.4                   88.1 +/- 4.5
+still going at the end of the run %                           0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0
+
+== K5 shared1 ==
+                                                      memory 10 (default)            memory 20, fade 150           memory 20, no fading         family home, memory 10  family home, mem 20, fade 150
+groups (3+ agents) per snapshot                               4.9 +/- 0.4                    6.9 +/- 0.2                    6.5 +/- 0.4                    5.1 +/- 0.7                    7.9 +/- 0.3
+living agents in a group %                                   21.1 +/- 2.2                   44.5 +/- 2.0                   46.9 +/- 1.4                   21.6 +/- 2.9                   51.2 +/- 1.7
+group size, mean                                              4.0 +/- 0.1                    6.1 +/- 0.3                    6.7 +/- 0.3                    3.9 +/- 0.1                    6.1 +/- 0.2
+biggest group, mean                                           5.9 +/- 0.4                   12.6 +/- 1.0                   14.8 +/- 1.3                    5.6 +/- 0.2                   11.8 +/- 0.9
+ties inside groups that are family %                         19.3 +/- 2.1                   15.8 +/- 1.3                   15.7 +/- 1.4                   25.7 +/- 2.0                   20.2 +/- 0.7
+home spread in a group (tiles)                                3.7 +/- 0.1                    4.7 +/- 0.2                    5.0 +/- 0.1                    1.4 +/- 0.3                    2.4 +/- 0.3
+group can be traced, ticks (mean)                          108.5 +/- 19.0                 238.3 +/- 34.2                368.1 +/- 129.8                 112.3 +/- 14.4                 276.3 +/- 55.0
+groups traced 1,000+ ticks %                                  0.0 +/- 0.0                    1.6 +/- 2.9                    8.1 +/- 9.3                    0.0 +/- 0.0                    3.0 +/- 3.8
+  of those, all first members dead %                                    -                  100.0 +/- 0.0                  100.0 +/- 0.0                              -                  100.0 +/- 0.0
+ended: members died %                                        15.4 +/- 6.9                    7.0 +/- 3.7                    8.9 +/- 4.6                   14.8 +/- 8.7                    8.2 +/- 3.6
+ended: split into other groups %                              0.8 +/- 1.1                   27.8 +/- 9.3                  27.5 +/- 14.3                    0.0 +/- 0.0                  22.1 +/- 11.9
+ended: dissolved (ties broke) %                              83.8 +/- 7.1                   65.2 +/- 9.1                  62.3 +/- 12.3                   85.2 +/- 8.7                  68.1 +/- 12.2
+still going at the end of the run %                           0.0 +/- 0.0                    0.0 +/- 0.0                    1.4 +/- 3.0                    0.0 +/- 0.0                    1.6 +/- 3.5
+
+== K5 shared2 ==
+                                                      memory 10 (default)            memory 20, fade 150           memory 20, no fading         family home, memory 10  family home, mem 20, fade 150
+groups (3+ agents) per snapshot                               0.6 +/- 0.2                    2.6 +/- 0.3                    2.9 +/- 0.3                    0.6 +/- 0.2                    3.9 +/- 0.4
+living agents in a group %                                    2.6 +/- 0.8                   14.4 +/- 1.8                   16.0 +/- 1.5                    2.8 +/- 1.0                   22.7 +/- 2.2
+group size, mean                                              4.4 +/- 0.1                    5.2 +/- 0.2                    5.2 +/- 0.3                    4.4 +/- 0.2                    5.4 +/- 0.1
+biggest group, mean                                           2.1 +/- 0.6                    5.9 +/- 0.6                    6.2 +/- 0.6                    2.1 +/- 0.6                    7.1 +/- 0.3
+ties inside groups that are family %                         21.2 +/- 1.9                   15.6 +/- 2.2                   15.9 +/- 2.1                   26.9 +/- 6.6                   19.1 +/- 0.9
+home spread in a group (tiles)                                3.4 +/- 0.3                    4.1 +/- 0.1                    4.0 +/- 0.1                    1.0 +/- 0.4                    1.7 +/- 0.3
+group can be traced, ticks (mean)                           34.2 +/- 15.9                   56.2 +/- 6.8                  72.8 +/- 16.2                  37.9 +/- 16.5                  90.0 +/- 27.1
+groups traced 1,000+ ticks %                                  0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0
+  of those, all first members dead %                                    -                              -                              -                              -                              -
+ended: members died %                                         3.9 +/- 6.2                    0.6 +/- 0.8                    2.4 +/- 1.7                   8.3 +/- 11.8                    2.2 +/- 1.7
+ended: split into other groups %                              0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0
+ended: dissolved (ties broke) %                              96.1 +/- 6.2                   99.4 +/- 0.8                   97.6 +/- 1.7                  91.7 +/- 11.8                   97.8 +/- 1.7
+still going at the end of the run %                           0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0
+
+== K5 shared3 ==
+                                                      memory 10 (default)            memory 20, fade 150           memory 20, no fading         family home, memory 10  family home, mem 20, fade 150
+groups (3+ agents) per snapshot                               0.0 +/- 0.0                    0.5 +/- 0.1                    0.6 +/- 0.2                    0.1 +/- 0.1                    1.1 +/- 0.2
+living agents in a group %                                    0.1 +/- 0.2                    2.8 +/- 0.6                    3.3 +/- 1.0                    0.4 +/- 0.4                    6.8 +/- 1.3
+group size, mean                                              5.0 +/- 0.0                    5.6 +/- 0.2                    5.6 +/- 0.3                    5.3 +/- 0.2                    5.8 +/- 0.2
+biggest group, mean                                           0.1 +/- 0.2                    2.1 +/- 0.3                    2.5 +/- 0.7                    0.4 +/- 0.4                    4.0 +/- 0.6
+ties inside groups that are family %                        22.5 +/- 10.6                   15.3 +/- 3.7                   15.2 +/- 2.2                   25.6 +/- 6.7                   18.0 +/- 2.1
+home spread in a group (tiles)                                2.9 +/- 0.0                    3.8 +/- 0.2                    4.0 +/- 0.2                    0.9 +/- 1.2                    1.5 +/- 0.4
+group can be traced, ticks (mean)                             0.0 +/- 0.0                  30.1 +/- 17.7                  39.2 +/- 15.5                  27.1 +/- 14.7                  42.7 +/- 25.4
+groups traced 1,000+ ticks %                                  0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0
+  of those, all first members dead %                                    -                              -                              -                              -                              -
+ended: members died %                                         0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0                    0.9 +/- 2.0
+ended: split into other groups %                              0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0
+ended: dissolved (ties broke) %                             40.0 +/- 54.8                  100.0 +/- 0.0                  100.0 +/- 0.0                  40.0 +/- 54.8                   99.1 +/- 2.0
+still going at the end of the run %                           0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0
+
+== K = 10 ==
+                                                      memory 10 (default)            memory 20, fade 150           memory 20, no fading         family home, memory 10  family home, mem 20, fade 150
+groups (3+ agents) per snapshot                               3.2 +/- 0.4                    4.3 +/- 0.5                    4.8 +/- 0.4                    3.1 +/- 0.5                    5.1 +/- 0.4
+living agents in a group %                                   12.3 +/- 1.6                   17.7 +/- 1.6                   21.0 +/- 1.4                   11.7 +/- 1.8                   21.8 +/- 1.8
+group size, mean                                              3.7 +/- 0.1                    3.9 +/- 0.1                    4.1 +/- 0.1                    3.5 +/- 0.1                    4.0 +/- 0.1
+biggest group, mean                                           4.4 +/- 0.2                    5.2 +/- 0.2                    5.8 +/- 0.5                    4.0 +/- 0.1                    5.6 +/- 0.2
+ties inside groups that are family %                         23.5 +/- 0.9                   19.8 +/- 3.8                   19.8 +/- 3.6                   28.6 +/- 3.1                   25.9 +/- 3.1
+home spread in a group (tiles)                                3.5 +/- 0.2                    3.7 +/- 0.2                    3.9 +/- 0.1                    1.2 +/- 0.4                    1.4 +/- 0.1
+group can be traced, ticks (mean)                           84.3 +/- 20.5                 105.4 +/- 13.4                 133.6 +/- 25.1                  85.8 +/- 13.0                 117.5 +/- 19.4
+groups traced 1,000+ ticks %                                  0.0 +/- 0.0                    0.0 +/- 0.0                    0.3 +/- 0.6                    0.0 +/- 0.0                    0.0 +/- 0.0
+  of those, all first members dead %                                    -                              -                  100.0 +/- 0.0                              -                              -
+ended: members died %                                       26.5 +/- 14.8                   25.2 +/- 9.3                   24.0 +/- 7.4                  24.0 +/- 12.5                   22.6 +/- 6.7
+ended: split into other groups %                              0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0                    0.4 +/- 0.8
+ended: dissolved (ties broke) %                             73.5 +/- 14.8                   74.8 +/- 9.3                   76.0 +/- 7.4                  76.0 +/- 12.5                   77.0 +/- 6.6
+still going at the end of the run %                           0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0                    0.0 +/- 0.0
+
+== Inside the big chained groups (K5, 20+ agents) ==
+                                                      memory 10 (default)            memory 20, fade 150           memory 20, no fading         family home, memory 10  family home, mem 20, fade 150
+big groups counted (all snapshots)                           18.4 +/- 5.1                   54.4 +/- 2.7                   55.0 +/- 5.0                    8.6 +/- 3.4                  44.2 +/- 16.1
+shared2 groups inside one                                     0.4 +/- 0.1                    1.6 +/- 0.3                    2.1 +/- 0.3                    0.2 +/- 0.2                    1.8 +/- 0.2
+  its members in a shared2 group %                            5.7 +/- 2.4                   20.4 +/- 3.9                   23.4 +/- 3.4                    4.5 +/- 3.7                   31.1 +/- 3.5
+
+core3 = 3+ ties each; sharedM = each tie has M+ friends in common (see top of
+the script). Endings count groups starting 1,000+ ticks before the end.

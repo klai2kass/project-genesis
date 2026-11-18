@@ -9,9 +9,11 @@ home) is built but OFF by default, because it did not reach its goal**
 cap.** **Step 7 (fading memory) is built but OFF by default: no fade time
 gave groups that both last and stay local** (short fading: local but
 short-lived; longer fading: lasting but regional, like room for 20).
-Today's default world is unchanged. **Proposed next: step 8**, a
-measurement only: are there tight local cores inside the big groups?
-(section 5). GitHub (`origin/main`) has everything up to `af88e8a`; later
+Today's default world is unchanged. **Step 8 (tight circles) is measured:
+small, very local circles of friends exist, but every one breaks up within
+about 35 to 90 ticks; none lasts 1,000 ticks in any world.** Proposed next:
+**step 9, rest at home** (a tired agent walks home before resting), section
+5. GitHub (`origin/main`) has everything up to `af88e8a`; later
 commits are local only.
 
 Plain words: a **tick** is one step of time. A **seed** is the number a world
@@ -95,6 +97,23 @@ rest while the decision text shows the value at decision time. The test save
 `saves/claude_browsercheck.json` is still in `saves/` (ignored by git).
 
 ## 4. Measured results
+
+**Tight circles** (step 8, `experiments/community_probe.py --cores --every
+50`; a tight circle = friends where every pair also has 2+ friends in
+common, checked every 50 ticks):
+
+| | memory 10 (default) | 20, fade 150 | 20, no fade | family home, 10 | family home, 20, fade 150 |
+| --- | --- | --- | --- | --- | --- |
+| agents in a tight circle | 2.6% | 14% | 16% | 2.8% | 23% |
+| members' homes spread | 3.4 tiles | 4.1 | 4.0 | 1.0 | 1.7 |
+| how long a circle lasts | 34 ticks | 56 | 73 | 38 | 90 |
+| circles lasting 1,000+ ticks | 0% | 0% | 0% | 0% | 0% |
+| ended by breaking apart | 96% | 99% | 98% | 92% | 98% |
+
+The big groups are loose chains, not lasting local communities. Also: the
+old "lasting" line depends on how often groups are checked (fade 150: 44%
+when checked every 250 ticks, 2% every 50). Details:
+`docs/MILESTONE3.md`, step 8.
 
 **Fading memory** (step 7, `experiments/community_probe.py --fading`, 5
 seeds x 3,000 ticks; success line: lasting 25%+ AND home spread about 6
@@ -204,52 +223,56 @@ disappears** (25 of 40, within luck), because homes keep every agent near
 its patch, which was the zigzaggers' edge. In normal runs no trait is
 selected beyond chance.
 
-## 5. Next step: Milestone 3, step 8, look inside the big groups (recommended)
+## 5. Next step: Milestone 3, step 9, rest at home (recommended)
 
-**What:** a measurement only, nothing in `genesis/` changes. In the worlds
-of step 7 (memory 10; memory 20 with fade 150; memory 20 without fading),
-find groups with a STRICTER definition that does not chain across a whole
-region: a **core** = agents who each have at least 3 mutual 5+ ties inside
-the core (repeatedly remove members with fewer; what is left is the core).
-Also report ties at K = 10. For cores: how many, size, home spread, how
-long they can be traced, and whether a big group is made of several local
-cores joined by a few links.
+**What:** a tired agent that is not hungry (rest below `rest_below`, the
+moment it would start resting) first walks home and rests when it is within
+`rest_home_within` tiles of home (proposed 1). If water blocks the way, or
+its rest falls very low (proposed: below 10), it rests where it is, as
+today. New setting `rest_home` (1 = on, 0 = today's rule; old saves get 0).
+No social rule: it is about a PLACE, not about other agents.
 
-**Why (evidence, section 4):** in every world measured so far, the settings
-that make groups last also make them large and spread out (memory 20,
-fades 150 to 600), and the settings that keep them local make them short
-(memory 10, fade 75). Today a "group" is any chain of ties, so one tie
-between two neighbourhoods joins them. Before building anything else I
-need to know whether real local communities already exist inside the big
-groups (then the problem is the measure) or not (then the world itself
-lacks something that keeps communities apart, and a rule is needed).
+**Why (evidence, section 4 and `docs/MILESTONE3.md` step 8):** tight
+circles of friends exist and are very local (homes 1 to 4 tiles apart),
+but each breaks up within about 35 to 90 ticks: agents meet only by chance
+while wandering, so the same few agents do not meet again often enough to
+keep or renew a circle. Resting is a long stay (about 13 ticks, several
+times a life). If everyone rests at home, neighbours and family (most of
+all with the family home) meet again and again in the same spot.
 
 **Alternatives considered:**
-- *Switch fading on anyway* (memory 20, fade 150): groups last 44% of the
-  time but are regional (biggest 38 of 93). It missed its success line;
-  kept as a decision for you (section 7).
-- *A rule that pulls an agent's home toward its friends*: would make
-  clusters, but it is a social rule with no measured need yet; step 8 tells
-  whether it is needed.
-- *Tidy-up tasks* (why.py history, `--summary`, curiosity): still listed.
+- *A newborn starts knowing its parent's close friends*: faster renewal, but
+  it writes meetings that never happened into memory; rejected unless rest
+  at home fails.
+- *Switch on fading or the family home anyway*: measured; neither gives
+  circles that last (section 4).
+- *Pause Milestone 3 for the tidy-up tasks* (section 6, tasks 2 to 5): a
+  fair choice if you prefer; nothing is broken.
 
-**Files:** `experiments/community_probe.py` (a `--cores` mode), results in
-`experiments/results/community_cores.txt/.json`, `docs/MILESTONE3.md`,
-`STATUS.md`.
+**Files:** `genesis/agents.py` (the rest decision), `genesis/config.py`,
+`overrides.py`, `save.py` (version 9), new `tests/test_rest_home.py`,
+README, `docs/MILESTONE3.md`. Frozen reference of today's world first.
 
-**Success / what would count as an answer:** either cores exist that are
-local (home spread at most about 6 tiles) and last 1,000+ ticks in 25%+ of
-cases in some world (then communities exist, the chained measure hid them),
-or they do not (then step 9 is a rule, chosen from this evidence). Both are
-useful; no tuning toward a pretty result.
+**Tests:** `rest_home = 0` reproduces today exactly; a v8 save migrates and
+continues exactly; a tired agent far from home walks home and then rests;
+one within reach rests at once; water in the way or very low rest = rests
+where it is; hunger still comes first; same seed = same world.
 
-**Risks:** "3 ties inside the core" is a choice; I will report 2 and 4 as
-well so the answer does not depend on it.
+**Measure and success:** `community_probe.py --cores --every 50` with rest
+at home on and off, with and without the family home. Success = tight
+circles last clearly longer (mean well above 90 ticks, and some reach
+1,000) AND the Milestone 2 bands hold (walking home costs energy; watch
+starvation). Report every world, including any that fail.
+
+**Risks:** walking home while tired may cost energy and raise starvation;
+home might be far after a long food chase (home radius keeps it within
+about 7 tiles).
 
 ## 6. Next 5 tasks
 
-1. **Your go for step 8 (look inside the big groups)**, then measure it as
-   in section 5. Check: `python3 experiments/community_probe.py --cores`.
+1. **Your go for step 9 (rest at home)**, then build it as in section 5.
+   Check: `python3 -m unittest discover -s tests`, then
+   `python3 experiments/community_probe.py --cores --every 50`.
 2. **Decide what curiosity should mean now** (decision 2). If "roaming
    distance": files `genesis/agents.py`, `genesis/traits.py`, tests; measure
    with `python3 experiments/curiosity_probe.py`.
@@ -262,8 +285,8 @@ well so the answer does not depend on it.
 
 ## 7. Decisions for you
 
-1. **Go for step 8 (section 5)?** Measurement only. Default: wait for
-   your yes.
+1. **Go for step 9, rest at home (section 5)?** It changes where agents
+   rest, so it changes the world. Default: wait for your yes.
 2. **Fading memory default.** OFF (`memory_fade` 0, `memory_keep` 10)
    because it missed its goal. If you prefer groups that last over groups
    that stay small, `memory_fade` 150 with `memory_keep` 20 gives 44%
@@ -294,7 +317,10 @@ well so the answer does not depend on it.
 - Saves are about 1.1 MB at 2,000-3,000 ticks, mostly decision history.
 - Memory costs about 6-13% speed (around the 10% aimed for).
 - Sharing: fewer gifts than hoped (187 per run); no gift ever returned.
-- Groups are measured with one definition (mutual 5+ ties, connected).
+- Groups: the chained definition (mutual 5+ ties, connected) and, since
+  step 8, stricter "tight circle" views. How long a group "lasts" depends on
+  how often it is checked (250 vs 50 ticks); compare only like with like.
+- Fading memory is built but off (no fade time met its goal).
 - The family home is built but off; with it on, starvation rises a little.
 - "Family" in panel and probes = parent, child, sibling while alive only.
 - One test (`test_controls.py`) sleeps 0.7 s and could rarely fail on a very
@@ -363,6 +389,7 @@ python3 experiments/community_probe.py
 ```bash
 python3 experiments/community_probe.py --endings
 python3 experiments/community_probe.py --fading
+python3 experiments/community_probe.py --cores --every 50
 ```
 
 ```bash
@@ -405,7 +432,8 @@ without it they write the `_home` files. `stage_compare.py` prints both
 (its homes-on output is saved as `stage_compare_home.txt`). Times on this Mac:
 memory probe about 3 min (`--old-drop-rule` for the rejected first cap
 rule), sharing count about 1.5 min, sharing probe about 5 min, community
-probe about 6 min (`--endings` about 8 min, `--fading` about 15 min), home drift about 1 min, encounter probe about 3 min, curiosity probe about 4 min, mixed extra about
+probe about 6 min (`--endings` about 8 min, `--fading` about 15 min, `--cores` about 20 min, `--cores --every 50`
+about 25 min), home drift about 1 min, encounter probe about 3 min, curiosity probe about 4 min, mixed extra about
 4 min, stage compare about 4 min, trait drift about 2 min, starvation study
 about 25 s, baseline check about 1 min. `trait_drift.py` and
 `starvation_study.py` now run with homes on; their saved results are from
@@ -445,6 +473,19 @@ before homes.
 
 Newest first. Older entries mention section numbers of earlier versions of
 this file; see `git log -p STATUS.md` for those.
+
+### Session 2026-11-18 (part 12: Milestone 3 step 8, tight circles)
+- **Your go** ("Yes, step 8"). Measurement only; nothing in `genesis/`.
+- **New:** `community_probe.py --cores` (stricter groups: core3, shared1/2/3,
+  K10), `--every N` (snapshot gap), `--reprint` (print a saved result).
+- **Assumptions / changes to the plan:** added the "shared friends" views
+  because a 3-core cannot cut a lone bridge; added two family-home worlds
+  after a quick trial; added the 50-tick run because 250 ticks is almost a
+  lifetime. The first printout had one overlapping column; it was printed
+  again from the saved .json with `--reprint` (checked identical).
+- **Found:** section 4: tight circles exist, are local, never last; the
+  old "lasting" line depends on the snapshot gap.
+- **Not done:** step 9 (waits for your go).
 
 ### Session 2026-11-18 (part 11: Milestone 3 step 7, fading memory)
 - **Your go** ("Yes, fading memory").

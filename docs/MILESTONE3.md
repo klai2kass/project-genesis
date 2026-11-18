@@ -13,7 +13,8 @@ Built one small step at a time, each measured before the next.
 | 5 | Family home: a child takes its parent's home | **Built, OFF by default**: it did not make groups last longer |
 | 6 | Why do groups end? (measurement only) | **Done** (below): the memory cap |
 | 7 | Fading memory: forget friends you stop meeting | **Built, OFF by default**: no fade time gave groups that both last and stay local |
-| 8 | Are there tight local cores inside the big groups? (measurement only) | Proposed (`STATUS.md`) |
+| 8 | Are there tight local cores inside the big groups? (measurement only) | **Done** (below): tight circles exist but never last |
+| 9 | Rest at home: a tired agent walks home before resting | Proposed (`STATUS.md`) |
 
 ## Step 1: home (built 2026-11-17)
 
@@ -631,4 +632,101 @@ than the fade; same seed = same world.
 - The sd of "lasting" for fade 150 and 300 is large (23 to 28 points).
 - Fading also changes who is "known" for sharing; gifts change by up to 34
   per run, starvation by at most 1 point.
+
+## Step 8: tight circles inside the big groups (measured 2026-11-18, no rule changed)
+
+### How
+
+`python3 experiments/community_probe.py --cores` (snapshots every 250
+ticks, as in steps 4 to 7) and `--cores --every 50` (every 50 ticks), 5
+seeds x 3,000 ticks. Same tie as before (both agents remember 5+ meetings
+with each other), but stricter ways to form a group:
+
+- **K5 core3**: keep only agents with 3+ ties to other kept agents. (This
+  was the plan. Reasoned from the definition, it cannot cut a lone tie
+  between two dense neighbourhoods, so it can still chain; kept for
+  comparison.)
+- **K5 shared1 / shared2 / shared3** (added): keep a tie only if the two
+  agents ALSO have 1 / 2 / 3+ friends in common (repeat until nothing
+  changes). A lone bridge between neighbourhoods has no common friend and is
+  cut. **shared2 = a "tight circle"** is the main view below.
+- **K10**: the old chained group with a stricter tie (10+ meetings).
+
+Five worlds: memory 10 (default); memory 20 with fade 150; memory 20 without
+fading; and, added after a 2-seed trial found almost no tight circles, the
+family home with memory 10 and with memory 20 + fade 150 (a family sharing
+one home area should meet each other most).
+The 50-tick run was added after the 250-tick run, because 250 ticks is
+almost a lifetime (310): a circle whose members all change within 250 ticks
+could not be followed at that gap.
+
+### Results (FACT, `experiments/results/community_cores.txt` and
+`community_cores_every50.txt`, `.json` beside them)
+
+Tight circles (shared2), checked every 50 ticks:
+
+| | memory 10 (default) | 20, fade 150 | 20, no fade | family home, 10 | family home, 20, fade 150 |
+| --- | --- | --- | --- | --- | --- |
+| living agents in a tight circle | 2.6% | 14% | 16% | 2.8% | **23%** |
+| biggest circle (mean) | 2.1 | 5.9 | 6.2 | 2.1 | 7.1 |
+| members' homes spread | 3.4 tiles | 4.1 | 4.0 | 1.0 | **1.7** |
+| how long a circle can be followed | 34 ticks | 56 | 73 | 38 | 90 |
+| circles followed 1,000+ ticks | **0%** | **0%** | **0%** | **0%** | **0%** |
+| ended: broke apart / members died | 96 / 4% | 99 / 1% | 98 / 2% | 92 / 8% | 98 / 2% |
+| members of a big chained group (20+) that are in a tight circle | 6% | 20% | 23% | 5% | 31% |
+
+The looser views agree: shared1 groups (one common friend) last 109 to 368
+ticks on average and 0 to 8% reach 1,000 ticks; core3 and K10 groups never
+do (at most 0.3%). At the 250-tick gap tight circles end mostly with "members
+died" (71 to 77% in the memory-20 worlds), which only says that almost
+all their members are gone 250 ticks later.
+
+How often you look changes the old "lasting" line too (chained K5 groups,
+traced 1,000+ ticks):
+
+| | memory 10 | 20, fade 150 | 20, no fade | family home, 10 | family home, 20, fade 150 |
+| --- | --- | --- | --- | --- | --- |
+| checked every 250 ticks (steps 4 to 7) | 6.3% | 44% | 54% | 6.1% | 36% |
+| checked every 50 ticks | 6.6% | **2.0%** | 25% | 11% | 25% |
+
+All Milestone 2 bands hold in all five worlds (same world numbers as steps 5
+to 7; this step only looks).
+
+### Plain reading
+
+- **The big groups are not made of lasting local communities.** Inside them
+  only 6 to 31% of the members are in a tight circle, and every tight circle
+  breaks up within about 35 to 90 ticks (a third of a lifetime or less).
+  None, in any world, lasts 1,000 ticks.
+- **Tight circles are real and very local**: 4 to 7 agents whose homes lie
+  1 to 4 tiles apart. The family home with room for 20 makes the most of
+  them (23% of agents, homes under 2 tiles apart).
+- **They break apart; they do not just die out.** Reasoned from the code
+  (not measured): a circle needs every pair to have met 5+ times, so when
+  one member dies or drifts away, the others lose a common friend, and a
+  circle of 4 to 7 falls below the rule. A newcomer needs 5 separate
+  meetings with several members before it counts, and agents meet only by
+  chance while wandering near home, so replacements come too slowly.
+- **The "lasting" numbers of steps 4 to 7 depend on how often groups are
+  checked.** Every 250 ticks hides short breaks; every 50 ticks catches
+  them. The big drop for fade 150 (44% to 2%) means its groups split and
+  re-form all the time. Memory 20 without fading and the family home with
+  room for 20 are the steadiest (25% either way).
+
+### What this points to
+
+Nothing in the rules makes the SAME few agents meet again and again: they
+meet only by chance near their homes. A small, non-social rule that would do
+it: **rest at home**. A tired agent (rest below `rest_below`, not hungry)
+walks home before resting. Agents with homes close together (a family, most
+of all with the family home) would then rest beside each other, over and
+over. Proposed as step 9 in `STATUS.md`.
+
+### Limitations
+
+- "Tight circle" is still one definition (shared2); shared1 and shared3 are
+  reported beside it and point the same way.
+- Tracing at 50 ticks is strict: a single 50-tick break ends the trace.
+- The reason circles break is reasoned from the code, not measured
+  directly.
 
