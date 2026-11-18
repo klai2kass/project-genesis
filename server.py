@@ -147,6 +147,7 @@ class Game:
                     # What its traits mean right now, worked out by the same
                     # code the simulation uses (so the page never guesses).
                     effects = {"turn_percent": turn_percent(agent, cfg),
+                               "curiosity_straight": cfg["curiosity_straight"],
                                "tire_rate": tire_rate(agent, cfg),
                                "tire_scale": cfg["tire_scale"],
                                "rest_below": cfg["rest_below"],

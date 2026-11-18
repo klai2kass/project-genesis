@@ -160,10 +160,12 @@ class HungerFirst(unittest.TestCase):
 
 
 class Curiosity(unittest.TestCase):
-    def _turns(self, curiosity):
-        # home_radius=0: this tests Milestone 2 turning alone, without homes.
+    def _turns(self, curiosity, straight=0):
+        # home_radius=0: this tests turning alone, without homes.
+        # straight=0 is the Milestone 2 rule (curious agents turn more); the
+        # fixed rule (curious agents turn less) is tested in test_curiosity.py.
         w = open_world(curiosity=curiosity, rest_below=0, width=60, height=60,
-                       home_radius=0)
+                       home_radius=0, curiosity_straight=straight)
         w["terrain"] = [GRASS] * (60 * 60)
         w["food"] = [0] * (60 * 60)
         changes, last = 0, w["agents"][0]["heading"]
@@ -174,7 +176,7 @@ class Curiosity(unittest.TestCase):
             last = h
         return changes / 3000.0
 
-    def test_more_curious_agents_turn_more_often(self):
+    def test_old_rule_more_curious_agents_turn_more_often(self):
         low, mid, high = self._turns(0), self._turns(50), self._turns(100)
         self.assertLess(low, mid)
         self.assertLess(mid, high)

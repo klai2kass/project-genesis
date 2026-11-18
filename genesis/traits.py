@@ -2,7 +2,8 @@
 
 Two traits, each a whole number 0 to 100 (50 = neutral, behaves like
 Milestone 1):
-    curiosity        how often a wandering agent turns (agents.py, _wander)
+    curiosity        how straight a wandering agent walks (agents.py, _wander):
+                     curious agents turn LESS, so they cover more ground
     industriousness  how slowly an agent tires while moving (needs.py)
 
 The dice for traits are NOT the world's main dice. Each agent gets its own
@@ -57,8 +58,26 @@ def trait_effect(base, trait, span):
 
 
 def turn_percent(agent, cfg):
-    """Chance (0-100) that a wandering agent turns this tick."""
-    p = trait_effect(cfg["turn_chance"], agent["traits"]["curiosity"], cfg["turn_span"])
+    """Chance (0-100) that a wandering agent turns this tick.
+
+    curiosity_straight = 1 (default since the curiosity fix, 2026-11-18):
+        turn_chance - ((curiosity - 50) * turn_span) // 100
+        curious agents turn less and walk straighter, so they reach more
+        new tiles (measured: experiments/curiosity_study.py). With the
+        defaults: curiosity 0 -> 25%, 10 -> 23%, 50 -> 15%, 90 -> 7%,
+        100 -> 5%. The // rounds down, so 46..49 give 16% and 50..54 15%.
+    curiosity_straight = 0 (Milestone 2 rule, kept for old saves):
+        turn_chance + ((curiosity - 50) * turn_span) // 100
+        curious agents turned MORE: a jittery walk that covered FEWER new
+        tiles, the opposite of the word (curiosity 90 explored less than 10
+        in 30 of 30 seeds, experiments/results/curiosity_before.txt).
+    Curiosity 50 gives turn_chance (15%) either way, so neutral agents and
+    the frozen Milestone 1 baseline are unchanged."""
+    shift = ((agent["traits"]["curiosity"] - NEUTRAL) * cfg["turn_span"]) // 100
+    if cfg["curiosity_straight"]:
+        p = cfg["turn_chance"] - shift
+    else:
+        p = cfg["turn_chance"] + shift
     return max(0, min(100, p))
 
 

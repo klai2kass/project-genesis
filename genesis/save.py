@@ -46,6 +46,10 @@ from .world import SAVE_VERSION
 #      an older save is migrated with memory_fade=0 (never fade) and, if it
 #      has no memory_keep, memory_keep=10, so it keeps its old rules. Try
 #      fading on an old world with --set memory_fade=300 --set memory_keep=20.
+#   9  Curiosity fix: curious agents turn less (setting curiosity_straight).
+#      Same layout; an older save is migrated with curiosity_straight=0 (the
+#      old rule: curious agents turn more), so it keeps its behaviour. Try
+#      the new rule on an old world with --set curiosity_straight=1.
 # Every change made while loading is written to world["migration_log"] (only
 # when something changed), so nothing happens silently.
 # To add a new version: bump SAVE_VERSION in world.py, write a function
@@ -69,24 +73,25 @@ AGENT_DEFAULTS = {
 MILESTONE1_RULES = {"rest_below": 0, "trait_founder_min": 50,
                     "trait_founder_max": 50, "trait_mutation": 0, "home_radius": 0,
                     "share_min_meetings": 0, "home_inherit": 0,
-                    "memory_fade": 0, "memory_keep": 10}
+                    "memory_fade": 0, "memory_keep": 10, "curiosity_straight": 0}
 
 # Settings that make the new rules behave exactly like Milestone 2.
 MILESTONE2_RULES = {"home_radius": 0, "share_min_meetings": 0, "home_inherit": 0,
-                    "memory_fade": 0, "memory_keep": 10}
+                    "memory_fade": 0, "memory_keep": 10, "curiosity_straight": 0}
 
 # Settings that make the new rules behave exactly like Milestone 3 step 2
 # (homes and memory, no sharing).
 MEMORY_ONLY_RULES = {"share_min_meetings": 0, "home_inherit": 0,
-                     "memory_fade": 0, "memory_keep": 10}
+                     "memory_fade": 0, "memory_keep": 10, "curiosity_straight": 0}
 
 # Settings that make the new rules behave exactly like Milestone 3 step 3
 # (homes from the birth tile, memory, sharing).
-BIRTH_TILE_HOME_RULES = {"home_inherit": 0, "memory_fade": 0, "memory_keep": 10}
+BIRTH_TILE_HOME_RULES = {"home_inherit": 0, "memory_fade": 0, "memory_keep": 10,
+                         "curiosity_straight": 0}
 
 # Settings that make the new rules behave exactly like Milestone 3 step 6
 # (memory of 10 that never fades).
-NO_FADE_RULES = {"memory_fade": 0, "memory_keep": 10}
+NO_FADE_RULES = {"memory_fade": 0, "memory_keep": 10, "curiosity_straight": 0}
 
 # Defaults for the counters in world["stats"].
 STATS_DEFAULTS = {"births": 0, "deaths_starved": 0, "deaths_old_age": 0, "gifts": 0}
@@ -237,9 +242,24 @@ def _migrate_7_to_8(world):
     world["version"] = 8
 
 
+# Settings that make the new rules behave exactly like Milestone 3 step 8
+# (curious agents turn more, the Milestone 2 curiosity rule).
+OLD_CURIOSITY_RULES = {"curiosity_straight": 0}
+
+
+def _migrate_8_to_9(world):
+    cfg = world["config"]
+    for key, value in OLD_CURIOSITY_RULES.items():
+        if key not in cfg:
+            cfg[key] = value
+            _note(world, "config.%s missing (save from before the curiosity fix): "
+                         "set to %r so this world keeps its old rules" % (key, value))
+    world["version"] = 9
+
+
 MIGRATIONS = {1: _migrate_1_to_2, 2: _migrate_2_to_3, 3: _migrate_3_to_4,
               4: _migrate_4_to_5, 5: _migrate_5_to_6, 6: _migrate_6_to_7,
-              7: _migrate_7_to_8}
+              7: _migrate_7_to_8, 8: _migrate_8_to_9}
 
 
 def world_from_json(text):

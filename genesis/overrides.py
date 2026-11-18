@@ -42,6 +42,7 @@ RULES = {
     "tire_scale": ("int", 1, 10000),
     "turn_chance": ("int", 0, 100),
     "turn_span": ("int", 0, 200),
+    "curiosity_straight": ("int", 0, 1),
     "trait_founder_min": ("int", 0, 100),
     "trait_founder_max": ("int", 0, 100),
     "trait_mutation": ("int", 0, 100),

@@ -57,9 +57,14 @@ DEFAULT_CONFIG = {
 
     # --- Personality traits (0-100, 50 = neutral) ---
     # Chance (percent) to turn on each wandering tick:
-    # turn_chance + (curiosity - 50) * turn_span / 100  -> 5..25
+    # turn_chance - ((curiosity - 50) * turn_span) // 100  -> 25..5
+    # (curious agents turn less and walk straighter; genesis/traits.py)
     "turn_chance": 15,
     "turn_span": 20,
+    # 1 = curious agents turn LESS (the fix of 2026-11-18). 0 = the
+    # Milestone 2 rule (curious agents turned more and so explored less);
+    # older saves load with 0 and keep their behaviour.
+    "curiosity_straight": 1,
     "trait_founder_min": 40,   # first agents: each trait in this range
     "trait_founder_max": 60,
     "trait_mutation": 5,       # child = parent +/- up to this, per trait

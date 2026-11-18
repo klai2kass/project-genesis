@@ -60,12 +60,14 @@ class RecordOnly(unittest.TestCase):
         for seed, ref in REF["short"].items():
             # Sharing (step 3) is the first thing that READS memory, so it is
             # switched off here; memory alone must change nothing.
-            w, now = self._short(seed, {"share_min_meetings": 0, "home_inherit": 0})
+            w, now = self._short(seed, {"share_min_meetings": 0, "home_inherit": 0,
+                                         "curiosity_straight": 0})
             self.assertEqual(now, ref, "memory on, seed " + seed)
             self.assertTrue(any(a["memory"] for a in w["agents"]))
             # Memory off: nobody knows anybody, so even with sharing on
             # nobody gives, and the world is the homes world again.
-            w, now = self._short(seed, {"memory_keep": 0, "home_inherit": 0})
+            w, now = self._short(seed, {"memory_keep": 0, "home_inherit": 0,
+                                         "curiosity_straight": 0})
             self.assertEqual(now, ref, "memory off, seed " + seed)
             self.assertFalse(any(a["memory"] for a in w["agents"]))
 

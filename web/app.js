@@ -295,7 +295,9 @@ function renderAgent() {
                  : " · rests below " + fx.rest_below + " when not hungry");
     const t = a.traits || {};
     $("a-traits").textContent = "Curiosity " + t.curiosity + " (turns " + fx.turn_percent +
-      "% of wandering ticks: high searches nearby, low walks straight) · industriousness " +
+      "% of wandering ticks: " + (fx.curiosity_straight
+        ? "high walks straight and covers more ground, low zigzags nearby"
+        : "old rule: high zigzags nearby, low walks straight") + ") · industriousness " +
       t.industriousness + " (loses " + (fx.tire_rate / fx.tire_scale).toFixed(2) +
       " rest per move)";
     if (a.home) {

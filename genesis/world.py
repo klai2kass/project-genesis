@@ -11,7 +11,7 @@ from .config import DEFAULT_CONFIG
 from .rng import Rng, seed_to_state
 from .traits import founder_traits, neutral_traits
 
-SAVE_VERSION = 8
+SAVE_VERSION = 9
 
 # Terrain codes stored in world["terrain"]
 WATER, GRASS, FOREST = 0, 1, 2
