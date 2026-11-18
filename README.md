@@ -113,8 +113,11 @@ may drift; `--set home_radius=0` switches homes off (Milestone 2 behaviour).
 `home_inherit` (0): `1` gives a child its parent's home instead of the
 tile where it was born (the "family home"; measured, off by default).
 `memory_keep` (10): how many agents each agent remembers meeting; `0` = no
-memory. `share_min_meetings` (2): how many meetings it takes before an agent
-gives food to that agent when it is starving; `0` = no sharing.
+memory. `memory_fade` (0): forget an agent not met for more than this many
+ticks; `0` = never (measured in step 7, off by default; try
+`--set memory_fade=150 --set memory_keep=20`). `share_min_meetings` (2):
+how many meetings it takes before an agent gives food to that agent when
+it is starving; `0` = no sharing.
 
 Notes: `food_cap` takes three numbers (water, grass, forest). If you give the
 same name twice, the last one wins. A wrong name or value stops with a plain
@@ -215,9 +218,9 @@ of 100"), the **options** it considered and whether each fitted, and the
 | `server.py` | Runs the world and serves the page |
 | `web/` | The page. It only draws; no rules live there |
 | `tests/` | The automatic checks |
-| `experiments/` | Measurement scripts (they only read the world); results in `experiments/results/`. `regrow_sweep.py`, `starvation_study.py`, `stage_compare.py`, `curiosity_probe.py`, `trait_drift.py`, `encounter_probe.py`, `memory_probe.py`, `sharing_opportunity.py`, `sharing_probe.py`, `community_probe.py` (add `--endings` for why groups end), `home_drift.py`; `baseline/` holds the frozen Milestone 1, Milestone 2 and homes references |
+| `experiments/` | Measurement scripts (they only read the world); results in `experiments/results/`. `regrow_sweep.py`, `starvation_study.py`, `stage_compare.py`, `curiosity_probe.py`, `trait_drift.py`, `encounter_probe.py`, `memory_probe.py`, `sharing_opportunity.py`, `sharing_probe.py`, `community_probe.py` (add `--endings` for why groups end, `--fading` for fading memory), `home_drift.py`; `baseline/` holds the frozen Milestone 1, Milestone 2 and homes references |
 | `VISION.md` | The long-term idea and roadmap (read first) |
-| `docs/MILESTONE3.md` | Milestone 3: homes, encounter memory, sharing (built), groups (measured), family home (built, off), with results |
+| `docs/MILESTONE3.md` | Milestone 3: homes, encounter memory, sharing (built), groups (measured), family home and fading memory (built, off), with results |
 | `docs/MILESTONE2_REPORT.md` | What Milestone 2 does, measured |
 | `docs/MILESTONE2_V2.md` | The Milestone 2 design as built |
 | `docs/STARVATION.md` | Why about two thirds of deaths are starvation |

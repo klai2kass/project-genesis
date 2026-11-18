@@ -41,9 +41,20 @@ dissolved, or still going), at what age do agents first join a group, and
 how often a full memory forgets a 5+-meeting friend. Worlds: default,
 family home, and default with memory_keep=20 and 1000 (1000 never forgets).
 
+Step 7 (`--fading`): the same endings report for fading memory
+(memory_fade, genesis/memory.py). Worlds: memory 10 that never fades (the
+step 6 world), memory 20 that never fades, and room for 20 with fading after
+75, 150, 300 and 600 ticks (75 added after a quick run showed 300 and 600
+change little: agents live about 310 ticks). All other settings are the code defaults; memory
+settings are given explicitly so the result does not depend on them.
+Also counted: living 5+-meeting friends forgotten by FADING (the row above
+it counts only those dropped from a full list). Files community_fading.txt / .json.
+
 Run:  python3 experiments/community_probe.py          (3 worlds x 5 seeds x 3000 ticks, ~6 min)
       python3 experiments/community_probe.py --endings   (step 6; ~8 min;
             files community_endings.txt / .json)
+      python3 experiments/community_probe.py --fading    (step 7; ~15 min;
+            files community_fading.txt / .json)
       python3 experiments/community_probe.py --quick  (2 seeds x 1500 ticks)
 Writes experiments/results/community_probe.json; printout in community_probe.txt.
 """
@@ -78,11 +89,22 @@ if ENDINGS:
               ("family home", {"home_inherit": 1}),
               ("default, memory 20", {"memory_keep": 20}),
               ("default, memory 1000", {"memory_keep": 1000})]
+FADING = "--fading" in sys.argv
+if FADING:
+    ENDINGS = True
+    THRESHOLDS = [5]
+    WORLDS = [("memory 10, no fading", {"memory_keep": 10, "memory_fade": 0}),
+              ("memory 20, no fading", {"memory_keep": 20, "memory_fade": 0}),
+              ("memory 20, fade 75", {"memory_keep": 20, "memory_fade": 75}),
+              ("memory 20, fade 150", {"memory_keep": 20, "memory_fade": 150}),
+              ("memory 20, fade 300", {"memory_keep": 20, "memory_fade": 300}),
+              ("memory 20, fade 600", {"memory_keep": 20, "memory_fade": 600})]
 JOIN_EVERY = 50          # how often (ticks) group membership is checked for joining
 
 # Count strong entries (5+ meetings) forgotten because a memory was full.
-FORGOTTEN = {"strong": 0}
+FORGOTTEN = {"strong": 0, "faded": 0}
 _real_trim = memory_mod._trim
+_real_fade = getattr(memory_mod, "_fade", None)
 
 
 def _counting_trim(agent, keep):
@@ -92,7 +114,31 @@ def _counting_trim(agent, keep):
     FORGOTTEN["strong"] += sum(1 for i, c in before.items() if c >= 5 and i not in after)
 
 
+# Fading forgets the dead too (that is fine); count only LIVING friends that
+# fade. update_memories calls meeting_pairs(world["agents"]) first, so that
+# call tells us who is alive this tick.
+ALIVE = set()
+_real_pairs = memory_mod.meeting_pairs
+
+
+def _pairs_noting_alive(agents, width):
+    ALIVE.clear()
+    ALIVE.update(a["id"] for a in agents)
+    return _real_pairs(agents, width)
+
+
+def _counting_fade(agent, oldest):
+    before = {e[0]: e[3] for e in agent["memory"]}
+    _real_fade(agent, oldest)
+    after = {e[0] for e in agent["memory"]}
+    FORGOTTEN["faded"] += sum(1 for i, c in before.items()
+                              if c >= 5 and i not in after and i in ALIVE)
+
+
 memory_mod._trim = _counting_trim
+if _real_fade:
+    memory_mod._fade = _counting_fade
+    memory_mod.meeting_pairs = _pairs_noting_alive
 
 
 def ties(agents, k):
@@ -170,7 +216,7 @@ def run(seed, extra):
     snaps = []                  # per snapshot: tick, alive ids, homes, groups per K, ties
     gifts = []                  # (tick, giver, receiver)
     pops, ages = [], []
-    FORGOTTEN["strong"] = 0
+    FORGOTTEN["strong"] = FORGOTTEN["faded"] = 0
     born_at = {}                # agents born in the run: birth tick
     joined_age = {}             # agent -> age when first seen in a group (K = 5)
     lived = {}                  # agent -> age at death (born in the run)
@@ -219,7 +265,8 @@ def run(seed, extra):
             / max(1, len(adults)),
             "age_at_joining": (sum(joined_age[i] for i in adults if i in joined_age)
                                / float(max(1, sum(i in joined_age for i in adults)))),
-            "strong_forgotten_per_1000_ticks": 1000.0 * FORGOTTEN["strong"] / TICKS}
+            "strong_forgotten_per_1000_ticks": 1000.0 * FORGOTTEN["strong"] / TICKS,
+            "strong_faded_per_1000_ticks": 1000.0 * FORGOTTEN["faded"] / TICKS}
     for k in THRESHOLDS:
         n_groups, in_group, sizes, biggest, fam, spread = [], [], [], [], [], []
         kept250, traced, long_, long_gone = [], [], 0, 0
@@ -311,7 +358,8 @@ ENDING_ROWS = [("ended_died_pct", "ended: members died %"),
                ("still_going_pct", "still going at the end of the run %")]
 JOIN_ROWS = [("adults_ever_in_group_pct", "adults that ever joined a group %"),
              ("age_at_joining", "age when first in a group (ticks)"),
-             ("strong_forgotten_per_1000_ticks", "5+-meeting friends forgotten / 1000 ticks")]
+             ("strong_forgotten_per_1000_ticks", "5+-meeting friends forgotten / 1000 ticks"),
+             ("strong_faded_per_1000_ticks", "living 5+-meeting friends faded / 1000 ticks")]
 
 
 def main():
@@ -337,8 +385,11 @@ def main():
         print("%-42s" % "" + "".join("%28s" % n for n, _ in WORLDS))
         rows = ROWS
         if ENDINGS:
-            rows = [r for r in ROWS if r[0] in ("in_group_pct", "group_size", "traced_ticks",
-                                                "traced_1000_pct")] + ENDING_ROWS
+            show = ("in_group_pct", "group_size", "traced_ticks", "traced_1000_pct")
+            if FADING:
+                show += ("groups_per_snapshot", "biggest_group", "home_spread", "family_ties_pct",
+                         "gifts_inside_pct")
+            rows = [r for r in ROWS if r[0] in show] + ENDING_ROWS
         for key, label in rows:
             print("%-42s" % label + "".join(
                 "%28s" % stats([r["K%d" % k][key] for r in out["worlds"][n]]) for n, _ in WORLDS))
@@ -354,7 +405,8 @@ def main():
         print("Joining: agents born in the run that lived 200+ ticks; group membership checked")
         print("every %d ticks, so ages are rounded to that." % JOIN_EVERY)
     if "--quick" not in sys.argv:
-        name = "community_endings.json" if ENDINGS else "community_probe.json"
+        name = ("community_fading.json" if FADING else
+                "community_endings.json" if ENDINGS else "community_probe.json")
         with open(os.path.join(ROOT, "experiments", "results", name), "w") as f:
             json.dump(out, f, indent=1, sort_keys=True,
                       default=lambda o: sorted(o) if isinstance(o, (set, frozenset)) else str(o))

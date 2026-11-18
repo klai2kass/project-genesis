@@ -1,16 +1,17 @@
 # Project Genesis: status
 
-Last checked: 2026-11-17, by running the commands in this file (not from memory).
+Last checked: 2026-11-18, by running the commands in this file (not from memory).
 
 **Milestones 1 and 2 are done. Milestone 3: steps 1 (home), 2 (memory) and
 3 (sharing) are built and on; step 4 (groups) is measured; step 5 (family
 home) is built but OFF by default, because it did not reach its goal**
 (`docs/MILESTONE3.md`). **Step 6 (why groups end) is measured: the memory
-cap.** With room for 10, about 210 close friendships are forgotten per
-1,000 ticks and only 6% of groups last 1,000+ ticks; with room for 20, 54%
-last, but they merge into about 3 huge regional groups. **Proposed next:
-step 7, fading memory** (forget agents you stop meeting, room for 20),
-section 5. GitHub (`origin/main`) has everything up to `af88e8a`; later
+cap.** **Step 7 (fading memory) is built but OFF by default: no fade time
+gave groups that both last and stay local** (short fading: local but
+short-lived; longer fading: lasting but regional, like room for 20).
+Today's default world is unchanged. **Proposed next: step 8**, a
+measurement only: are there tight local cores inside the big groups?
+(section 5). GitHub (`origin/main`) has everything up to `af88e8a`; later
 commits are local only.
 
 Plain words: a **tick** is one step of time. A **seed** is the number a world
@@ -29,11 +30,14 @@ is equal only when two worlds are exactly equal. **Headless** = no window.
       shown in the panel and in the stats ("Food shared").
 - [x] **Family home** (optional): `home_inherit` 0 by default, 1 = a child
       takes its parent's home. The panel says where a home comes from.
+- [x] **Fading memory** (optional): `memory_fade` 0 by default (never
+      fade); e.g. `--set memory_fade=150 --set memory_keep=20`. The panel
+      says "forgets anyone not met for N ticks" when it is on.
 - [x] Every decision has a "why"; recent decisions are kept in saves.
-- [x] Saves version 7; versions 1 to 6 load and keep their old rules.
+- [x] Saves version 8; versions 1 to 7 load and keep their old rules.
 - [x] Milestone 1, Milestone 2, homes and memory behaviour frozen and
       reproduced exactly: `tests/test_baseline.py`, `tests/test_home.py`,
-      `tests/test_memory.py`, `tests/test_sharing.py`,
+      `tests/test_memory.py`, `tests/test_sharing.py`, `tests/test_fading.py`,
       `experiments/baseline/make_baseline.py --check`.
 - [x] Browser page, including the clicked agent's home and whom it knows
       (checked this session at http://127.0.0.1:8766, see 3).
@@ -43,9 +47,9 @@ is equal only when two worlds are exactly equal. **Headless** = no window.
 
 ## 2. Tests (run this session)
 
-`python3 -m unittest discover -s tests` -> `Ran 145 tests`, `OK` (about 1.5
-minutes). By file: baseline 5, controls 11, determinism 7, history 8, home 16,
-memory 11, movement 7, overrides 11, rest 12, rest_design 14, save_load 10,
+`python3 -m unittest discover -s tests` -> `Ran 155 tests`, `OK` (about 1.6
+minutes). By file: baseline 5, controls 11, determinism 7, fading 10,
+history 8, home 16, memory 11, movement 7, overrides 11, rest 12, rest_design 14, save_load 10,
 sharing 9, summary 5, trait_streams 5, traits 8, why_log 6.
 Changed tests (on purpose): save-version checks now use `SAVE_VERSION`
 instead of a fixed number; the curiosity turning test in `test_rest.py`
@@ -56,8 +60,10 @@ Reference run: `python3 run_headless.py --seed 42 --ticks 500 --every 0` ->
 100 alive (homes on). Frozen references: `experiments/baseline/baseline.json`
 (Milestone 1), `milestone2.json` (before homes), `milestone3_home.json`
 (homes, before memory), `milestone3_memory.json` (memory, before sharing),
-`milestone3_share.json` (sharing, before the family home; today's default
-world reproduces it exactly).
+`milestone3_share.json` (sharing, before the family home),
+`milestone3_family.json` (step 6 world, before fading memory, now also with
+a code for every agent's memory; today's default world reproduces it
+exactly).
 
 ## 3. Browser check (this session)
 
@@ -75,6 +81,11 @@ so it ran outside the sandbox), page opened in the app's browser.
   (remembers up to 10). Met most:" and a list such as "#231 · met 3 times,
   last at tick 664 near (26, 27)", with "has died" where right. **No console
   errors.**
+- Fading check (step 7, fresh tab, default world): the panel still reads
+  "Knows 10 agents (remembers up to 10). Met most:" (fading off); fed a
+  fade of 150 it reads "... (remembers up to 20, forgets anyone not met for
+  150 ticks)". Step works. (A first scripted try sent malformed requests
+  and got 400 errors; after a reload, real clicks gave no errors.)
 - Sharing check (fresh tab, tick 821): stats show "Food shared 71" and
   "Newest generation 7"; agent #111's list shows "met 15 times ... it gave
   me 1 food" and "met 10 times ... I gave it 1 food". **No console errors.**
@@ -84,6 +95,21 @@ rest while the decision text shows the value at decision time. The test save
 `saves/claude_browsercheck.json` is still in `saves/` (ignored by git).
 
 ## 4. Measured results
+
+**Fading memory** (step 7, `experiments/community_probe.py --fading`, 5
+seeds x 3,000 ticks; success line: lasting 25%+ AND home spread about 6
+tiles or less AND biggest group well under half the world):
+
+| | memory 10 (default) | 20, no fade | 20, fade 75 | 20, fade 150 | 20, fade 300 | 20, fade 600 |
+| --- | --- | --- | --- | --- | --- | --- |
+| groups lasting 1,000+ ticks | 6.3% | 54% | 11% | 44% | 60% | 54% |
+| home spread in a group | 5.7 tiles | 9.0 | 5.0 | 7.7 | 8.5 | 9.0 |
+| biggest group (of about 93) | 18 | 50 | 15 | 38 | 48 | 50 |
+| starved % | 62.9 | 62.5 | 62.7 | 63.8 | 63.1 | 62.5 |
+
+No setting meets all three: whatever makes groups last also makes them
+big. Fade 600 = no fading (agents die first). Bands hold everywhere. Kept
+OFF; details in `docs/MILESTONE3.md`, step 7.
 
 **Why groups end** (`experiments/community_probe.py --endings`, 5 seeds x
 3,000 ticks):
@@ -178,61 +204,52 @@ disappears** (25 of 40, within luck), because homes keep every agent near
 its patch, which was the zigzaggers' edge. In normal runs no trait is
 selected beyond chance.
 
-## 5. Next step: Milestone 3, step 7, fading memory (recommended)
+## 5. Next step: Milestone 3, step 8, look inside the big groups (recommended)
 
-**What:** memory forgets by TIME as well as by space. An agent forgets
-another agent it has not met for `memory_fade` ticks (proposed 300, about
-one lifetime). Room for `memory_keep = 20` instead of 10. When the list is
-still full, the least-met is dropped as now.
+**What:** a measurement only, nothing in `genesis/` changes. In the worlds
+of step 7 (memory 10; memory 20 with fade 150; memory 20 without fading),
+find groups with a STRICTER definition that does not chain across a whole
+region: a **core** = agents who each have at least 3 mutual 5+ ties inside
+the core (repeatedly remove members with fewer; what is left is the core).
+Also report ties at K = 10. For cores: how many, size, home spread, how
+long they can be traced, and whether a big group is made of several local
+cores joined by a few links.
 
-**Why (evidence, section 4):** today memory forgets only when the list of
-10 overflows. That throws away about 210 close friendships per 1,000 ticks,
-which is why groups stay small and short (6% last 1,000+ ticks). Giving
-room for 20 almost stops the forgetting and groups last (54%), but then a
-friendship never fades, so groups merge into about 3 regional blobs (the
-biggest half the world, homes 9 tiles apart). Fading by time is the
-smallest rule that keeps ties to agents you KEEP meeting and drops the
-rest: it should give groups that last and stay local.
+**Why (evidence, section 4):** in every world measured so far, the settings
+that make groups last also make them large and spread out (memory 20,
+fades 150 to 600), and the settings that keep them local make them short
+(memory 10, fade 75). Today a "group" is any chain of ties, so one tie
+between two neighbourhoods joins them. Before building anything else I
+need to know whether real local communities already exist inside the big
+groups (then the problem is the measure) or not (then the world itself
+lacks something that keeps communities apart, and a rule is needed).
 
 **Alternatives considered:**
-- *Just set `memory_keep` to 20* (a setting, no new rule): simplest, and
-  groups last; rejected as the default because the groups become regions,
-  not neighbourhoods. Kept as a comparison.
-- *A newborn inherits its parent's acquaintances*: the step 6 data shows
-  newcomers already join groups (96% of adults, at age about 150), so slow
-  joining is not the problem.
+- *Switch fading on anyway* (memory 20, fade 150): groups last 44% of the
+  time but are regional (biggest 38 of 93). It missed its success line;
+  kept as a decision for you (section 7).
+- *A rule that pulls an agent's home toward its friends*: would make
+  clusters, but it is a social rule with no measured need yet; step 8 tells
+  whether it is needed.
 - *Tidy-up tasks* (why.py history, `--summary`, curiosity): still listed.
 
-**Rule (proposed):** in `genesis/memory.py`, once per tick (or every N
-ticks, measured for speed), drop entries with `tick - last_tick >
-memory_fade`. `memory_fade = 0` = no fading (old saves get 0 and
-`memory_keep` 10, so they keep their behaviour). Sharing uses the same
-memory, so it changes too (measured).
+**Files:** `experiments/community_probe.py` (a `--cores` mode), results in
+`experiments/results/community_cores.txt/.json`, `docs/MILESTONE3.md`,
+`STATUS.md`.
 
-**Files:** `genesis/memory.py`, `genesis/config.py`, `overrides.py`,
-`save.py` (version 8), `tests/test_memory.py`, README, `docs/MILESTONE3.md`.
-Frozen reference of today's world first.
+**Success / what would count as an answer:** either cores exist that are
+local (home spread at most about 6 tiles) and last 1,000+ ticks in 25%+ of
+cases in some world (then communities exist, the chained measure hid them),
+or they do not (then step 9 is a rule, chosen from this evidence). Both are
+useful; no tuning toward a pretty result.
 
-**Tests:** `memory_fade = 0` with `memory_keep = 10` reproduces today
-exactly; a v7 save migrates and continues exactly; an entry is dropped
-exactly when not met for more than `memory_fade` ticks and kept otherwise;
-meeting again before that keeps it; same seed = same world.
-
-**Measure and success:** `community_probe.py --endings` with the new
-default against memory 10 and memory 20: success = groups lasting 1,000+
-ticks well above 6% (say 25%+) AND groups stay local (home spread at most
-about 6 tiles, biggest group well under half the world) AND the bands hold.
-Also `memory_probe.py` (what is remembered) and speed.
-
-**Risks:** the right fade time is a guess (try 150, 300, 600 and report
-all; choose by the success lines, not by a pretty number); larger memories
-cost speed and save size.
+**Risks:** "3 ties inside the core" is a choice; I will report 2 and 4 as
+well so the answer does not depend on it.
 
 ## 6. Next 5 tasks
 
-1. **Your go for step 7 (fading memory)**, then build it as in section 5.
-   Check: `python3 -m unittest discover -s tests`, then
-   `python3 experiments/community_probe.py --endings`.
+1. **Your go for step 8 (look inside the big groups)**, then measure it as
+   in section 5. Check: `python3 experiments/community_probe.py --cores`.
 2. **Decide what curiosity should mean now** (decision 2). If "roaming
    distance": files `genesis/agents.py`, `genesis/traits.py`, tests; measure
    with `python3 experiments/curiosity_probe.py`.
@@ -245,21 +262,25 @@ cost speed and save size.
 
 ## 7. Decisions for you
 
-1. **Go for step 7, fading memory (section 5)?** It changes what agents
-   remember and so whom they share with. Default: wait for your yes.
-2. **Family home default.** I switched it OFF after it missed its goal
+1. **Go for step 8 (section 5)?** Measurement only. Default: wait for
+   your yes.
+2. **Fading memory default.** OFF (`memory_fade` 0, `memory_keep` 10)
+   because it missed its goal. If you prefer groups that last over groups
+   that stay small, `memory_fade` 150 with `memory_keep` 20 gives 44%
+   lasting groups (biggest about 38 of 93), bands hold, about 12% slower.
+3. **Family home default.** I switched it OFF after it missed its goal
    (groups did not last longer; a bit more starvation). If you like the
    tighter family groups anyway, set the default to 1 in `genesis/config.py`.
-3. **Curiosity after homes.** It now matters little. Options: (a) leave it;
+4. **Curiosity after homes.** It now matters little. Options: (a) leave it;
    (b) let it also set each agent's roaming distance around home (curious =
    wanders further), which matches the word; (c) remove its effect.
    Default: (a) until you choose.
-4. **`home_radius` = 6** (chosen as proposed). 3 doubles family contact
+5. **`home_radius` = 6** (chosen as proposed). 3 doubles family contact
    again (20%) but agents meet fewer different agents (19 in a life) and
    reunite less after long gaps. Change anytime with `--set home_radius=3`.
-5. History caps (20 decisions per agent, 50 dead agents) and
+6. History caps (20 decisions per agent, 50 dead agents) and
    `memory_keep` 10: kept.
-6. The gather-then-eat flaw (6.2% of starvation deaths happen one tick after
+7. The gather-then-eat flaw (6.2% of starvation deaths happen one tick after
    picking food up): still NOT fixed, so all comparisons stay valid.
 
 ## 8. Remaining limitations
@@ -341,6 +362,7 @@ python3 experiments/community_probe.py
 
 ```bash
 python3 experiments/community_probe.py --endings
+python3 experiments/community_probe.py --fading
 ```
 
 ```bash
@@ -383,7 +405,7 @@ without it they write the `_home` files. `stage_compare.py` prints both
 (its homes-on output is saved as `stage_compare_home.txt`). Times on this Mac:
 memory probe about 3 min (`--old-drop-rule` for the rejected first cap
 rule), sharing count about 1.5 min, sharing probe about 5 min, community
-probe about 6 min (`--endings` about 8 min), home drift about 1 min, encounter probe about 3 min, curiosity probe about 4 min, mixed extra about
+probe about 6 min (`--endings` about 8 min, `--fading` about 15 min), home drift about 1 min, encounter probe about 3 min, curiosity probe about 4 min, mixed extra about
 4 min, stage compare about 4 min, trait drift about 2 min, starvation study
 about 25 s, baseline check about 1 min. `trait_drift.py` and
 `starvation_study.py` now run with homes on; their saved results are from
@@ -423,6 +445,20 @@ before homes.
 
 Newest first. Older entries mention section numbers of earlier versions of
 this file; see `git log -p STATUS.md` for those.
+
+### Session 2026-11-18 (part 11: Milestone 3 step 7, fading memory)
+- **Your go** ("Yes, fading memory").
+- **Frozen first** (`ce05be0`): `experiments/baseline/milestone3_family.json`
+  (now with a code for every agent's memory), `tests/fixtures/save_v7_seed42_t300.json`.
+- **Built:** `memory_fade` (`genesis/memory.py` `_fade`), save version 8
+  (older saves: fade 0 and memory 10), `tests/test_fading.py` (10), panel
+  text, `community_probe.py --fading`.
+- **Assumption:** added fade 75 to the planned 150/300/600 after a quick
+  2-seed run showed 300 and 600 change little (agents live about 310 ticks).
+- **Found:** section 4. No fade time met the success line; kept OFF, so the
+  default world is unchanged (reproduces the frozen step 6 world exactly).
+- **Tests:** 155 OK. Browser: section 3.
+- **Not done:** step 8 (waits for your go).
 
 ### Session 2026-11-18 (part 10: Milestone 3 step 6, why do groups end?)
 - **Your go** ("Yes, step 6"). Measurement only; nothing in `genesis/`.

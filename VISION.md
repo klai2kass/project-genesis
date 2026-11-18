@@ -55,7 +55,8 @@ serve this, question it. If this file and the code disagree about what
   flowed one way (no gift was ever returned).
 - Groups (measured, `docs/MILESTONE3.md`): over half of all agents belong to
   a local group of agents who know each other well; a few groups outlive
-  all their founders. Optional family home (`home_inherit=1`).
+  all their founders. Optional family home (`home_inherit=1`) and optional
+  fading memory (`memory_fade`); both measured and off by default.
 - Same seed gives the same result; Milestone 1 and Milestone 2 behaviour are
   frozen and reproducible (`tests/test_baseline.py`, `tests/test_home.py`).
 - "Why" record for every decision: need, options considered, reason; the
@@ -77,11 +78,11 @@ serve this, question it. If this file and the code disagree about what
 
 ### Next (proposed in STATUS.md, not built)
 
-- **Milestone 3, step 7: fading memory.** Measured in step 6: groups end
-  mainly because an agent's memory of 10 keeps overflowing and forgetting
-  close friends; with room for 20 groups last but merge into a few huge
-  regions. Next: forget agents you stop meeting (by time), with room for
-  20, so groups can both last and stay local.
+- **Milestone 3, step 8: look inside the big groups** (measurement only).
+  Steps 6 and 7 showed that every memory setting tried so far that makes
+  groups last also makes them merge into a few huge regions (fading memory
+  is built but off by default). Next: check with a stricter group
+  definition whether those regions hold tight local cores that last.
 
 ### Future ambition (nothing below exists)
 

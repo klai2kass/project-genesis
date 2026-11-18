@@ -1,0 +1,39 @@
+Community probe: seeds 42,1,2,3,4, 3000 ticks, snapshot every 250 ticks from tick 500.
+Tie = both living agents remember K+ meetings with each other. Group = 3+
+agents connected by ties. Cells: mean over snapshots, then mean +/- sd over seeds.
+
+== The world (Milestone 2 bands: pop 80-98, starved 62-73, births 830-1010, age 265-325) ==
+                                                  memory 10, no fading        memory 20, no fading          memory 20, fade 75         memory 20, fade 150         memory 20, fade 300         memory 20, fade 600
+population after tick 500                                 93.6 +/- 0.8                93.3 +/- 0.5                93.5 +/- 0.7                93.3 +/- 0.5                93.4 +/- 0.6                93.3 +/- 0.5
+births                                                   893.6 +/- 7.6               887.8 +/- 5.2              894.6 +/- 14.0              896.6 +/- 10.2              890.2 +/- 13.5               887.8 +/- 5.2
+starved % of deaths                                       62.9 +/- 0.8                62.5 +/- 1.5                62.7 +/- 0.6                63.8 +/- 1.0                63.1 +/- 1.4                62.5 +/- 1.5
+age at death                                             319.1 +/- 2.5               321.4 +/- 1.9               319.7 +/- 4.6               316.3 +/- 2.8               319.6 +/- 3.0               321.4 +/- 1.9
+gifts of food                                           186.6 +/- 15.9               217.4 +/- 3.2               204.6 +/- 7.2               221.0 +/- 5.5              214.0 +/- 29.6               217.4 +/- 3.2
+died out (0/1)                                             0.0 +/- 0.0                 0.0 +/- 0.0                 0.0 +/- 0.0                 0.0 +/- 0.0                 0.0 +/- 0.0                 0.0 +/- 0.0
+
+== K = 5 ==
+                                                  memory 10, no fading        memory 20, no fading          memory 20, fade 75         memory 20, fade 150         memory 20, fade 300         memory 20, fade 600
+groups (3+ agents) per snapshot                            7.0 +/- 0.2                 3.1 +/- 0.4                 8.2 +/- 0.5                 4.5 +/- 0.4                 3.4 +/- 0.4                 3.1 +/- 0.4
+living agents in a group %                                58.1 +/- 2.1                71.7 +/- 2.1                58.5 +/- 1.4                70.8 +/- 1.1                70.6 +/- 1.8                71.7 +/- 2.1
+group size, mean                                           7.7 +/- 0.4                21.9 +/- 3.6                 6.7 +/- 0.4                15.0 +/- 1.6                19.7 +/- 2.8                21.9 +/- 3.6
+biggest group, mean                                       18.3 +/- 1.8                49.6 +/- 5.0                15.4 +/- 1.7                37.8 +/- 3.7                47.9 +/- 5.2                49.6 +/- 5.0
+ties inside groups that are family %                      18.6 +/- 2.0                16.2 +/- 1.7                16.4 +/- 2.1                15.8 +/- 0.7                15.7 +/- 1.5                16.2 +/- 1.7
+home spread in a group (tiles)                             5.7 +/- 0.3                 9.0 +/- 0.9                 5.0 +/- 0.1                 7.7 +/- 0.6                 8.5 +/- 0.7                 9.0 +/- 0.9
+group can be traced, ticks (mean)                       224.6 +/- 54.1             997.4 +/- 247.1              325.1 +/- 63.7             831.1 +/- 407.5            1050.8 +/- 447.2             997.4 +/- 247.1
+groups traced 1,000+ ticks %                               6.3 +/- 1.5               54.0 +/- 12.4                11.4 +/- 6.7               43.5 +/- 28.0               59.6 +/- 23.4               54.0 +/- 12.4
+gifts inside a group %                                    31.0 +/- 6.9                45.6 +/- 7.2                28.6 +/- 8.3                46.7 +/- 6.3                49.1 +/- 3.7                45.6 +/- 7.2
+ended: members died %                                     55.4 +/- 9.9                21.4 +/- 9.6                64.7 +/- 6.6                25.4 +/- 7.8               28.4 +/- 14.3                21.4 +/- 9.6
+ended: split into other groups %                         28.3 +/- 12.7               46.4 +/- 38.6                19.1 +/- 9.3               47.4 +/- 35.7               18.4 +/- 29.6               46.4 +/- 38.6
+ended: dissolved (ties broke) %                          15.4 +/- 10.4                 0.0 +/- 0.0                13.1 +/- 5.7                 3.2 +/- 3.1                 0.8 +/- 1.8                 0.0 +/- 0.0
+still going at the end of the run %                        0.9 +/- 1.2               32.2 +/- 33.4                 3.1 +/- 3.4               24.0 +/- 29.8               52.4 +/- 35.1               32.2 +/- 33.4
+
+== Joining and forgetting ==
+                                                  memory 10, no fading        memory 20, no fading          memory 20, fade 75         memory 20, fade 150         memory 20, fade 300         memory 20, fade 600
+adults that ever joined a group %                         96.1 +/- 1.3                99.6 +/- 0.3                98.8 +/- 0.5                99.5 +/- 0.3                99.7 +/- 0.4                99.6 +/- 0.3
+age when first in a group (ticks)                        148.3 +/- 4.7               124.0 +/- 2.9               132.6 +/- 2.7               122.6 +/- 3.4               126.2 +/- 4.5               124.0 +/- 2.9
+5+-meeting friends forgotten / 1000 ticks               210.7 +/- 13.8                 2.3 +/- 1.5                 0.0 +/- 0.0                 0.1 +/- 0.3                 0.5 +/- 0.5                 2.3 +/- 1.5
+living 5+-meeting friends faded / 1000 ticks                 0.0 +/- 0.0                 0.0 +/- 0.0              516.0 +/- 24.7               154.1 +/- 4.2                10.3 +/- 1.3                 0.0 +/- 0.0
+
+Endings count every group that starts at least 1,000 ticks before the end.
+Joining: agents born in the run that lived 200+ ticks; group membership checked
+every 50 ticks, so ages are rounded to that.

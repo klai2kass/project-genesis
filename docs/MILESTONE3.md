@@ -12,7 +12,8 @@ Built one small step at a time, each measured before the next.
 | 4 | Look for groups in the memory network (measurement only) | **Done** (below) |
 | 5 | Family home: a child takes its parent's home | **Built, OFF by default**: it did not make groups last longer |
 | 6 | Why do groups end? (measurement only) | **Done** (below): the memory cap |
-| 7 | Fading memory: forget friends you stop meeting, keep up to 20 | Proposed (`STATUS.md`) |
+| 7 | Fading memory: forget friends you stop meeting | **Built, OFF by default**: no fade time gave groups that both last and stay local |
+| 8 | Are there tight local cores inside the big groups? (measurement only) | Proposed (`STATUS.md`) |
 
 ## Step 1: home (built 2026-11-17)
 
@@ -546,4 +547,88 @@ while, with room for 20.
 - "Group" is still one definition (mutual 5+ ties, connected).
 - The memory 20 and 1000 worlds also change sharing a little (more agents
   are "known"), so they are not memory-only comparisons.
+
+## Step 7: fading memory (built 2026-11-18, then left OFF by default)
+
+### The rule (whole numbers, no dice; `genesis/memory.py`, `_fade`)
+
+Setting `memory_fade` (0 = off). Every tick, after meetings are noted and
+before a full list is trimmed, every living agent forgets each agent it has
+not been within 1 tile of for MORE than `memory_fade` ticks
+(`tick - last_tick > memory_fade`). A full list still drops the least-met.
+Save version 8: an older save gets `memory_fade` 0 and, if it has none,
+`memory_keep` 10, so it keeps its old rules (logged).
+
+### What it was meant to do (section "What this points to" of step 6)
+
+Keep ties to agents you keep meeting, drop the others, so that groups last
+(as with room for 20) but stay local (as with room for 10).
+Success line, written before measuring: groups traced 1,000+ ticks 25% or
+more, AND home spread at most about 6 tiles, AND the biggest group well
+under half the world (about 47), AND the Milestone 2 bands hold.
+
+### Results (FACT, `experiments/results/community_fading.txt` and `.json`)
+
+`python3 experiments/community_probe.py --fading`, 5 seeds x 3,000 ticks,
+K = 5. All worlds use today's other defaults. Fade 75 was added after a
+quick 2-seed run showed that 300 and 600 change little (agents live about
+310 ticks, so they die before a friend fades).
+
+| | memory 10, no fade (default) | memory 20, no fade | 20, fade 75 | 20, fade 150 | 20, fade 300 | 20, fade 600 |
+| --- | --- | --- | --- | --- | --- | --- |
+| groups traced 1,000+ ticks | 6.3% | 54% | 11% | 44% (sd 28) | 60% | 54% |
+| home spread in a group | 5.7 tiles | 9.0 | **5.0** | 7.7 | 8.5 | 9.0 |
+| biggest group (of about 93) | 18 | 50 | **15** | 38 | 48 | 50 |
+| groups per snapshot | 7.0 | 3.1 | 8.2 | 4.5 | 3.4 | 3.1 |
+| living close friends faded / 1,000 ticks | 0 | 0 | 516 | 154 | 10 | 0 |
+| close friends dropped by a full list / 1,000 ticks | 211 | 2 | 0 | 0.1 | 0.5 | 2 |
+| starved % / age at death | 62.9 / 319 | 62.5 / 321 | 62.7 / 320 | 63.8 / 316 | 63.1 / 320 | 62.5 / 321 |
+| gifts of food per run | 187 | 217 | 205 | 221 | 214 | 217 |
+
+Fade 600 gives exactly the memory-20 world (nobody lives long enough to
+fade). All bands hold everywhere. Speed: 3.29 s per 1,500 ticks with fade
+150 and room for 20, against 2.93 s today (+12%).
+
+### Plain reading
+
+- **No fade time meets the success line.** Short fading (75) keeps groups
+  small and local, but they do not last (11%). Longer fading (150 and up)
+  lets them last, but they grow into regional groups again.
+- Fading and the memory size move the world along **the same line**:
+  every setting so far that makes groups last also makes them big. A tie
+  is broken either by forgetting or not at all; there is no setting where
+  neighbours keep their ties and far-away groups stay apart.
+- Likely reason (reasoned from the code, not yet measured): a group is any
+  chain of ties (a friend of a friend of a friend ...). Agents spread over
+  the whole land, homes sit next to each other and neighbours really do
+  keep meeting, so one chain of real ties can link neighbourhood to
+  neighbourhood. Big groups may then be many local cores joined by a few
+  links, and "lasting" may partly mean "big enough to survive deaths".
+
+### Decision
+
+Same as the family home: **built, tested, left OFF** (`memory_fade` 0,
+`memory_keep` 10), so today's default world is unchanged (it still
+reproduces `experiments/baseline/milestone3_family.json`). Try it with
+`--set memory_fade=150 --set memory_keep=20`. Whether to switch it on is in
+`STATUS.md`, decisions.
+
+### Tests (`tests/test_fading.py`, 10)
+
+Fade off + memory 10 reproduces the frozen step 6 world (events, behaviour
+and every memory, 3 seeds); a v7 save migrates with the old rules and
+continues exactly; a v4 save gets memory 10 and no fading; an entry is kept
+at exactly `memory_fade` ticks and forgotten one tick later (both sides);
+meeting again in time keeps and counts it; fade 0 never forgets; a full
+list still drops the least-met; the setting is accepted by `--set` and
+negative values are refused; in a real world nobody remembers anyone older
+than the fade; same seed = same world.
+
+### Limitations
+
+- One group definition again (mutual 5+ ties, chained). Step 8 checks
+  whether a stricter one shows lasting local cores.
+- The sd of "lasting" for fade 150 and 300 is large (23 to 28 points).
+- Fading also changes who is "known" for sharing; gifts change by up to 34
+  per run, starvation by at most 1 point.
 
