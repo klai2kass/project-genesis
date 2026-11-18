@@ -106,6 +106,8 @@ Milestone 2 settings (all whole numbers; see `genesis/config.py`):
 (1), `drain_units_per_energy` (2), `tire_base` (100), `tire_span` (100),
 `tire_scale` (100), `turn_chance` (15), `turn_span` (20),
 `trait_founder_min` (40), `trait_founder_max` (60), `trait_mutation` (5).
+`curiosity_straight` (1): `1` = curious agents turn less (the fixed rule),
+`0` = the old rule (curious agents turn more).
 `--set rest_below=0` switches resting off.
 
 Milestone 3 settings: `home_radius` (6). How far from home a wandering agent
@@ -183,11 +185,14 @@ its own seeded dice and inherited by children (parent's value +/- 5):
 
 - **Industriousness**: how fast it tires while moving (lazy agents rest
   about twice as often as hard-working ones).
-- **Curiosity**: how often a wandering agent turns (7% of wandering ticks at
-  10, 15% at 50, 23% at 90). High curiosity means zigzagging and searching
-  the nearby patch thoroughly, not exploring further. Measured: when
-  high- and low-curiosity families share a world, the high ones usually end
-  up with more descendants (`docs/MILESTONE2_REPORT.md`).
+- **Curiosity**: how straight a wandering agent walks. A curious agent turns
+  rarely (7% of wandering ticks at 90, 15% at 50, 23% at 10), so it gets
+  further and sees more new ground; an incurious one zigzags around one
+  spot. Fixed 2026-11-18: before that the rule was the other way round
+  (curious agents zigzagged); old saves keep the old rule
+  (`curiosity_straight` 0). Measured in `docs/MILESTONE2_REPORT.md` section
+  7: without homes curious agents cover about 4% more tiles in all 30 seeds;
+  with homes the difference is lost in noise, and nothing else changes.
 
 It **dies** if its energy hits 0 (starved) or it reaches its lifespan (old age).
 
@@ -218,7 +223,7 @@ of 100"), the **options** it considered and whether each fitted, and the
 | `server.py` | Runs the world and serves the page |
 | `web/` | The page. It only draws; no rules live there |
 | `tests/` | The automatic checks |
-| `experiments/` | Measurement scripts (they only read the world); results in `experiments/results/`. `regrow_sweep.py`, `starvation_study.py`, `stage_compare.py`, `curiosity_probe.py`, `trait_drift.py`, `encounter_probe.py`, `memory_probe.py`, `sharing_opportunity.py`, `sharing_probe.py`, `community_probe.py` (add `--endings` for why groups end, `--fading` for fading memory, `--cores` for tight circles, `--every 50` for 50-tick snapshots), `home_drift.py`; `baseline/` holds the frozen Milestone 1, Milestone 2 and homes references |
+| `experiments/` | Measurement scripts (they only read the world); results in `experiments/results/`. `regrow_sweep.py`, `starvation_study.py`, `stage_compare.py`, `curiosity_probe.py`, `curiosity_study.py` (curiosity before/after the fix), `trait_drift.py`, `encounter_probe.py`, `memory_probe.py`, `sharing_opportunity.py`, `sharing_probe.py`, `community_probe.py` (add `--endings` for why groups end, `--fading` for fading memory, `--cores` for tight circles, `--every 50` for 50-tick snapshots), `home_drift.py`; `baseline/` holds the frozen Milestone 1, Milestone 2 and homes references |
 | `VISION.md` | The long-term idea and roadmap (read first) |
 | `docs/MILESTONE3.md` | Milestone 3: homes, encounter memory, sharing (built), groups (measured), family home and fading memory (built, off), with results |
 | `docs/MILESTONE2_REPORT.md` | What Milestone 2 does, measured |

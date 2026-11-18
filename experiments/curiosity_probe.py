@@ -18,7 +18,7 @@ Everything else uses the code defaults. The script only READS events.
 Run:  python3 experiments/curiosity_probe.py          (10 seeds x 3000 ticks, ~4 min)
       python3 experiments/curiosity_probe.py --mixed-extra  (mixed worlds only,
             30 more seeds 10..39, ~4 min)
-Add --homes-off for the Milestone 2 world (home_radius=0): that reproduces
+Add --homes-off for the Milestone 2 world (MILESTONE2_RULES): that reproduces
 curiosity_probe.json/.txt and curiosity_mixed_extra.json/.txt exactly.
 Without it homes are on and files end in _home (curiosity_probe_home.json ...).
       python3 experiments/curiosity_probe.py --quick  (3 seeds x 1000 ticks)
@@ -36,14 +36,18 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
 from genesis import create_world, step  # noqa: E402
+from genesis.save import MILESTONE2_RULES  # noqa: E402
 
 SEEDS = ["42", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 TICKS = 3000
 if "--quick" in sys.argv:
     SEEDS, TICKS = ["42", "1", "2"], 1000
 LEVELS = [("low", 10), ("neutral", 50), ("high", 90)]
-# Milestone 2 results were made before homes existed. --homes-off sets
-# home_radius=0, which reproduces them exactly (files without a suffix).
+# Milestone 2 results were made before homes existed. --homes-off uses
+# MILESTONE2_RULES (homes, sharing and the family home off, memory 10 that
+# never fades, the old curiosity rule), which reproduces them exactly (files
+# without a suffix). Until 2026-11-18 it only set home_radius=0, which
+# stopped matching once sharing (step 3) was on by default.
 # Without it, homes are on (the default) and files get the suffix "_home".
 HOMES_OFF = "--homes-off" in sys.argv
 SUFFIX = "" if HOMES_OFF else "_home"
@@ -102,7 +106,7 @@ def close_search(g, ag, outcome):
 def run(seed, mode, value=None):
     cfg = {"history_keep": 0, "trait_mutation": 0}
     if HOMES_OFF:
-        cfg["home_radius"] = 0
+        cfg.update(MILESTONE2_RULES)
     w = create_world(seed, cfg)
     for a in w["agents"]:
         if mode == "forced":

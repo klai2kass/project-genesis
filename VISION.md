@@ -44,7 +44,8 @@ serve this, question it. If this file and the code disagree about what
   around water), gather, eat, rest, reproduce and die.
 - A **rest need** (resting halves energy use, only when not hungry) and two
   inherited **personality traits**: industriousness (how fast an agent
-  tires) and curiosity (how often a wandering agent turns).
+  tires) and curiosity (how straight a wandering agent walks: curious agents
+  turn less and see more new ground; fixed 2026-11-18).
 - A **home** for every agent (where it was born). Wandering agents stay
   within 6 tiles of it, so families and neighbours keep meeting
   (`docs/MILESTONE3.md`).
@@ -66,8 +67,9 @@ serve this, question it. If this file and the code disagree about what
 - Browser map with pause, speed, step, save, load and an agent inspector.
 - Measurement scripts in `experiments/`; what they found for Milestone 2 is
   in `docs/MILESTONE2_REPORT.md` (short version: rest changes behaviour;
-  curiosity changes how agents walk and, in competition, which families
-  survive; in normal runs no trait is selected yet).
+  curiosity changes how agents walk and, in competition without homes,
+  which families survive; in normal runs no trait is selected yet). Section
+  7 of that report covers the curiosity fix.
 
 ### Not built, deliberately
 

@@ -18,6 +18,7 @@ kept as the design record. Where the build differs, "As built" says so.
 | 6 scoring | conditional | Not built: the condition (a trade-off thresholds cannot express) was never shown |
 | 7 company | gate | Not built (owner has not said "yes, add company"; no payoff exists) |
 | 8 tidy | summary, docs | Docs done this session. `summary.py` does not yet report action mix or trait averages |
+| (fix, 2026-11-18) curiosity direction | flip the turn rule, save v9, study | Done. Curious agents now turn less (`curiosity_straight` 1); `experiments/curiosity_study.py`, `tests/test_curiosity.py`; report section 7 |
 
 Stages 1 to 4 were committed together in `e3e07c3`, not one commit each.
 Every number in the plan's formulas below matches the code
@@ -49,7 +50,10 @@ Every number in the plan's formulas below matches the code
   decimals. The resting threshold is the same for everyone.
 - **Curiosity:** changes how often a wandering agent turns, 5% to 25% per
   tick (15% at 50), see section 3 for exact behaviour and how we measure
-  whether it matters.
+  whether it matters. **As built since 2026-11-18: curious agents turn
+  LESS** (25% at 0, 5% at 100; setting `curiosity_straight` 1). The rule
+  below with "+" is the original one, kept for old saves
+  (`curiosity_straight` 0). Study: `docs/MILESTONE2_REPORT.md` section 7.
 - **Curiosity is judged by you from reported measurements**, not by a built-in pass/fail rule.
 - **Measured against the frozen baseline** at stages 3 and 4: starvation,
   population, births, age at death, rest behaviour and speed (section 5).
@@ -204,7 +208,7 @@ numbers, 0 at start); `company` is added in the stage that uses it, so no field 
 | Trait | Plain meaning | Effect, stage 4 (all use the neutral-at-50 rule) | Only needs |
 | --- | --- | --- | --- |
 | industriousness | how slowly it tires while moving | rest lost per moving tick, in hundredths: `tire_rate = tire_base - ((industriousness - 50) * tire_span) // 100`; with `tire_base` 100 and `tire_span` 100 this is 150 (lazy, 0) down to 50 (tireless, 100); exact formula in section 4 | rest only |
-| curiosity | how restless its wandering is (exact behaviour below) | chance of a voluntary turn on each wandering tick = `turn_chance + ((curiosity - 50) * turn_span) // 100` percent; with 15 and 20 that is 5 to 25 | its own heading only. It does NOT mean seeking unseen or unvisited places: agents remember no places |
+| curiosity | how restless its wandering is (exact behaviour below) | chance of a voluntary turn on each wandering tick = `turn_chance + ((curiosity - 50) * turn_span) // 100` percent; with 15 and 20 that is 5 to 25. **Fixed 2026-11-18:** now `turn_chance - ((curiosity - 50) * turn_span) // 100` (25 to 5), so curious agents walk straighter; the "+" form stays for old saves | its own heading only. It does NOT mean seeking unseen or unvisited places: agents remember no places |
 | *(boldness)* | *deferred until the simulation has real risk mechanics (your Q2)* | *no field, no effect* | |
 | *(sociability, boldness)* | *not stored, not defined* | *added with a migration when a meaningful social or risk behaviour exists (stage 7 or later)* | |
 
@@ -226,8 +230,10 @@ hungry ("explore", 5.9%). Each wandering tick:
    below p. A turn is the only thing curiosity changes. Eating, gathering,
    walking to seen food and reproducing are untouched.
 3. Otherwise it keeps walking the same way.
-So a low-curiosity agent walks long straight lines; a high-curiosity agent
-zigzags and stays closer to where it began. **Whether either helps is not
+So (original rule) a low-curiosity agent walks long straight lines; a
+high-curiosity agent zigzags and stays closer to where it began. Since the
+fix of 2026-11-18 it is the other way round: high curiosity = straight
+lines. **Whether either helps is not
 known** (GUESS: straight lines cover more new ground and find food faster in
 open country, zigzags search one patch more thoroughly). That is exactly
 what we measure, and curiosity is judged "meaningful" or "not" by the

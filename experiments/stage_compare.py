@@ -9,7 +9,9 @@ Prints measurements only; it does not judge them.
 Since homes (Milestone 3) "defaults" and the forced-trait rows have homes
 on; "M2 rules (homes off)" reproduces Milestone 2. The Milestone 2 printout is
 experiments/results/stage_compare.txt; the one with homes is
-experiments/results/stage_compare_home.txt.
+experiments/results/stage_compare_home.txt. Since the curiosity fix
+(2026-11-18) "defaults" use the fixed rule and "defaults, old curiosity" the
+old one; printout experiments/results/stage_compare_curiosity_fix.txt.
 
 Run:  python3 experiments/stage_compare.py            (about 4 minutes)
       python3 experiments/stage_compare.py --quick    (2 seeds, 1500 ticks)
@@ -107,6 +109,7 @@ def main():
     runs = [("M1 rules (new code)", MILESTONE1_RULES, None),
             ("M2 rules (homes off)", MILESTONE2_RULES, None),
             ("defaults (homes on)", {}, None),
+            ("defaults, old curiosity", {"curiosity_straight": 0}, None),
             ("all industrious 10", {}, {"industriousness": 10}),
             ("all industrious 90", {}, {"industriousness": 90}),
             ("all curiosity 10", {}, {"curiosity": 10}),

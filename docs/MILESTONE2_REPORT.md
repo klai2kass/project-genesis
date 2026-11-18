@@ -5,6 +5,13 @@ comes from a saved result file; the command that makes it is listed with it.
 Nothing is estimated from memory. Labels: **FACT** = measured, **GUESS** =
 plausible but not tested.
 
+> **Update 2026-11-18: curiosity was fixed.** Sections 1 to 6 describe the
+> rule as it was (curious agents turned MORE). Since the fix, curious agents
+> turn LESS and walk straighter (setting `curiosity_straight`, on by
+> default; old saves keep the old rule). Section 7 has the before/after
+> study. Where a sentence below talks about "curious" agents, it means the
+> OLD rule.
+
 ## Short answer
 
 - **Rest works as designed.** About 9% of all decisions are now "rest". Lazy
@@ -19,9 +26,9 @@ plausible but not tested.
   curious agent gathers only about 1.5% more food, but over 16 generations of
   competing for the same food that small edge adds up. This is the first
   real selection pressure in Genesis, and nobody wrote it as a rule.
-- **The name is backwards.** In the code a "curious" agent turns more often,
-  so it explores *less*. It wins because it stays near the food patch it is
-  on, not because it explores.
+- **The name was backwards** (fixed 2026-11-18, section 7). In the code a
+  "curious" agent turned more often, so it explored *less*. It won because
+  it stayed near the food patch it was on, not because it explored.
 - **In normal runs no trait is selected yet.** Founders only differ by
   40-60 (turn chance 13-17%), too little for the edge to beat chance in
   3,000 ticks: trait averages move no further than in a control world.
@@ -161,8 +168,10 @@ neither urgent:
    which would match the word. Only with the same measurements before and
    after, because it would change which families win.
 
-Flipping its direction (curious = straighter) is rejected: the data says
-that would simply make "curious" the losing trait.
+Flipping its direction (curious = straighter) was rejected here, because
+the data said that would make "curious" the losing trait in mixed worlds
+without homes. **Changed 2026-11-18 at the project owner's request** so the
+word matches the behaviour; section 7 confirms the consequence exactly.
 
 ## 3. Was any trait selected? (FACT, `trait_drift.txt`, 10 seeds)
 
@@ -248,3 +257,102 @@ an agent meets about 38 different agents in its life, but only 7% of pairs
 meet again after 100 ticks apart, and only 6% of meetings are between family.
 A prototype in which agents drift back toward their birthplace roughly
 doubles family meetings and repeated meetings, with no change in survival.
+
+## 7. Curiosity fix (2026-11-18)
+
+### The rule
+
+`genesis/traits.py`, `turn_percent`. Chance that a wandering agent turns on
+a tick, with `turn_chance` 15 and `turn_span` 20:
+
+| curiosity | 0 | 10 | 49 | 50 | 51 | 90 | 100 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| old rule: `15 + ((c - 50) * 20) // 100` | 5% | 7% | 14% | 15% | 15% | 23% | 25% |
+| new rule: `15 - ((c - 50) * 20) // 100` | 25% | 23% | 16% | 15% | 15% | 7% | 5% |
+
+`//` rounds down, so the new rule gives 16% for 45 to 49 and 15% for 50 to
+54 (tested). Curiosity 50 is 15% either way, so all-neutral worlds and the
+frozen Milestone 1 baseline are byte-identical (`tests/test_curiosity.py`,
+`tests/test_baseline.py`, `make_baseline.py --check`: ALL SAME). Setting
+`curiosity_straight` (1 = new, the default; 0 = old). Save version 9: older
+saves get 0 and continue exactly as before (tested with a frozen v8 save).
+
+### The study (FACT, `experiments/curiosity_study.py`)
+
+Every agent at one curiosity, industriousness 50, set from outside the
+simulation code (all traits 50 through the public settings, then each
+founder's curiosity written as data; children copy it). 30 seeds (1-30) x
+1,500 ticks. Each agent is tracked for its first 300 ticks; "survivors" live
+through them, "early-dying" do not, and both are reported. Values are
+per-seed results, then mean, sd and min..max over the 30 seeds. Files:
+`experiments/results/curiosity_before.*` (old rule, run before the fix) and
+`curiosity_after.*` (new rule, same seeds and settings).
+`curiosity_before_check.*` is the old rule run again AFTER the fix with
+`--rule old`: identical to `curiosity_before` (checked with diff).
+
+Survivors, homes off (the clean world for this question; homes pull every
+agent back within about 6 tiles):
+
+| | old 10 | old 90 | new 10 | new 90 |
+| --- | --- | --- | --- | --- |
+| tiles per 1,000 wander ticks (MAIN) | 825 (sd 8) | 792 (sd 8) | 792 (sd 8) | **825** (sd 8) |
+| distance from start at end (tiles) | 22.4 | 20.9 | 20.9 | **22.4** |
+| turns per free wander tick | 16.1% | 28.3% | 28.3% | 16.1% |
+| water ahead (forced turn) | 10.6% | 10.6% | 10.6% | 10.6% |
+| ticks to first food | 10.4 | 10.8 | 10.8 | 10.4 |
+| food eaten per 100 ticks | 5.8 | 5.8 | 5.8 | 5.8 |
+| resting | 10.3% | 10.2% | 10.2% | 10.3% |
+| starved (all tracked agents) | 48.6% | 48.3% | 48.3% | 48.6% |
+| 90 explores more than 10 (per seed) | 0 of 30 | | 30 of 30 | |
+
+Early-dying agents show the same pattern (new rule: 812 vs 842 tiles,
+16.9 vs 18.7 tiles from start, 30 of 30 seeds). With homes on (today's
+default world) curiosity makes almost no difference to exploring: 579 vs
+583 tiles per 1,000 wander ticks, 5.5 vs 5.6 tiles from start; 90 beats 10
+in 19 of 30 seeds (about luck). Wander share is about 46% (survivors) and
+57% (early-dying) at every level.
+
+**The new numbers are the old ones with 10 and 90 swapped, exactly.** That
+is expected: the new rule at curiosity c is the old rule at 100 - c, and
+turning is the only thing curiosity changes. Checked directly: a mixed world
+(founders at 10/50/90, homes off) under the old rule and the same world with
+every curiosity replaced by 100 - c under the new rule give identical events
+for 1,500 ticks (seeds 42 and 7). So the fix adds no new behaviour; it gives
+the existing behaviour the right name.
+
+### Risks checked
+
+- **More obstacle hits?** No: water is ahead on about 10.6% (homes off) and
+  9.5% (homes on) of free wander ticks at every level.
+- **Slower reaction to food nearby?** No: ticks to first food and food
+  eaten are the same at every level. From the code: food in sight always
+  wins over wandering (`_walk_to_food`), and curiosity is only read while
+  wandering.
+- **Travelling far without finding more?** Yes, mildly: curious agents end
+  about 1.5 tiles (7%) further from their start without homes, and gather no
+  more food.
+- **Competition (from the mirror above, not re-run):** in mixed worlds
+  without homes, the Milestone 2 result now belongs to the LOW-curiosity
+  families: they out-breed the curious ones in 34 of 40 seeds. With homes on
+  (the default) it was 25 of 40, about luck.
+- **Whole world** (`experiments/results/stage_compare_curiosity_fix.txt`, 5
+  seeds x 3,000 ticks, default world): new rule pop 93.4, starved 62.7%,
+  births 899, age 317; old rule 93.6, 62.9%, 894, 319. All Milestone 2 bands
+  hold.
+
+### Acceptance check (FACT, `tests/test_curiosity.py`, Acceptance)
+
+Two otherwise identical agents (same world dice, same start, open grass, no
+food, no home), curiosity 10 and 90, 500 ticks, 20 pairs: the curious one
+changes direction about 31 times against 101, in all 20 pairs; it ends
+further from its start in 18 of 20 (mean 125 against 51 tiles) and visits
+more different tiles in 17 of 20 (452 against 423).
+
+**In plain words:** a curious agent keeps walking the way it is going and
+only turns now and then, so it gets far and keeps seeing new ground. An
+incurious agent changes direction about every fourth step, so it zigzags
+around the same spot. In the real world the difference is small, because
+agents only wander when no food is in sight, a "turn" picks a random
+direction that can be the same as before, water forces turns anyway, and
+homes keep everyone within about 6 tiles.
+

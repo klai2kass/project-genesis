@@ -9,12 +9,14 @@ home) is built but OFF by default, because it did not reach its goal**
 cap.** **Step 7 (fading memory) is built but OFF by default: no fade time
 gave groups that both last and stay local** (short fading: local but
 short-lived; longer fading: lasting but regional, like room for 20).
-Today's default world is unchanged. **Step 8 (tight circles) is measured:
+**Step 8 (tight circles) is measured:
 small, very local circles of friends exist, but every one breaks up within
 about 35 to 90 ticks; none lasts 1,000 ticks in any world.** Proposed next:
 **step 9, rest at home** (a tired agent walks home before resting), section
-5. GitHub (`origin/main`) has everything up to `af88e8a`; later
-commits are local only.
+5. **Curiosity is fixed (2026-11-18): curious agents now turn LESS and walk
+straighter** (before, the rule was backwards); old saves keep the old rule.
+Its effect is real but small (section 4). GitHub (`origin/main`) has
+everything up to `b0222bb`; later commits are local only.
 
 Plain words: a **tick** is one step of time. A **seed** is the number a world
 is built from (same seed = same world). A **fingerprint** is a short code that
@@ -25,6 +27,8 @@ is equal only when two worlds are exactly equal. **Headless** = no window.
 - [x] World, food, agents that search (around water), gather, eat, rest,
       reproduce and die. Same seed = same world.
 - [x] Rest need and traits (curiosity, industriousness), inherited +/-5.
+      Curiosity: curious agents turn less (`curiosity_straight` 1, fixed
+      2026-11-18; 0 = the old rule, used by old saves).
 - [x] **Homes**: `home` per agent (birth tile), `home_radius` 6 (0 = off).
 - [x] **Encounter memory**: `memory` per agent, `memory_keep` 10 (0 = off);
       shown in the agent panel.
@@ -36,7 +40,7 @@ is equal only when two worlds are exactly equal. **Headless** = no window.
       fade); e.g. `--set memory_fade=150 --set memory_keep=20`. The panel
       says "forgets anyone not met for N ticks" when it is on.
 - [x] Every decision has a "why"; recent decisions are kept in saves.
-- [x] Saves version 8; versions 1 to 7 load and keep their old rules.
+- [x] Saves version 9; versions 1 to 8 load and keep their old rules.
 - [x] Milestone 1, Milestone 2, homes and memory behaviour frozen and
       reproduced exactly: `tests/test_baseline.py`, `tests/test_home.py`,
       `tests/test_memory.py`, `tests/test_sharing.py`, `tests/test_fading.py`,
@@ -49,13 +53,15 @@ is equal only when two worlds are exactly equal. **Headless** = no window.
 
 ## 2. Tests (run this session)
 
-`python3 -m unittest discover -s tests` -> `Ran 155 tests`, `OK` (about 1.6
-minutes). By file: baseline 5, controls 11, determinism 7, fading 10,
-history 8, home 16, memory 11, movement 7, overrides 11, rest 12, rest_design 14, save_load 10,
+`python3 -m unittest discover -s tests` -> `Ran 165 tests`, `OK` (about 1.7
+minutes). By file: baseline 5, controls 11, curiosity 10, determinism 7,
+fading 10, history 8, home 16, memory 11, movement 7, overrides 11, rest 12, rest_design 14, save_load 10,
 sharing 9, summary 5, trait_streams 5, traits 8, why_log 6.
 Changed tests (on purpose): save-version checks now use `SAVE_VERSION`
 instead of a fixed number; the curiosity turning test in `test_rest.py`
-runs with `home_radius=0`; the memory tests switch sharing off to compare
+runs with `home_radius=0` and, since the fix, the old rule
+(`curiosity_straight=0`; the new rule is tested in `test_curiosity.py`);
+the memory tests (which also pin the old curiosity rule) switch sharing off to compare
 with the frozen memory world; `test_why_log.py` knows the action "give".
 `make_baseline.py --check` -> ALL SAME (Milestone 1 unchanged).
 Reference run: `python3 run_headless.py --seed 42 --ticks 500 --every 0` ->
@@ -68,6 +74,11 @@ a code for every agent's memory; today's default world reproduces it
 exactly).
 
 ## 3. Browser check (this session)
+
+- Curiosity fix check (fresh tab, seed 42): clicking agent #11 shows
+  "Curiosity 51 (turns 15% of wandering ticks: high walks straight and
+  covers more ground, low zigzags nearby)"; Pause and Step work ("Stepped to
+  tick 41"). **No console errors.**
 
 Server started from the shell on port 8766 (Claude's sandbox blocks ports,
 so it ran outside the sandbox), page opened in the app's browser.
@@ -216,12 +227,26 @@ One starvation death in three (33.7%) happened to an agent that, in its last
 Both success lines met (family share and 5+ meetings at least doubled), all
 Milestone 2 bands hold, speed unchanged.
 
-**Curiosity** (`docs/MILESTONE2_REPORT.md`, `docs/MILESTONE3.md`): it always
-changes how agents walk. Without homes, high-curiosity families out-bred low
-ones in 34 of 40 mixed worlds. **With homes that advantage mostly
-disappears** (25 of 40, within luck), because homes keep every agent near
-its patch, which was the zigzaggers' edge. In normal runs no trait is
-selected beyond chance.
+**Curiosity, before and after the fix** (`experiments/curiosity_study.py`,
+30 seeds x 1,500 ticks, every agent at one curiosity; survivors of their
+first 300 ticks; `docs/MILESTONE2_REPORT.md` section 7):
+
+| homes off | old rule 10 | old rule 90 | new rule 10 | new rule 90 |
+| --- | --- | --- | --- | --- |
+| new tiles per 1,000 wander ticks | 825 | 792 | 792 | 825 |
+| distance from start at end | 22.4 | 20.9 | 20.9 | 22.4 |
+| turns per wander tick | 16% | 28% | 28% | 16% |
+| 90 explores more than 10 | 0 of 30 seeds | | 30 of 30 | |
+
+The new numbers are the old ones with 10 and 90 swapped, exactly (the new
+rule at c is the old rule at 100 - c). Food found, food eaten, resting,
+starvation and water hits do not change with curiosity. With homes on (the
+default) the exploring difference is lost in noise (90 ahead in 19 of 30
+seeds). Whole default world: all bands hold (pop 93.4, starved 62.7%).
+Consequence: in mixed worlds without homes the zigzaggers win, which are now
+the LOW-curiosity families (34 of 40 seeds, Milestone 2 result mirrored);
+with homes it was 25 of 40, about luck. In normal runs no trait is selected
+beyond chance.
 
 ## 5. Next step: Milestone 3, step 9, rest at home (recommended)
 
@@ -268,14 +293,48 @@ starvation). Report every world, including any that fail.
 home might be far after a long food chase (home radius keeps it within
 about 7 tiles).
 
+### The staged memory plan (a, b, c): where it stands
+
+Asked again on 2026-11-18. All three stages are already built (Milestone 3,
+`docs/MILESTONE3.md`), without friendship or relationship scores:
+- **(a) recognising individuals**: every agent keeps the ids of agents it
+  met (`genesis/memory.py`, step 2).
+- **(b) encounter memory**: who, first and last tick, how many separate
+  meetings, where, and food given / received (step 2, gifts since step 3).
+- **(c) memories that change decisions**: sharing reads it (a fed agent
+  gives food to a starving agent it has met 2+ times, step 3). It is the
+  only rule that does.
+Relationships are left to emerge; steps 4 to 8 measured what came of it
+(groups form, but close circles never last). Step 9 above is the next
+proposal.
+
+**Future idea, not built: curiosity decides WHERE an agent goes.** Today
+curiosity only changes how often a wanderer turns. Once agents remember
+PLACES (they now remember only their home and where meetings began), a
+curious agent could prefer directions it has not visited recently, and an
+incurious one familiar ground.
+- Files: a small place memory per agent (`genesis/memory.py` or a new
+  `genesis/places.py`: e.g. the last N tiles or 4x4 areas visited), the
+  turn choice in `genesis/agents.py` `_wander`, `config.py`, `save.py`
+  (new version, old saves keep the random turn), tests, page text.
+- Tests: off = today exactly (frozen digests); a curious agent picks the
+  least-visited open direction, an incurious one the most familiar; ties
+  broken in a fixed order (no new dice); same seed = same world.
+- Success: in `curiosity_study.py` curiosity 90 reaches clearly more new
+  tiles than 10 (well beyond today's 4%), in most seeds, with homes on as
+  well as off; bands hold.
+- Risks: memory size and speed; it may still not matter while food is in
+  sight 94% of the time; it may change which families win, so mixed worlds
+  must be re-measured.
+
 ## 6. Next 5 tasks
 
 1. **Your go for step 9 (rest at home)**, then build it as in section 5.
    Check: `python3 -m unittest discover -s tests`, then
    `python3 experiments/community_probe.py --cores --every 50`.
-2. **Decide what curiosity should mean now** (decision 2). If "roaming
-   distance": files `genesis/agents.py`, `genesis/traits.py`, tests; measure
-   with `python3 experiments/curiosity_probe.py`.
+2. **Curiosity that chooses WHERE to go** (future idea in section 5; needs a
+   memory of places first). Measure with
+   `python3 experiments/curiosity_study.py --out <name>`.
 3. **Test industriousness in mixed worlds** (copy the mixed mode of
    `curiosity_probe.py`).
 4. **`why.py --load` reads stored history.** Files: `why.py`,
@@ -294,10 +353,10 @@ about 7 tiles).
 3. **Family home default.** I switched it OFF after it missed its goal
    (groups did not last longer; a bit more starvation). If you like the
    tighter family groups anyway, set the default to 1 in `genesis/config.py`.
-4. **Curiosity after homes.** It now matters little. Options: (a) leave it;
-   (b) let it also set each agent's roaming distance around home (curious =
-   wanders further), which matches the word; (c) remove its effect.
-   Default: (a) until you choose.
+4. **Curiosity: decided 2026-11-18** (your request): curious agents walk
+   straighter. Note the cost: without homes, mixed worlds now favour the
+   low-curiosity families. With homes (the default) no family is favoured
+   beyond luck.
 5. **`home_radius` = 6** (chosen as proposed). 3 doubles family contact
    again (20%) but agents meet fewer different agents (19 in a life) and
    reunite less after long gaps. Change anytime with `--set home_radius=3`.
@@ -310,6 +369,11 @@ about 7 tiles).
 
 - Results are for one map size (60 x 40), one food setting, 3,000 ticks.
 - Mixed-world curiosity results use extreme values (10/50/90), no mutation.
+  After the fix they were not re-run; they follow exactly by mirroring
+  (checked on 2 seeds: identical events).
+- Results files made before 2026-11-18 used the old curiosity rule; the
+  `_home` curiosity-probe files and later probes ran with the defaults of
+  their day.
 - Homes never move. How often an agent is stuck on the far side of a lake
   from its home was not measured on real maps.
 - `why.py` replays from the seed; it does not read stored history.
@@ -403,6 +467,8 @@ python3 run_headless.py --seed 42 --ticks 2000 --every 0 --summary --set share_m
 ```
 
 ```bash
+python3 experiments/curiosity_study.py --out after
+python3 experiments/curiosity_study.py --rule old --out before_check
 python3 experiments/curiosity_probe.py
 ```
 
@@ -473,6 +539,32 @@ before homes.
 
 Newest first. Older entries mention section numbers of earlier versions of
 this file; see `git log -p STATUS.md` for those.
+
+### Session 2026-11-18 (part 13: curiosity fix)
+- **Your request** (pasted plan): study curiosity, fix its direction, report.
+- **Tests first:** 155 OK before any change.
+- **Study** (`155c71b`): `experiments/curiosity_study.py`, run on the old
+  rule -> `curiosity_before.*`. Curiosity is set from outside (settings plus
+  plain data), nothing in `genesis/` touched. Homes on AND off, because homes
+  hide the effect.
+- **Frozen** (`268d113`): a v8 save of today's world before the fix.
+- **Fix** (`f1fafe9`): `curiosity_straight` (1 = curious agents turn less),
+  save version 9 (older saves: 0), `tests/test_curiosity.py` (10). Three
+  older tests now pin the old rule where they compare with frozen worlds.
+  Page text changed. 165 OK; `make_baseline.py --check` ALL SAME.
+- **After:** `curiosity_after.*` (same seeds); `--rule old` reproduces
+  `curiosity_before` exactly (`curiosity_before_check.*`). New = old with 10
+  and 90 swapped; mixed worlds checked to mirror exactly on 2 seeds.
+- **Also fixed:** `curiosity_probe.py --homes-off` now uses all Milestone 2
+  rules (it had stopped matching once sharing came); re-run: identical
+  except the run time. `stage_compare.py` gained a "defaults, old curiosity"
+  row (`stage_compare_curiosity_fix.txt`).
+- **Decisions made:** tracked window 300 ticks per agent (nobody lives the
+  whole run, so "survivors" = alive after 300 ticks); the acceptance test
+  uses 20 single-agent pairs on open grass, "most pairs and on average"
+  (single walks are luck); the asked-for staged memory plan (a, b, c) is
+  already built, so section 5 says so and adds the curiosity-where idea.
+- **Not done:** step 9 (waits for your go).
 
 ### Session 2026-11-18 (part 12: Milestone 3 step 8, tight circles)
 - **Your go** ("Yes, step 8"). Measurement only; nothing in `genesis/`.
