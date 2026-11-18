@@ -298,7 +298,9 @@ function renderAgent() {
       " rest per move)";
     if (a.home) {
       const far = Math.max(Math.abs(a.x - a.home[0]), Math.abs(a.y - a.home[1]));
-      $("a-home").textContent = "Home (" + a.home[0] + ", " + a.home[1] + "), where it was born · " +
+      const whose = a.parent === null ? "where it started"
+        : (fx.home_inherit ? "its family's home, from #" + a.parent : "where it was born");
+      $("a-home").textContent = "Home (" + a.home[0] + ", " + a.home[1] + "), " + whose + " · " +
         far + " tiles away · " + (fx.home_radius > 0
           ? "wanders within " + fx.home_radius + " tiles of it (gold square on the map)"
           : "homes are off in this world");

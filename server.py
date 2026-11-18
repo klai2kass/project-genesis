@@ -150,7 +150,8 @@ class Game:
                                "tire_scale": cfg["tire_scale"],
                                "rest_below": cfg["rest_below"],
                                "rest_resume": cfg["rest_resume"],
-                               "home_radius": cfg["home_radius"]}
+                               "home_radius": cfg["home_radius"],
+                               "home_inherit": cfg["home_inherit"]}
                     selected = {"alive": True, "agent": agent, "trail": trail,
                                 "effects": effects,
                                 "known": _known(agent, agents, cfg)}
