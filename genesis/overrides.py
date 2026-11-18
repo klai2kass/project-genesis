@@ -46,6 +46,7 @@ RULES = {
     "trait_founder_max": ("int", 0, 100),
     "trait_mutation": ("int", 0, 100),
     "home_radius": ("int", 0, 200),
+    "home_inherit": ("int", 0, 1),
     "memory_keep": ("int", 0, 1000),
     "share_min_meetings": ("int", 0, 1000),
 }

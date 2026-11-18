@@ -70,6 +70,10 @@ DEFAULT_CONFIG = {
     # full) that is more than home_radius tiles from home steps back toward
     # it. 0 = off (old saves load with 0 and keep their old behaviour).
     "home_radius": 6,
+    # Family home (Milestone 3 step 5): 1 = a child's home is its parent's
+    # home; 0 = the tile where it was born (the step 1 rule). Founders keep
+    # their start tile either way.
+    "home_inherit": 1,
     # Encounter memory (Milestone 3 step 2; genesis/memory.py): how many
     # agents each agent remembers meeting. 0 = no memory. Never changes
     # behaviour; it is a record.

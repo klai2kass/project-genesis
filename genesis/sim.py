@@ -136,6 +136,8 @@ def _apply(world, agent, decision, rng):
                            generation=agent["generation"] + 1,
                            traits=child_traits(world["seed"], world["next_id"],
                                                agent["traits"], cfg))
+        if cfg["home_inherit"]:
+            child["home"] = list(agent["home"])   # the family home
         world["next_id"] += 1
         return child
     elif action == "rest" and decision.get("voluntary"):

@@ -87,9 +87,47 @@ class HomesOffIsMilestoneTwo(unittest.TestCase):
         self.assertTrue(all(a["home"] == [a["x"], a["y"]] for a in w["agents"]))
 
 
-class WhereHomeIs(unittest.TestCase):
-    def test_founders_home_is_start_and_children_home_is_birth_tile(self):
+class FamilyHomeOffIsTheSharingWorld(unittest.TestCase):
+    REF3 = json.load(open(os.path.join(ROOT, "experiments", "baseline", "milestone3_share.json")))
+
+    def test_home_inherit_zero_reproduces_frozen_sharing_world(self):
+        from genesis.save import BIRTH_TILE_HOME_RULES
+        for seed, ref in self.REF3["short"].items():
+            w = create_world(seed, dict(BIRTH_TILE_HOME_RULES))
+            ed = EventDigest()
+            for _ in range(500):
+                ed.add(step(w))
+            s = w["stats"]
+            now = {"alive": len(w["agents"]), "births": s["births"],
+                   "starved": s["deaths_starved"], "old_age": s["deaths_old_age"],
+                   "gifts": s["gifts"], "behaviour_digest": behaviour_digest(w),
+                   "event_digest": ed.hexdigest()}
+            self.assertEqual(now, ref, "seed " + seed)
+
+    def test_family_home_changes_behaviour(self):
         w = create_world("42")
+        ed = EventDigest()
+        for _ in range(500):
+            ed.add(step(w))
+        self.assertNotEqual(ed.hexdigest(), self.REF3["short"]["42"]["event_digest"])
+
+    def test_v6_save_migrates_keeps_its_rules_and_continues_the_same(self):
+        w = load_world(os.path.join(ROOT, "tests", "fixtures", "save_v6_seed42_t300.json"))
+        self.assertEqual(w["version"], SAVE_VERSION)
+        self.assertEqual(w["config"]["home_inherit"], 0)
+        self.assertTrue(any("home_inherit" in line and "old rules" in line
+                            for line in w["migration_log"]))
+        ed = EventDigest()
+        for _ in range(200):
+            ed.add(step(w))
+        self.assertEqual({"tick": w["tick"], "behaviour_digest": behaviour_digest(w),
+                          "event_digest": ed.hexdigest()}, self.REF3["save_v6"])
+
+
+class WhereHomeIs(unittest.TestCase):
+    def test_birth_tile_home_when_home_inherit_is_0(self):
+        # The step 1 rule, still available with home_inherit=0.
+        w = create_world("42", {"home_inherit": 0})
         start = {a["id"]: [a["x"], a["y"]] for a in w["agents"]}
         self.assertTrue(all(a["home"] == start[a["id"]] for a in w["agents"]))
         born = {}
@@ -100,6 +138,26 @@ class WhereHomeIs(unittest.TestCase):
         self.assertTrue(born)
         for a in w["agents"]:
             self.assertEqual(a["home"], born.get(a["id"], start.get(a["id"])))
+
+    def test_family_home_children_and_grandchildren_keep_the_founders_home(self):
+        # Step 5 (default): a child's home is its parent's home, so every
+        # descendant has the home of the founder its family started from.
+        w = create_world("42")
+        self.assertEqual(w["config"]["home_inherit"], 1)
+        home = {a["id"]: list(a["home"]) for a in w["agents"]}
+        founder = {a["id"]: a["id"] for a in w["agents"]}
+        deep = 0
+        for _ in range(600):
+            for e in step(w):
+                if e["action"] == "born":
+                    child = next(c for c in w["agents"] if c["id"] == e["agent"])
+                    founder[child["id"]] = founder[child["parent"]]
+                    self.assertEqual(child["home"], home[child["parent"]])
+                    home[child["id"]] = list(child["home"])
+                    deep += child["generation"] >= 2
+        self.assertGreater(deep, 0)
+        for a in w["agents"]:
+            self.assertEqual(a["home"], home[founder[a["id"]]])
 
     def test_home_survives_save_and_load(self):
         w = create_world("42")

@@ -39,6 +39,9 @@ from .world import SAVE_VERSION
 #      An older save is migrated so it KEEPS ITS OLD RULES:
 #      share_min_meetings=0 (nobody gives). Try sharing on an old world with
 #      --set share_min_meetings=2.
+#   7  Milestone 3 step 5: the family home (setting home_inherit). Same
+#      layout; an older save is migrated with home_inherit=0 so children
+#      keep getting their birth tile as home, as before.
 # Every change made while loading is written to world["migration_log"] (only
 # when something changed), so nothing happens silently.
 # To add a new version: bump SAVE_VERSION in world.py, write a function
@@ -61,14 +64,18 @@ AGENT_DEFAULTS = {
 # Used when migrating a version 1/2 save, so old worlds keep their rules.
 MILESTONE1_RULES = {"rest_below": 0, "trait_founder_min": 50,
                     "trait_founder_max": 50, "trait_mutation": 0, "home_radius": 0,
-                    "share_min_meetings": 0}
+                    "share_min_meetings": 0, "home_inherit": 0}
 
 # Settings that make the new rules behave exactly like Milestone 2.
-MILESTONE2_RULES = {"home_radius": 0, "share_min_meetings": 0}
+MILESTONE2_RULES = {"home_radius": 0, "share_min_meetings": 0, "home_inherit": 0}
 
 # Settings that make the new rules behave exactly like Milestone 3 step 2
 # (homes and memory, no sharing).
-MEMORY_ONLY_RULES = {"share_min_meetings": 0}
+MEMORY_ONLY_RULES = {"share_min_meetings": 0, "home_inherit": 0}
+
+# Settings that make the new rules behave exactly like Milestone 3 step 3
+# (homes from the birth tile, memory, sharing).
+BIRTH_TILE_HOME_RULES = {"home_inherit": 0}
 
 # Defaults for the counters in world["stats"].
 STATS_DEFAULTS = {"births": 0, "deaths_starved": 0, "deaths_old_age": 0, "gifts": 0}
@@ -199,8 +206,18 @@ def _migrate_5_to_6(world):
     world["version"] = 6
 
 
+def _migrate_6_to_7(world):
+    cfg = world["config"]
+    for key, value in BIRTH_TILE_HOME_RULES.items():
+        if key not in cfg:
+            cfg[key] = value
+            _note(world, "config.%s missing (save from before family homes): set "
+                         "to %r so this world keeps its old rules" % (key, value))
+    world["version"] = 7
+
+
 MIGRATIONS = {1: _migrate_1_to_2, 2: _migrate_2_to_3, 3: _migrate_3_to_4,
-              4: _migrate_4_to_5, 5: _migrate_5_to_6}
+              4: _migrate_4_to_5, 5: _migrate_5_to_6, 6: _migrate_6_to_7}
 
 
 def world_from_json(text):
