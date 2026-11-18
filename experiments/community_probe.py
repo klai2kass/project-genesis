@@ -36,7 +36,14 @@ step 1-4 rule) and homes off (home_radius=0) as the control. Also reported per w
 population after tick 500, births, starved share and age at death, to check
 the Milestone 2 bands.
 
+Step 6 (`--endings`): HOW does each traced group end (members died, split,
+dissolved, or still going), at what age do agents first join a group, and
+how often a full memory forgets a 5+-meeting friend. Worlds: default,
+family home, and default with memory_keep=20 and 1000 (1000 never forgets).
+
 Run:  python3 experiments/community_probe.py          (3 worlds x 5 seeds x 3000 ticks, ~6 min)
+      python3 experiments/community_probe.py --endings   (step 6; ~8 min;
+            files community_endings.txt / .json)
       python3 experiments/community_probe.py --quick  (2 seeds x 1500 ticks)
 Writes experiments/results/community_probe.json; printout in community_probe.txt.
 """
@@ -49,6 +56,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
 from genesis import create_world, step  # noqa: E402
+from genesis import memory as memory_mod  # noqa: E402
 
 SEEDS = ["42", "1", "2", "3", "4"]
 TICKS = 3000
@@ -59,6 +67,32 @@ THRESHOLDS = [5, 2]
 WORLDS = [("family home", {"home_inherit": 1}),
           ("birth-tile home (default)", {"home_inherit": 0}),
           ("homes off (control)", {"home_radius": 0, "home_inherit": 0})]
+
+# --endings (Milestone 3 step 6): WHY do groups end? Other worlds, K = 5 only,
+# files community_endings.txt / .json. The memory_keep=1000 world never
+# forgets anyone, so it shows what the memory cap of 10 does.
+ENDINGS = "--endings" in sys.argv
+if ENDINGS:
+    THRESHOLDS = [5]
+    WORLDS = [("default (birth-tile home)", {}),
+              ("family home", {"home_inherit": 1}),
+              ("default, memory 20", {"memory_keep": 20}),
+              ("default, memory 1000", {"memory_keep": 1000})]
+JOIN_EVERY = 50          # how often (ticks) group membership is checked for joining
+
+# Count strong entries (5+ meetings) forgotten because a memory was full.
+FORGOTTEN = {"strong": 0}
+_real_trim = memory_mod._trim
+
+
+def _counting_trim(agent, keep):
+    before = {e[0]: e[3] for e in agent["memory"]}
+    _real_trim(agent, keep)
+    after = {e[0] for e in agent["memory"]}
+    FORGOTTEN["strong"] += sum(1 for i, c in before.items() if c >= 5 and i not in after)
+
+
+memory_mod._trim = _counting_trim
 
 
 def ties(agents, k):
@@ -94,21 +128,32 @@ def groups_of(edges):
 
 
 def trace(snaps, i, group, k):
-    """(steps, all_first_members_dead) following `group` from snapshot i."""
-    cur, n = group, 0
+    """(steps, all_first_members_dead, how_it_ended) following `group` from
+    snapshot i. how_it_ended:
+      died       fewer than 2 of its members are alive at the next snapshot
+      split      most survivors are still in groups, but no single later
+                 group holds half of them
+      dissolved  most survivors are in no group at all any more (their ties
+                 broke: a tie between two living agents only breaks when one
+                 forgets the other, or the members that linked them died)
+      end        still going when the run ended"""
+    cur, n, how = group, 0, "end"
     for j in range(i + 1, len(snaps)):
         survivors = cur & snaps[j]["alive"]
         if len(survivors) < 2:
+            how = "died"
             break
         later = snaps[j]["k"][k]["groups"]
         best = max(later, key=lambda h: (len(survivors & h), -min(h)), default=None)
         if best is None or len(survivors & best) * 2 < len(survivors):
+            in_any = survivors & (frozenset().union(*later) if later else frozenset())
+            how = "split" if len(in_any) * 2 >= len(survivors) else "dissolved"
             break
         n += 1
         cur = best
     # every first member has died by the last snapshot the trace reached
     gone = n > 0 and not (group & snaps[i + n]["alive"])
-    return n, gone
+    return n, gone, how
 
 
 def kept(group, later_groups, alive_later):
@@ -125,16 +170,28 @@ def run(seed, extra):
     snaps = []                  # per snapshot: tick, alive ids, homes, groups per K, ties
     gifts = []                  # (tick, giver, receiver)
     pops, ages = [], []
+    FORGOTTEN["strong"] = 0
+    born_at = {}                # agents born in the run: birth tick
+    joined_age = {}             # agent -> age when first seen in a group (K = 5)
+    lived = {}                  # agent -> age at death (born in the run)
     for _ in range(TICKS):
         for e in step(w):
             if e["action"] == "die":
                 ages.append(e["age"])
+                if e["agent"] in born_at:
+                    lived[e["agent"]] = e["age"]
             if e["action"] == "born":
                 parent[e["agent"]] = next(c["parent"] for c in w["agents"] if c["id"] == e["agent"])
+                born_at[e["agent"]] = e["tick"]
             elif e["action"] == "give":
                 gifts.append((e["tick"], e["agent"], e["to"]))
         t = w["tick"]
         pops.append(len(w["agents"]))
+        if ENDINGS and t % JOIN_EVERY == 0:
+            members = set().union(*groups_of(ties(w["agents"], 5)) or [set()])
+            for a in w["agents"]:
+                if a["id"] in born_at and a["id"] not in joined_age and a["id"] in members:
+                    joined_age[a["id"]] = a["age"]
         if t >= FIRST and (t - FIRST) % EVERY == 0:
             snap = {"tick": t, "alive": {a["id"] for a in w["agents"]},
                     "home": {a["id"]: a["home"] for a in w["agents"]}, "k": {}}
@@ -155,9 +212,18 @@ def run(seed, extra):
                      / (st["deaths_starved"] + st["deaths_old_age"]),
                      "age_at_death": sum(ages) / float(len(ages)),
                      "gifts": st["gifts"], "extinct": int(not w["agents"])}}
+    adults = [i for i, age in lived.items() if age >= 200]
+    if ENDINGS:
+        out["joining"] = {
+            "adults_ever_in_group_pct": 100.0 * sum(i in joined_age for i in adults)
+            / max(1, len(adults)),
+            "age_at_joining": (sum(joined_age[i] for i in adults if i in joined_age)
+                               / float(max(1, sum(i in joined_age for i in adults)))),
+            "strong_forgotten_per_1000_ticks": 1000.0 * FORGOTTEN["strong"] / TICKS}
     for k in THRESHOLDS:
         n_groups, in_group, sizes, biggest, fam, spread = [], [], [], [], [], []
         kept250, traced, long_, long_gone = [], [], 0, 0
+        endings = {"died": 0, "split": 0, "dissolved": 0, "end": 0}
         gift_in, gift_n, ref_in, ref_n = 0, 0, 0, 0
         for i, s in enumerate(snaps):
             gs = s["k"][k]["groups"]
@@ -183,7 +249,8 @@ def run(seed, extra):
                         kept250.append(v)
             if i + 4 < len(snaps):          # 1,000+ ticks of room left
                 for g in gs:
-                    n, gone = trace(snaps, i, g, k)
+                    n, gone, how = trace(snaps, i, g, k)
+                    endings[how] += 1
                     traced.append(n * EVERY)
                     if n >= 4:
                         long_ += 1
@@ -208,7 +275,11 @@ def run(seed, extra):
                   "outlived_founders_pct": 100.0 * long_gone / long_ if long_ else None,
                   "gifts_inside_pct": 100.0 * gift_in / gift_n if gift_n else None,
                   "known_pairs_inside_pct": 100.0 * ref_in / ref_n if ref_n else None,
-                  "gifts_counted": gift_n}
+                  "gifts_counted": gift_n,
+                  "ended_died_pct": 100.0 * endings["died"] / max(1, sum(endings.values())),
+                  "ended_split_pct": 100.0 * endings["split"] / max(1, sum(endings.values())),
+                  "ended_dissolved_pct": 100.0 * endings["dissolved"] / max(1, sum(endings.values())),
+                  "still_going_pct": 100.0 * endings["end"] / max(1, sum(endings.values()))}
     return out
 
 
@@ -234,6 +305,13 @@ ROWS = [("groups_per_snapshot", "groups (3+ agents) per snapshot"),
         ("gifts_inside_pct", "gifts inside a group %"),
         ("known_pairs_inside_pct", "  vs met-2+ pairs inside a group %"),
         ("gifts_counted", "gifts counted")]
+ENDING_ROWS = [("ended_died_pct", "ended: members died %"),
+               ("ended_split_pct", "ended: split into other groups %"),
+               ("ended_dissolved_pct", "ended: dissolved (ties broke) %"),
+               ("still_going_pct", "still going at the end of the run %")]
+JOIN_ROWS = [("adults_ever_in_group_pct", "adults that ever joined a group %"),
+             ("age_at_joining", "age when first in a group (ticks)"),
+             ("strong_forgotten_per_1000_ticks", "5+-meeting friends forgotten / 1000 ticks")]
 
 
 def main():
@@ -257,11 +335,27 @@ def main():
         print()
         print("== K = %d ==" % k)
         print("%-42s" % "" + "".join("%28s" % n for n, _ in WORLDS))
-        for key, label in ROWS:
+        rows = ROWS
+        if ENDINGS:
+            rows = [r for r in ROWS if r[0] in ("in_group_pct", "group_size", "traced_ticks",
+                                                "traced_1000_pct")] + ENDING_ROWS
+        for key, label in rows:
             print("%-42s" % label + "".join(
                 "%28s" % stats([r["K%d" % k][key] for r in out["worlds"][n]]) for n, _ in WORLDS))
+    if ENDINGS:
+        print()
+        print("== Joining and forgetting ==")
+        print("%-42s" % "" + "".join("%28s" % n for n, _ in WORLDS))
+        for key, label in JOIN_ROWS:
+            print("%-42s" % label + "".join(
+                "%28s" % stats([r["joining"][key] for r in out["worlds"][n]]) for n, _ in WORLDS))
+        print()
+        print("Endings count every group that starts at least 1,000 ticks before the end.")
+        print("Joining: agents born in the run that lived 200+ ticks; group membership checked")
+        print("every %d ticks, so ages are rounded to that." % JOIN_EVERY)
     if "--quick" not in sys.argv:
-        with open(os.path.join(ROOT, "experiments", "results", "community_probe.json"), "w") as f:
+        name = "community_endings.json" if ENDINGS else "community_probe.json"
+        with open(os.path.join(ROOT, "experiments", "results", name), "w") as f:
             json.dump(out, f, indent=1, sort_keys=True,
                       default=lambda o: sorted(o) if isinstance(o, (set, frozenset)) else str(o))
 

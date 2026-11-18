@@ -77,11 +77,11 @@ serve this, question it. If this file and the code disagree about what
 
 ### Next (proposed in STATUS.md, not built)
 
-- **Milestone 3, step 6: why do groups end?** Groups of agents who know each
-  other well exist (58% of agents are in one), but most last less than a
-  lifetime, and keeping families on one home (step 5, built, off by default)
-  did not change that. Measure whether groups end because their members die
-  or because they split, before choosing the next rule.
+- **Milestone 3, step 7: fading memory.** Measured in step 6: groups end
+  mainly because an agent's memory of 10 keeps overflowing and forgetting
+  close friends; with room for 20 groups last but merge into a few huge
+  regions. Next: forget agents you stop meeting (by time), with room for
+  20, so groups can both last and stay local.
 
 ### Future ambition (nothing below exists)
 

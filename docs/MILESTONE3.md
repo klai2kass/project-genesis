@@ -11,7 +11,8 @@ Built one small step at a time, each measured before the next.
 | 3 | First USE of that memory: share food with a starving agent you know | **Built** (below) |
 | 4 | Look for groups in the memory network (measurement only) | **Done** (below) |
 | 5 | Family home: a child takes its parent's home | **Built, OFF by default**: it did not make groups last longer |
-| 6 | Why do groups end? (measurement only) | Proposed (`STATUS.md`) |
+| 6 | Why do groups end? (measurement only) | **Done** (below): the memory cap |
+| 7 | Fading memory: forget friends you stop meeting, keep up to 20 | Proposed (`STATUS.md`) |
 
 ## Step 1: home (built 2026-11-17)
 
@@ -465,4 +466,84 @@ switch the default (STATUS, decisions).
 exactly; with 1, behaviour changes, every child's home equals its parent's
 and every agent's home equals its founder's (600 ticks, generation 2+
 checked); with 0, children's homes are their birth tiles.
+
+## Step 6: why do groups end? (measured 2026-11-18, no rule changed)
+
+### How
+
+`python3 experiments/community_probe.py --endings` (5 seeds x 3,000 ticks,
+K = 5). Every group that starts at least 1,000 ticks before the end is
+followed (step 4 trace) until it ends, and the ending is classified:
+- **members died**: fewer than 2 of its members are alive at the next
+  snapshot;
+- **split**: most survivors are still in groups, but no single group holds
+  half of them;
+- **dissolved**: most survivors are in no group any more (a tie between two
+  living agents only breaks when one forgets the other, or when the members
+  linking them die);
+- **still going** when the run ends.
+Also: at what age agents first appear in a group (checked every 50 ticks),
+and how often a full memory forgets an agent met 5+ times (counted inside
+the memory's own forgetting step, without changing it). Four worlds: the
+default, the family home, and the default with `memory_keep` 20 and 1000.
+
+### Results (FACT, `experiments/results/community_endings.txt` and `.json`)
+
+| | default (memory 10) | family home | memory 20 | memory 1000 |
+| --- | --- | --- | --- | --- |
+| 5+-meeting friends forgotten per 1,000 ticks | **211** | 288 | **2** | 0 |
+| groups traced 1,000+ ticks | **6.3%** | 6.1% | **54%** | 71% |
+| how long a group can be traced | 225 ticks | 248 | 997 | 1,317 |
+| ended: members died | 55% | 61% | 21% | 21% |
+| ended: split | 28% | 19% | 46% | 17% |
+| ended: dissolved | 15% | 19% | 0% | 1% |
+| still going at the end of the run | 1% | 1% | 32% | 61% |
+| agents in a group | 58% | 58% | 72% | 72% |
+| groups per snapshot | 7.0 | 7.9 | 3.1 | 2.5 |
+| group size (biggest) | 7.7 (18) | 6.7 (15) | 21.9 (50) | 27.1 (55) |
+| members' homes spread | 5.7 tiles | 3.3 | 9.0 | 10.3 |
+| family ties inside groups | 19% | 24% | 16% | 16% |
+| adults that ever join a group | 96% | 97% | 99.6% | 99.5% |
+| age when first in a group | 148 | 146 | 124 | 122 |
+| starved % / age at death | 62.9 / 319 | 65.0 / 311 | 62.5 / 321 | 62.5 / 318 |
+| gifts of food per run | 187 | 226 | 217 | 233 |
+
+(sd over seeds is large for the ending shares, 10 to 38 points, because each
+seed has only a few dozen groups; the forgetting and lasting lines differ
+between worlds far more than their spread, which is at most 47 for
+forgetting and 16 for lasting.)
+
+### Plain reading
+
+- **The memory cap is the main reason groups do not last.** With room for
+  10, an agent keeps forgetting friends: about 210 friendships of 5+
+  meetings are forgotten every 1,000 ticks across the world. With room for
+  20, almost none are (2), and groups last: 54% run for 1,000+ ticks
+  instead of 6%.
+- **But lasting groups become very large.** With memory 20 there are only
+  about 3 groups, the biggest holding about half the world, with homes 9
+  tiles apart. Once nothing is forgotten, everyone who ever met someone
+  five times stays linked forever, so groups merge into regions. That is
+  not a village either.
+- So the small groups of the default world are small partly BECAUSE agents
+  forget, and the big groups of the memory-20 world last only because they
+  never forget. Neither is "a local group of agents who keep meeting".
+- The family home makes no difference to any of this (as in step 5).
+- All Milestone 2 bands hold in every world (age at death 321 with memory
+  20 is close to the 325 ceiling).
+
+### What this points to
+
+Memory today forgets by **space** (a full list drops the least-met), never
+by **time**. A friend met 30 times long ago stays "close" forever, unless
+the list overflows. Real ties fade when people stop meeting. The proposed
+step 7 (`STATUS.md`) tests exactly that: forget an agent not met for a
+while, with room for 20.
+
+### Limitations
+
+- Ending shares vary a lot between seeds (few groups per seed).
+- "Group" is still one definition (mutual 5+ ties, connected).
+- The memory 20 and 1000 worlds also change sharing a little (more agents
+  are "known"), so they are not memory-only comparisons.
 

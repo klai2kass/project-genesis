@@ -5,11 +5,13 @@ Last checked: 2026-11-17, by running the commands in this file (not from memory)
 **Milestones 1 and 2 are done. Milestone 3: steps 1 (home), 2 (memory) and
 3 (sharing) are built and on; step 4 (groups) is measured; step 5 (family
 home) is built but OFF by default, because it did not reach its goal**
-(`docs/MILESTONE3.md`). It kept families on one spot and made groups
-tighter, but groups did not last longer (6.1% against 6.3% lasting 1,000+
-ticks). **Proposed next: step 6, find out why groups end (measurement
-only)**, section 5. GitHub (`origin/main`) has everything up to `af88e8a`;
-later commits are local only.
+(`docs/MILESTONE3.md`). **Step 6 (why groups end) is measured: the memory
+cap.** With room for 10, about 210 close friendships are forgotten per
+1,000 ticks and only 6% of groups last 1,000+ ticks; with room for 20, 54%
+last, but they merge into about 3 huge regional groups. **Proposed next:
+step 7, fading memory** (forget agents you stop meeting, room for 20),
+section 5. GitHub (`origin/main`) has everything up to `af88e8a`; later
+commits are local only.
 
 Plain words: a **tick** is one step of time. A **seed** is the number a world
 is built from (same seed = same world). A **fingerprint** is a short code that
@@ -82,6 +84,21 @@ rest while the decision text shows the value at decision time. The test save
 `saves/claude_browsercheck.json` is still in `saves/` (ignored by git).
 
 ## 4. Measured results
+
+**Why groups end** (`experiments/community_probe.py --endings`, 5 seeds x
+3,000 ticks):
+
+| | memory 10 (default) | memory 20 | memory 1000 |
+| --- | --- | --- | --- |
+| close friends (5+ meetings) forgotten per 1,000 ticks | 211 | 2 | 0 |
+| groups lasting 1,000+ ticks | 6.3% | 54% | 71% |
+| groups per snapshot (biggest) | 7.0 (18) | 3.1 (50) | 2.5 (55) |
+| members' homes spread | 5.7 tiles | 9.0 | 10.3 |
+| ended by death / split / dissolved | 55 / 28 / 15% | 21 / 46 / 0% | 21 / 17 / 1% |
+
+The cap of 10 makes agents forget friends all the time, so groups stay
+small and short. Without forgetting, groups last but grow into a few huge
+regional blobs. Bands hold everywhere.
 
 **Family home** (`experiments/community_probe.py`, `home_drift.py`, 5 seeds
 x 3,000 ticks): family homes stop drifting (0 tiles against 14-19 after 10
@@ -161,47 +178,61 @@ disappears** (25 of 40, within luck), because homes keep every agent near
 its patch, which was the zigzaggers' edge. In normal runs no trait is
 selected beyond chance.
 
-## 5. Next step: Milestone 3, step 6, why do groups end? (measurement only, recommended)
+## 5. Next step: Milestone 3, step 7, fading memory (recommended)
 
-**What:** extend `experiments/community_probe.py` so that every traced group
-records HOW its trace ended: (a) its members died (fewer than 2 left),
-(b) it split (survivors spread over several later groups, none holding
-half), or (c) it dissolved (survivors no longer in any group: ties fell
-below 5 meetings, or were forgotten from a full memory). Also: how many
-meetings a newcomer needs before it joins a group, and how often a tie is
-lost because memory was full. Default world and family home, same seeds.
-No rule change.
+**What:** memory forgets by TIME as well as by space. An agent forgets
+another agent it has not met for `memory_fade` ticks (proposed 300, about
+one lifetime). Room for `memory_keep = 20` instead of 10. When the list is
+still full, the least-met is dropped as now.
 
-**Why (evidence):** two guesses about lasting groups have been tested and
-neither moved "groups lasting 1,000+ ticks" off about 6%: homes created
-groups but not lasting ones, and the family home (step 5) removed home drift
-without effect. Choosing a third rule without knowing why groups end would
-be guessing again.
+**Why (evidence, section 4):** today memory forgets only when the list of
+10 overflows. That throws away about 210 close friendships per 1,000 ticks,
+which is why groups stay small and short (6% last 1,000+ ticks). Giving
+room for 20 almost stops the forgetting and groups last (54%), but then a
+friendship never fades, so groups merge into about 3 regional blobs (the
+biggest half the world, homes 9 tiles apart). Fading by time is the
+smallest rule that keeps ties to agents you KEEP meeting and drops the
+rest: it should give groups that last and stay local.
 
-**What the answer would point to (not decided):**
-- mostly (a) die-out: newcomers join too slowly. Candidate: a newborn starts
-  knowing its parent's closest acquaintances (passing knowledge to children,
-  toward the vision's "habits passed on").
-- mostly (b) splits: groups grow until they break. Candidate: nothing, or a
-  group-size measure as the next study.
-- mostly (c) lost ties: the memory cap of 10 is the limit. Candidate: test a
-  larger `memory_keep` (a setting, no new rule).
+**Alternatives considered:**
+- *Just set `memory_keep` to 20* (a setting, no new rule): simplest, and
+  groups last; rejected as the default because the groups become regions,
+  not neighbourhoods. Kept as a comparison.
+- *A newborn inherits its parent's acquaintances*: the step 6 data shows
+  newcomers already join groups (96% of adults, at age about 150), so slow
+  joining is not the problem.
+- *Tidy-up tasks* (why.py history, `--summary`, curiosity): still listed.
 
-**Alternatives considered:** another rule straight away (rejected for the
-reason above); tidy-up tasks (why.py history, `--summary` additions, the
-curiosity decision), still listed below and fine to do first if you prefer.
+**Rule (proposed):** in `genesis/memory.py`, once per tick (or every N
+ticks, measured for speed), drop entries with `tick - last_tick >
+memory_fade`. `memory_fade = 0` = no fading (old saves get 0 and
+`memory_keep` 10, so they keep their behaviour). Sharing uses the same
+memory, so it changes too (measured).
 
-**Files:** `experiments/community_probe.py`, results, `docs/MILESTONE3.md`,
-STATUS. Nothing in `genesis/`.
+**Files:** `genesis/memory.py`, `genesis/config.py`, `overrides.py`,
+`save.py` (version 8), `tests/test_memory.py`, README, `docs/MILESTONE3.md`.
+Frozen reference of today's world first.
 
-**Done when:** the report gives the share of group endings of each kind,
-with spread over seeds, for both home settings, and names the next rule
-only if one kind clearly dominates.
+**Tests:** `memory_fade = 0` with `memory_keep = 10` reproduces today
+exactly; a v7 save migrates and continues exactly; an entry is dropped
+exactly when not met for more than `memory_fade` ticks and kept otherwise;
+meeting again before that keeps it; same seed = same world.
+
+**Measure and success:** `community_probe.py --endings` with the new
+default against memory 10 and memory 20: success = groups lasting 1,000+
+ticks well above 6% (say 25%+) AND groups stay local (home spread at most
+about 6 tiles, biggest group well under half the world) AND the bands hold.
+Also `memory_probe.py` (what is remembered) and speed.
+
+**Risks:** the right fade time is a guess (try 150, 300, 600 and report
+all; choose by the success lines, not by a pretty number); larger memories
+cost speed and save size.
 
 ## 6. Next 5 tasks
 
-1. **Your go for step 6 (why do groups end?)**, then extend the script as in
-   section 5. Check: `python3 experiments/community_probe.py`.
+1. **Your go for step 7 (fading memory)**, then build it as in section 5.
+   Check: `python3 -m unittest discover -s tests`, then
+   `python3 experiments/community_probe.py --endings`.
 2. **Decide what curiosity should mean now** (decision 2). If "roaming
    distance": files `genesis/agents.py`, `genesis/traits.py`, tests; measure
    with `python3 experiments/curiosity_probe.py`.
@@ -214,7 +245,8 @@ only if one kind clearly dominates.
 
 ## 7. Decisions for you
 
-1. **Go for step 6 (section 5)?** Default: wait for your yes.
+1. **Go for step 7, fading memory (section 5)?** It changes what agents
+   remember and so whom they share with. Default: wait for your yes.
 2. **Family home default.** I switched it OFF after it missed its goal
    (groups did not last longer; a bit more starvation). If you like the
    tighter family groups anyway, set the default to 1 in `genesis/config.py`.
@@ -308,6 +340,10 @@ python3 experiments/community_probe.py
 ```
 
 ```bash
+python3 experiments/community_probe.py --endings
+```
+
+```bash
 python3 experiments/home_drift.py
 ```
 
@@ -347,7 +383,7 @@ without it they write the `_home` files. `stage_compare.py` prints both
 (its homes-on output is saved as `stage_compare_home.txt`). Times on this Mac:
 memory probe about 3 min (`--old-drop-rule` for the rejected first cap
 rule), sharing count about 1.5 min, sharing probe about 5 min, community
-probe about 6 min, home drift about 1 min, encounter probe about 3 min, curiosity probe about 4 min, mixed extra about
+probe about 6 min (`--endings` about 8 min), home drift about 1 min, encounter probe about 3 min, curiosity probe about 4 min, mixed extra about
 4 min, stage compare about 4 min, trait drift about 2 min, starvation study
 about 25 s, baseline check about 1 min. `trait_drift.py` and
 `starvation_study.py` now run with homes on; their saved results are from
@@ -387,6 +423,15 @@ before homes.
 
 Newest first. Older entries mention section numbers of earlier versions of
 this file; see `git log -p STATUS.md` for those.
+
+### Session 2026-11-18 (part 10: Milestone 3 step 6, why do groups end?)
+- **Your go** ("Yes, step 6"). Measurement only; nothing in `genesis/`.
+- **New:** `community_probe.py --endings` (how each group ends, when agents
+  join, how often full memories forget close friends), worlds: default,
+  family home, memory 20, memory 1000.
+- **Found:** section 4. The memory cap of 10 is the main reason groups do
+  not last; without forgetting, groups last but become regional blobs.
+- **Not done:** step 7 (waits for your go).
 
 ### Session 2026-11-18 (part 9: Milestone 3 step 5, the family home)
 - **Your go** ("Yes, family home").
